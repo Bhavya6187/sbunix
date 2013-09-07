@@ -4,7 +4,6 @@
 void start(void* modulep, void* physbase, void* physfree)
 {
 	volatile char *video = (volatile char*)0xB8000;
-	//char* string = "abvkjajbvjabvkvknkanknvknekvfnnknvljeflalqnnav   nvbbknrbnanebnakjnba kbnelanmbvaenblanl ojkbnlbnlsenbkllsbnlalbnalbla   ngvnljnjbnajlbnjnajbnljanbljanjbnlanvanblnlnslblsnblnlkafjegfoj";
 	int color = 0x07;
 	int i;
 	//:wchar ch=' ';
@@ -16,8 +15,10 @@ void start(void* modulep, void* physbase, void* physfree)
 	}
   for(i=0;i<80*25;i++)
 	putchar('a');
-
   clrscr();
+	putchar('D');
+	putchar('G');
+	puts("\nDushyant Goyal\n");
 	putchar('D');
 	putchar('G');
 // kernel starts herie
