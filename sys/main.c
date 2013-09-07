@@ -1,12 +1,6 @@
 #include <defs.h>
 #include <stdio.h>
-void putchar(char a)
-{
-	int color = 0x07;
-	volatile char *video = (volatile char*)0xB8000;
-	*video++ = a;
-	*video++ = color;
-}
+
 void start(void* modulep, void* physbase, void* physfree)
 {
 	volatile char *video = (volatile char*)0xB8000;
@@ -20,9 +14,11 @@ void start(void* modulep, void* physbase, void* physfree)
 		*video++ = NULL;
 		*video++ = color;
 	}
+  for(i=0;i<80*25;i++)
 	putchar('a');
 // kernel starts herie
 }
+
 #define INITIAL_STACK_SIZE 4096
 char stack[INITIAL_STACK_SIZE];
 uint32_t* loader_stack;
@@ -40,10 +36,10 @@ void boot(void)
 		&physbase,
 		(void*)(uint64_t)loader_stack[4]
 	);
-/*	for(
+  /*	for(
 		temp1 = "!!!!! start() returned !!!!!", temp2 = (char*)0xb8050;
 		*temp1;
 		temp1 += 1, temp2 += 2
 	) *temp2 = *temp1;
-*/	while(1);
+  */	while(1);
 }

@@ -3,7 +3,11 @@
 
 //#include <unistd.h>
 
-int printf(const char *format, ...);
+//int position=0;
+//int printf(const char *format, ...);
+int printf(const char *format);
+int putchar(char a);
 int scanf(const char *format, ...);
+
 
 #endif
