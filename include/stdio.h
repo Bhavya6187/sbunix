@@ -8,6 +8,7 @@
 int printf(const char *format);
 int putchar(char a);
 int scanf(const char *format, ...);
+int clrscr();
 
 
 #endif

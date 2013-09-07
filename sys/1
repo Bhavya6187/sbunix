@@ -24,13 +24,13 @@ int clrscr()
 {
   int i;
 	int color = 0x07;
+  char ch = ' ';
 	volatile char *video = (volatile char*)0xB8000;
   for(i=0; i<ROW*COLUMN; i++)
   {
-    *video++ = 0;
-	  *video++ = color;
+    video++ = (volatile char)ch;
+	  video++ = color;
   }
-  position=0;
   return 0;
 }
 

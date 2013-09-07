@@ -16,6 +16,10 @@ void start(void* modulep, void* physbase, void* physfree)
 	}
   for(i=0;i<80*25;i++)
 	putchar('a');
+
+  clrscr();
+	putchar('D');
+	putchar('G');
 // kernel starts herie
 }
 
