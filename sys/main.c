@@ -21,6 +21,7 @@ void start(void* modulep, void* physbase, void* physfree)
 	puts("\nDushyant Goyal\n");
 	putchar('D');
 	putchar('G');
+  putint(123456789);
 // kernel starts herie
 }
 

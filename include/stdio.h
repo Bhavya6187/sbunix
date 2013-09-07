@@ -10,6 +10,6 @@ int putchar(char a);
 int puts(char* str);
 int scanf(const char *format, ...);
 int clrscr();
-
+int putint(int value);
 
 #endif

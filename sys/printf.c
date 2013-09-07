@@ -11,9 +11,9 @@ int printf(const char* str) {
 	return 0;
 }
 
-int putchar(char a)
+int putchar(char a )
 {
-	int color = 0x07;
+  int color = 0x07;
 	volatile char *video = (volatile char*)0xB8000;
   if(a=='\n')
   {
@@ -48,6 +48,35 @@ int clrscr()
 	  *video++ = color;
   }
   position=0;
+  return 0;
+}
+
+int putint(int value)
+{
+  char * ptr=((void *)0);
+  char * low=((void *)0);
+  char *rc=((void *)0);
+  rc = ptr;
+  if ( value < 0 )
+  {
+    *ptr++ = '-';
+  }
+  low =ptr;
+  do
+  {
+    // Modulo is negative for negative value. This trick makes abs() unnecessary.
+    *ptr++ = "9876543210123456789"[9+ value%10];
+    value /= 10;
+  } while ( value );
+  
+  *ptr-- = '\0';
+  while ( low < ptr )
+  {
+    char tmp = *low;
+    *low++ = *ptr;
+    *ptr-- = tmp;
+  }
+  puts(rc);
   return 0;
 }
 
