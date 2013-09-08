@@ -2,18 +2,18 @@
 #define _STDIO_H
 #endif
 
+#include <stdarg.h>
 //#include <unistd.h>
 #define ROW 25
 #define COLUMN 80
 int position=0;
 int scanf(const char *format, ...);
-int printf(const char* str) {
-	return 0;
-}
+
 static inline void outb( unsigned short port, unsigned char val )
 {
       asm volatile( "outb %0, %1": : "a"(val), "Nd"(port) );
 }
+
 void update_cursor(int row, int col)
 {
    int position=(row*80) + col;
@@ -37,7 +37,7 @@ int putchar(char a )
   *(video++ + 2*position) = a;
 	*video++ = color;
   position++;
-  return 0;
+  return 1;
 }
 
 int puts(char* str)
@@ -90,8 +90,7 @@ int putint(int value)
     *low++ = *ptr;
     *ptr-- = tmp;
   }
-  puts(rc);
-  return 0;
+  return puts(rc);
 }
 
 int int2hex(int value)
@@ -131,4 +130,41 @@ int int2hex(int value)
   }
   puts(rc);
   return 0;
+}
+
+int printf(const char* format, ...) 
+{
+  const char* str;
+	va_list parameters;
+
+  int total=0;
+  va_start(parameters, format);
+  str = format;
+  while(*str != '\0')
+  {
+    if(*str != '%')
+    {
+      total+=putchar(*str++);
+      continue;
+    }
+    str++;
+    switch( *str )
+    {
+      case 'c': total+=putchar(va_arg(parameters, int));
+                break;
+
+      case 'd': total+=putint(va_arg(parameters, int));
+                break;
+
+      case 's': total+=puts(va_arg(parameters, char*));
+                break;
+
+      case '%': total+=putchar('%');
+                break;
+    }
+    str++;
+  }
+
+  va_end(parameters);
+  return total;
 }

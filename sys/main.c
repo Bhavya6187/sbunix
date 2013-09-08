@@ -1,4 +1,5 @@
 #include <defs.h>
+#include <stdarg.h>
 #include <stdio.h>
 
 void start(void* modulep, void* physbase, void* physfree)
@@ -6,6 +7,7 @@ void start(void* modulep, void* physbase, void* physfree)
 	volatile char *video = (volatile char*)0xB8000;
 	int color = 0x07;
 	int i;
+  int test=0;
 	//:wchar ch=' ';
 	video = (volatile char*)0xB8000;
 	for(i=0 ;i < 2000 ; i++)
@@ -21,6 +23,25 @@ void start(void* modulep, void* physbase, void* physfree)
 	puts("\nDushyant Goyal\n");
 	int2hex(100);
   update_cursor(10,10);
+	putchar('D');
+	putchar('G');
+  putint(123456789);
+
+  printf("%s's ID = %d","Dushyant",109323567);
+	puts("\nDushyant Goyal\n");
+  test=printf("%d",1093267);
+  printf("  %d\n",test);
+  test=printf("%c%d%s%%",'a',145423, "Bhavya here to test !!");
+  printf("  %d\n",test);
+	puts("\nDushyant Goyal\n");
+	puts("\nDushyant Goyal\n");
+	puts("\nDushyant Goyal\n");
+	puts("\nDushyant Goyal\n");
+
+  putchar('Z');
+  putchar('\n');
+  putchar('E');
+
 // kernel starts herie
 }
 
