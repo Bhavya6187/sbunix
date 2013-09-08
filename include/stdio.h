@@ -11,5 +11,5 @@ int puts(char* str);
 int scanf(const char *format, ...);
 int clrscr();
 int putint(int value);
-
+int int2hex(int value);
 #endif

@@ -80,3 +80,41 @@ int putint(int value)
   return 0;
 }
 
+int int2hex(int value)
+{
+  char * ptr=((void *)0);
+  char * low=((void *)0);
+  char *rc=((void *)0);
+  rc = ptr;
+  low =ptr;
+ 
+   
+  do
+  {
+    int temp = value & 0x0f;
+    if(temp < 10)
+        *ptr++ = temp + '0';
+     else
+        *ptr++ = (temp) - 10 + 'A';
+     value = value >> 4;
+
+  } while ( value );
+  
+  *ptr++ = 'x';
+  *ptr++ = '0';
+  *ptr-- = '\0';
+  while ( low < ptr )
+  {
+    char tmp = *low;
+    *low++ = *ptr;
+    *ptr-- = tmp;
+  }
+  while ( low < ptr )
+  {
+    char tmp = *low;
+    *low++ = *ptr;
+    *ptr-- = tmp;
+  }
+  puts(rc);
+  return 0;
+}
