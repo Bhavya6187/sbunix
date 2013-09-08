@@ -36,11 +36,9 @@ void start(void* modulep, void* physbase, void* physfree)
 	puts("\nDushyant Goyal\n");
   test=printf("%d",1093266);
   printf("  %d\n",test);
-  for(i=0;i<30;i++)
-  test=printf("%c%d%s%%   %x\n",'a',-145423, "Bhavya here to test !!",10);
-  printf("  %d\n",test);
 	puts("\nDushyant Goyal\n");
-	puts("\nDushyant Goyal\n");
+  for(i=0;i<20;i++)
+  test=printf("Bhavya here to test !!\n");
 
 // kernel starts herie
 }

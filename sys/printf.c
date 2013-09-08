@@ -40,15 +40,19 @@ int clrscr()
   return 0;
 }
 
-int scrollup(int lrow, int lcol)
+int scrollup(int dist)
 {
-  int i;
+  int i,j;
 	int color = 0x07;
 	volatile char *video = (volatile char*)0xB8000;
-  for(i=0; i<lrow*lcol; i++)
+  for(i=0; i<lrow; i++)
   {
-    *(video++) = *(video + lrow*COLUMN + lcol);
-	  *video++ = color;
+    for(j=0;j<lcol;j++)
+    {
+      *(video) = *(video + dist*COLUMN + i*COLUMN + j);
+      video++;
+	    *video++ = color;
+    }
   }
   for(i=lrow*lcol; i<ROW*COLUMN; i++)
   {
@@ -66,7 +70,7 @@ int putchar(char a )
 	volatile char *video = (volatile char*)0xB8000;
   if(position>=ROW*COLUMN)
     //clrscr();
-    scrollup(ROW-2,COLUMN-2);
+    scrollup(3);
   if(a=='\n')
   {
     position = ((position/80)+1)*80; 
