@@ -11,4 +11,6 @@ int clrscr();
 int putint(int value);
 int int2hex(int value);
 void update_cursor(int row, int col);
+int long2hex(unsigned long value);
+int putlong(unsigned long value);
 #endif

@@ -40,29 +40,6 @@ int clrscr()
   return 0;
 }
 
-int scrollup(int dist)
-{
-  int i,j;
-	int color = 0x07;
-	volatile char *video = (volatile char*)0xB8000;
-  for(i=0; i<lrow; i++)
-  {
-    for(j=0;j<lcol;j++)
-    {
-      *(video) = *(video + dist*COLUMN + i*COLUMN + j);
-      video++;
-	    *video++ = color;
-    }
-  }
-  for(i=lrow*lcol; i<ROW*COLUMN; i++)
-  {
-    *video++ = 0;
-	  *video++ = color;
-  }
-  position=lrow*lcol;
-  update_cursor(lrow,lcol);
-  return 0;
-}
 
 int putchar(char a )
 {
@@ -70,7 +47,7 @@ int putchar(char a )
 	volatile char *video = (volatile char*)0xB8000;
   if(position>=ROW*COLUMN)
     //clrscr();
-    scrollup(3);
+   // scrollup(3);
   if(a=='\n')
   {
     position = ((position/80)+1)*80; 
@@ -159,6 +136,43 @@ int int2hex(int value)
   return puts(rc);
 }
 
+int long2hex(unsigned long value)
+{
+  char * ptr=((void *)0);
+  char * low=((void *)0);
+  char *rc=((void *)0);
+  rc = ptr;
+  low =ptr;
+   
+  do
+  {
+    int temp = value & 0x0f;
+    if(temp < 10)
+        *ptr++ = temp + '0';
+     else
+        *ptr++ = (temp) - 10 + 'A';
+     value = value >> 4;
+
+  } while ( value );
+  
+  *ptr++ = 'x';
+  *ptr++ = '0';
+  *ptr-- = '\0';
+  while ( low < ptr )
+  {
+    char tmp = *low;
+    *low++ = *ptr;
+    *ptr-- = tmp;
+  }
+  while ( low < ptr )
+  {
+    char tmp = *low;
+    *low++ = *ptr;
+    *ptr-- = tmp;
+  }
+  return puts(rc);
+}
+
 int printf(const char* format, ...) 
 {
   const char* str;
@@ -203,4 +217,29 @@ int printf(const char* format, ...)
   va_end(parameters);
   update_cursor(position/COLUMN, position%COLUMN);
   return total;
+}
+
+int putlong(unsigned long value)
+{
+  char * ptr=((void *)0);
+  char * low=((void *)0);
+  char *rc=((void *)0);
+  rc = ptr;
+  low =ptr;
+  do
+  {
+    // Modulo is negative for negative value. This trick makes abs() unnecessary.
+    *ptr++ = "0123456789"[value%10];
+    value /= 10;
+  } while ( value );
+  
+  *ptr-- = '\0';
+  while ( low < ptr )
+  {
+    char tmp = *low;
+    *low++ = *ptr;
+    *ptr-- = tmp;
+  }
+  puts(rc);
+  return 0;
 }
