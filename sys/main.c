@@ -11,16 +11,17 @@ void start(void* modulep, void* physbase, void* physfree)
   long testing;
 	//:wchar ch=' ';
 	video = (volatile char*)0xB8000;
+  printf("\nVideo pointer = %p\n",video);
 	for(i=0 ;i < 2000 ; i++)
 	{
 		*video++ = NULL;
 		*video++ = color;
     testing++;
 	}
-  for(i=0;i<80*25;i++)
+  //for(i=0;i<80*25;i++)
 	putchar('a');
 	putchar('D');
-  clrscr();
+  //clrscr();
 	putchar('G');
 	puts("\nDushyant Goyal\n");
 	int2hex(100);
@@ -32,13 +33,16 @@ void start(void* modulep, void* physbase, void* physfree)
   putchar('\n');
   putchar('E');
 
-  clrscr();
+  //clrscr();
   printf("%s's ID = %d","Dushyant",109323567);
 	puts("\nDushyant Goyal\n");
   test=printf("%d",1093266);
   printf("  %d\n",test);
+  printf("  %d\n",test);
+	video = (volatile char*)0xB8000;
+  printf("\nVideo pointer = %p\n",video);
 	puts("\nDushyant Goyal\n");
-  for(i=0;i<31;i++)
+  //for(i=0;i<31;i++)
   test=printf("%dBhavya here to test !!\n",i);
   //scrollup(10);
 // kernel starts herie

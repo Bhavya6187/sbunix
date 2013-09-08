@@ -52,9 +52,6 @@ int scrollup(int dist)
      *(video) = *(video + dist*COLUMN*2);
       video++; 
      *video++ = color;
-      // *video++ = *(video + dist*COLUMN + i);
-     //*video++ = (*(temp++));
-     //*video++;
   }
   
   for(i=COLUMN*(ROW-dist); i<ROW*COLUMN; i++)
@@ -198,6 +195,30 @@ int long2hex(unsigned long value)
   return puts(rc);
 }
 
+int putlong(unsigned long value)
+{
+  char * ptr=((void *)0);
+  char * low=((void *)0);
+  char *rc=((void *)0);
+  rc = ptr;
+  low =ptr;
+  do
+  {
+    // Modulo is negative for negative value. This trick makes abs() unnecessary.
+    *ptr++ = "0123456789"[value%10];
+    value /= 10;
+  } while ( value );
+  
+  *ptr-- = '\0';
+  while ( low < ptr )
+  {
+    char tmp = *low;
+    *low++ = *ptr;
+    *ptr-- = tmp;
+  }
+  return puts(rc);
+}
+
 int printf(const char* format, ...) 
 {
   const char* str;
@@ -230,9 +251,12 @@ int printf(const char* format, ...)
       
       case 'l': if(*(++str)=='d')
                 {
-                  //total+=putlong(va_arg(parameters, unsigned long));
+                  total+=putlong(va_arg(parameters, unsigned long));
                   break;
                 }
+
+      case 'p': total+=long2hex(va_arg(parameters, unsigned long));
+                break;
 
       case '%': total+=putchar('%');
                 break;
@@ -244,27 +268,3 @@ int printf(const char* format, ...)
   return total;
 }
 
-int putlong(unsigned long value)
-{
-  char * ptr=((void *)0);
-  char * low=((void *)0);
-  char *rc=((void *)0);
-  rc = ptr;
-  low =ptr;
-  do
-  {
-    // Modulo is negative for negative value. This trick makes abs() unnecessary.
-    *ptr++ = "0123456789"[value%10];
-    value /= 10;
-  } while ( value );
-  
-  *ptr-- = '\0';
-  while ( low < ptr )
-  {
-    char tmp = *low;
-    *low++ = *ptr;
-    *ptr-- = tmp;
-  }
-  puts(rc);
-  return 0;
-}
