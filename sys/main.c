@@ -20,6 +20,7 @@ void start(void* modulep, void* physbase, void* physfree)
 	putchar('G');
 	puts("\nDushyant Goyal\n");
 	int2hex(100);
+  update_cursor(10,10);
 // kernel starts herie
 }
 

@@ -10,6 +10,20 @@ int scanf(const char *format, ...);
 int printf(const char* str) {
 	return 0;
 }
+static inline void outb( unsigned short port, unsigned char val )
+{
+      asm volatile( "outb %0, %1": : "a"(val), "Nd"(port) );
+}
+void update_cursor(int row, int col)
+{
+   int position=(row*80) + col;
+   // cursor LOW port to vga INDEX register
+   outb(0x3D4, 0x0F);
+   outb(0x3D5, (unsigned char)(position&0xFF));
+   // cursor HIGH port to vga INDEX register
+   outb(0x3D4, 0x0E);
+   outb(0x3D5, (unsigned char )((position>>8)&0xFF));
+}
 
 int putchar(char a )
 {
