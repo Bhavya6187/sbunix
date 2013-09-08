@@ -40,12 +40,33 @@ int clrscr()
   return 0;
 }
 
+int scrollup(int lrow, int lcol)
+{
+  int i;
+	int color = 0x07;
+	volatile char *video = (volatile char*)0xB8000;
+  for(i=0; i<lrow*lcol; i++)
+  {
+    *(video++) = *(video + lrow*COLUMN + lcol);
+	  *video++ = color;
+  }
+  for(i=lrow*lcol; i<ROW*COLUMN; i++)
+  {
+    *video++ = 0;
+	  *video++ = color;
+  }
+  position=lrow*lcol;
+  update_cursor(lrow,lcol);
+  return 0;
+}
+
 int putchar(char a )
 {
   int color = 0x07;
 	volatile char *video = (volatile char*)0xB8000;
   if(position>=ROW*COLUMN)
-    clrscr();
+    //clrscr();
+    scrollup(ROW-2,COLUMN-2);
   if(a=='\n')
   {
     position = ((position/80)+1)*80; 
@@ -73,7 +94,7 @@ int putint(int value)
 {
   char * ptr=((void *)0);
   char * low=((void *)0);
-  char *rc=((void *)0);
+  char * rc=((void *)0);
   rc = ptr;
   if ( value < 0 )
   {
@@ -163,6 +184,12 @@ int printf(const char* format, ...)
 
       case 'x': total+=int2hex(va_arg(parameters, int));
                 break;
+      
+      case 'l': if(*(++str)=='d')
+                {
+                  //total+=putlong(va_arg(parameters, unsigned long));
+                  break;
+                }
 
       case '%': total+=putchar('%');
                 break;
