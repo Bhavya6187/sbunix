@@ -11,7 +11,7 @@ int scanf(const char *format, ...);
 
 static inline void outb( unsigned short port, unsigned char val )
 {
-      asm volatile( "outb %0, %1": : "a"(val), "Nd"(port) );
+   asm volatile( "outb %0, %1": : "a"(val), "Nd"(port) );
 }
 
 void update_cursor(int row, int col)
@@ -25,10 +25,27 @@ void update_cursor(int row, int col)
    outb(0x3D5, (unsigned char )((position>>8)&0xFF));
 }
 
+int clrscr()
+{
+  int i;
+	int color = 0x07;
+	volatile char *video = (volatile char*)0xB8000;
+  for(i=0; i<ROW*COLUMN; i++)
+  {
+    *video++ = 0;
+	  *video++ = color;
+  }
+  position=0;
+  update_cursor(0,0);
+  return 0;
+}
+
 int putchar(char a )
 {
   int color = 0x07;
 	volatile char *video = (volatile char*)0xB8000;
+  if(position>=ROW*COLUMN)
+    clrscr();
   if(a=='\n')
   {
     position = ((position/80)+1)*80; 
@@ -48,21 +65,8 @@ int puts(char* str)
     putchar(*(str++));
     strlength++;
   }
+  update_cursor(position/COLUMN, position%COLUMN);
   return strlength;
-}
-
-int clrscr()
-{
-  int i;
-	int color = 0x07;
-	volatile char *video = (volatile char*)0xB8000;
-  for(i=0; i<ROW*COLUMN; i++)
-  {
-    *video++ = 0;
-	  *video++ = color;
-  }
-  position=0;
-  return 0;
 }
 
 int putint(int value)
@@ -100,7 +104,6 @@ int int2hex(int value)
   char *rc=((void *)0);
   rc = ptr;
   low =ptr;
- 
    
   do
   {
@@ -128,8 +131,7 @@ int int2hex(int value)
     *low++ = *ptr;
     *ptr-- = tmp;
   }
-  puts(rc);
-  return 0;
+  return puts(rc);
 }
 
 int printf(const char* format, ...) 
@@ -159,12 +161,15 @@ int printf(const char* format, ...)
       case 's': total+=puts(va_arg(parameters, char*));
                 break;
 
+      case 'x': total+=int2hex(va_arg(parameters, int));
+                break;
+
       case '%': total+=putchar('%');
                 break;
     }
     str++;
   }
-
   va_end(parameters);
+  update_cursor(position/COLUMN, position%COLUMN);
   return total;
 }

@@ -8,12 +8,14 @@ void start(void* modulep, void* physbase, void* physfree)
 	int color = 0x07;
 	int i;
   int test=0;
+  long testing;
 	//:wchar ch=' ';
 	video = (volatile char*)0xB8000;
 	for(i=0 ;i < 2000 ; i++)
 	{
 		*video++ = NULL;
 		*video++ = color;
+    testing++;
 	}
   for(i=0;i<80*25;i++)
 	putchar('a');
@@ -26,21 +28,19 @@ void start(void* modulep, void* physbase, void* physfree)
 	putchar('D');
 	putchar('G');
   putint(123456789);
-
-  printf("%s's ID = %d","Dushyant",109323567);
-	puts("\nDushyant Goyal\n");
-  test=printf("%d",1093267);
-  printf("  %d\n",test);
-  test=printf("%c%d%s%%",'a',145423, "Bhavya here to test !!");
-  printf("  %d\n",test);
-	puts("\nDushyant Goyal\n");
-	puts("\nDushyant Goyal\n");
-	puts("\nDushyant Goyal\n");
-	puts("\nDushyant Goyal\n");
-
   putchar('Z');
   putchar('\n');
   putchar('E');
+
+  printf("%s's ID = %d","Dushyant",109323567);
+	puts("\nDushyant Goyal\n");
+  test=printf("%d",1093266);
+  printf("  %d\n",test);
+  for(i=0;i<30;i++)
+  test=printf("%c%d%s%%   %x\n",'a',-145423, "Bhavya here to test !!",10);
+  printf("  %d\n",test);
+	puts("\nDushyant Goyal\n");
+	puts("\nDushyant Goyal\n");
 
 // kernel starts herie
 }
