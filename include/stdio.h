@@ -8,6 +8,7 @@ int putchar(char a);
 int puts(char* str);
 int scanf(const char *format, ...);
 int clrscr();
+int scrollup(int dist);
 int putint(int value);
 int int2hex(int value);
 void update_cursor(int row, int col);

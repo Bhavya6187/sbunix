@@ -19,8 +19,8 @@ void start(void* modulep, void* physbase, void* physfree)
 	}
   for(i=0;i<80*25;i++)
 	putchar('a');
-  clrscr();
 	putchar('D');
+  clrscr();
 	putchar('G');
 	puts("\nDushyant Goyal\n");
 	int2hex(100);
@@ -32,14 +32,15 @@ void start(void* modulep, void* physbase, void* physfree)
   putchar('\n');
   putchar('E');
 
+  clrscr();
   printf("%s's ID = %d","Dushyant",109323567);
 	puts("\nDushyant Goyal\n");
   test=printf("%d",1093266);
   printf("  %d\n",test);
 	puts("\nDushyant Goyal\n");
-  for(i=0;i<20;i++)
-  test=printf("Bhavya here to test !!\n");
-
+  for(i=0;i<31;i++)
+  test=printf("%dBhavya here to test !!\n",i);
+  //scrollup(10);
 // kernel starts herie
 }
 

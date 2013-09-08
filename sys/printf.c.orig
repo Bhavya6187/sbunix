@@ -40,6 +40,8 @@ int clrscr()
   return 0;
 }
 
+<<<<<<< Updated upstream
+=======
 int scrollup(int dist)
 {
   int i;
@@ -66,13 +68,19 @@ int scrollup(int dist)
   update_cursor((ROW-dist), COLUMN);
   return 0;
 }
+>>>>>>> Stashed changes
 
 int putchar(char a )
 {
   int color = 0x07;
 	volatile char *video = (volatile char*)0xB8000;
   if(position>=ROW*COLUMN)
+<<<<<<< Updated upstream
+    //clrscr();
+   // scrollup(3);
+=======
     scrollup(1);
+>>>>>>> Stashed changes
   if(a=='\n')
   {
     position = ((position/80)+1)*80; 
