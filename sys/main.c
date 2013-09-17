@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <sys/gdt.h>
 #include <sys/idt.h>
+#include <sys/isr.h>
 
 void start(void* modulep, void* physbase, void* physfree)
 {
