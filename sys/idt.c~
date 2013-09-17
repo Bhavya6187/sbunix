@@ -14,6 +14,7 @@ struct idt_entry {
   uint32_t reserved;
 }__attribute__((packed));
 
+struct idt_entry idt[MAX_IDT];
 
 struct idt_entry get_entry(uint64_t target)
 {
@@ -27,8 +28,7 @@ struct idt_entry get_entry(uint64_t target)
    return ret;
 }
 
-
-struct idt_entry idt[MAX_IDT];// = { get_entry((uint64_t)&_isr_000), get_entry((uint64_t)&_isr_001)};
+idt[0] = get_entry((uint64_t)&_isr_000);
 
 struct idtr_t {
 	uint16_t size;
@@ -42,8 +42,6 @@ static struct idtr_t idtr = {
 
 void _x86_64_asm_lidt(struct idtr_t* idtr);
 void reload_idt() {
-  
-  idt[0] = get_entry((uint64_t)&_isr_000);
 	_x86_64_asm_lidt(&idtr);
 }
 
