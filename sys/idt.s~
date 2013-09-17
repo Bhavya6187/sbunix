@@ -1,0 +1,5 @@
+.global _x86_64_asm_lgdt
+_x86_64_asm_lgdt:
+
+	lgdt (%rdi)
+
