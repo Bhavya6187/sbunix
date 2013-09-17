@@ -1,11 +1,19 @@
 #include <defs.h>
 #include <stdio.h>
 #include <sys/gdt.h>
+#include <sys/idt.h>
 
 void start(void* modulep, void* physbase, void* physfree)
 {
+  int a, b,c;
+  a=5;
+  b=0;
 	// kernel starts here
   clrscr();
+  printf("Checking printf before ISR()\n");
+  c= a/b;
+  printf("Checking printf after ISR() %d %d %d\n", a,b,c);
+  printf("Checking printf\n");
   printf("Checking printf\n");
 }
 
@@ -25,6 +33,7 @@ void boot(void)
 		:"r"(&stack[INITIAL_STACK_SIZE])
 	);
 	reload_gdt();
+	reload_idt();
 	start(
 		(char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase,
 		&physbase,

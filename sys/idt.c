@@ -19,7 +19,7 @@ struct idt_entry get_entry(uint64_t target)
 {
    struct idt_entry ret;
    ret.offset1 = (target) & 0x0000ffff;
-   ret.flags = IST | RESERVED | TYPE | ZERO | DPL0| P;
+   ret.flags = IDT_IST | IDT_RESERVED | IDT_TYPE | IDT_ZERO | IDT_DPL0| IDT_P;
    ret.target_selector = 8;
    ret.reserved = 0;
    ret.offset2 = ((target) >> 16) & 0x0000ffff;
@@ -40,11 +40,13 @@ static struct idtr_t idtr = {
 	(uint64_t)idt
 };
 
+extern void  _isr_000();
+
 void _x86_64_asm_lidt(struct idtr_t* idtr);
 void reload_idt() {
   
   idt[0] = get_entry((uint64_t)&_isr_000);
-	_x86_64_asm_lidt(&idtr);
+ 	_x86_64_asm_lidt(&idtr);
 }
 
 
