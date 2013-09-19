@@ -34,9 +34,9 @@ void init_timer()
    // The value we send to the PIT is the value to divide it's input clock
    // (1193180 Hz) by, to get our required frequency. Important to note is
    // that the divisor must be small enough to fit into 16-bits.
-   uint32_t divisor;
-  divisor = (1193180/500);
-
+   uint16_t divisor;
+//  divisor = (1193180/500);
+   divisor = 65000;
 
    // Send the command byte.
    outb(0x43, 0x36);
