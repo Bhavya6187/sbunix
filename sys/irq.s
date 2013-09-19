@@ -1,8 +1,8 @@
-.global _isr_000
+.global _irq_032
 
-_isr_000:
+_irq_032:
   cli
-  movq $0, %rdi
+  movq $32, %rdi
   pushq %rdi      # Push the interrupt number 0
   jmp isr_common_stub  # Go to our common handler. 
   sti
@@ -25,11 +25,8 @@ isr_common_stub:
   pushq %r13
   pushq %r14
   pushq %r15
-
   #trying to restore the code segment, instruction pointer, flags register, stack segment and stack pointer                         
-  
-  call isr_handler_0
-  
+  call irq_handler_0
   popq %r15
   popq %r14
   popq %r13

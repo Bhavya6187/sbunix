@@ -9,7 +9,7 @@
 int position=0;
 int scanf(const char *format, ...);
 
-static inline void outb( unsigned short port, unsigned char val )
+inline void outb( unsigned short port, unsigned char val )
 {
    asm volatile( "outb %0, %1": : "a"(val), "Nd"(port) );
 }

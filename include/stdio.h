@@ -3,6 +3,7 @@
 
 //#include <unistd.h>
 
+inline void outb( unsigned short port, unsigned char val );
 int printf(const char *format, ...);
 int putchar(char a);
 int puts(char* str);

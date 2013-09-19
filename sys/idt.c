@@ -46,6 +46,7 @@ void _x86_64_asm_lidt(struct idtr_t* idtr);
 void reload_idt() {
   
   idt[0] = get_entry((uint64_t)&_isr_000);
+  //idt[32] = get_entry((uint64_t)&_irq_032);
  	_x86_64_asm_lidt(&idtr);
 }
 
