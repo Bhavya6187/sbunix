@@ -3,16 +3,18 @@
 #include <sys/gdt.h>
 #include <sys/idt.h>
 #include <sys/isr.h>
+#include <sys/irq.h>
 
 void start(void* modulep, void* physbase, void* physfree)
 {
   int a, b,c;
   a=5;
   b=0;
+  c = 9;
 	// kernel starts here
   clrscr();
   printf("Checking printf before ISR()\n");
-  c= a/b;
+//  c= a/b;
   printf("Checking printf after ISR() %d %d %d\n", a,b,c);
   printf("Checking printf\n");
   printf("Checking printf\n");

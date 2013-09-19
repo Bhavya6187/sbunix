@@ -1,4 +1,5 @@
 #include <sys/idt.h>
+#include <sys/irq.h>
 
 /* adapted from Chris Stones, shovelos */
 
@@ -41,12 +42,15 @@ static struct idtr_t idtr = {
 };
 
 extern void  _isr_000();
+extern void  _irq_032();
 
 void _x86_64_asm_lidt(struct idtr_t* idtr);
 void reload_idt() {
   
+  init_pic();
+  init_timer(); 
   idt[0] = get_entry((uint64_t)&_isr_000);
-  //idt[32] = get_entry((uint64_t)&_irq_032);
+  idt[32] = get_entry((uint64_t)&_irq_032);
  	_x86_64_asm_lidt(&idtr);
 }
 
