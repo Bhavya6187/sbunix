@@ -4,6 +4,7 @@
 //#include <unistd.h>
 
 inline void outb( unsigned short port, unsigned char val );
+inline unsigned char inb( unsigned short port );
 int printf(const char *format, ...);
 int putchar(char a);
 int puts(char* str);

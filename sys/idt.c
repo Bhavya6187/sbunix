@@ -1,8 +1,6 @@
 #include <sys/idt.h>
 #include <sys/irq.h>
 
-/* adapted from Chris Stones, shovelos */
-
 #define MAX_IDT 256
 
 struct idt_entry {
@@ -15,7 +13,6 @@ struct idt_entry {
   uint32_t reserved;
 }__attribute__((packed));
 
-
 struct idt_entry get_entry(uint64_t target)
 {
    struct idt_entry ret;
@@ -27,7 +24,6 @@ struct idt_entry get_entry(uint64_t target)
    ret.offset3 = ((target) >> 32) & 0xffffffff;
    return ret;
 }
-
 
 struct idt_entry idt[MAX_IDT];// = { get_entry((uint64_t)&_isr_000), get_entry((uint64_t)&_isr_001)};
 
@@ -43,6 +39,7 @@ static struct idtr_t idtr = {
 
 extern void  _isr_000();
 extern void  _irq_032();
+extern void  _irq_033();
 
 void _x86_64_asm_lidt(struct idtr_t* idtr);
 void reload_idt() {
@@ -51,6 +48,7 @@ void reload_idt() {
   init_timer(); 
   idt[0] = get_entry((uint64_t)&_isr_000);
   idt[32] = get_entry((uint64_t)&_irq_032);
+  idt[33] = get_entry((uint64_t)&_irq_033);
  	_x86_64_asm_lidt(&idtr);
 }
 

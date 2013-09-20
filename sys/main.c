@@ -12,7 +12,6 @@ void start(void* modulep, void* physbase, void* physfree)
   b=0;
   c = 9;
 	// kernel starts here
-  clrscr();
   printf("Checking printf before ISR()\n");
 //  c= a/b;
   printf("Checking printf after ISR() %d %d %d\n", a,b,c);
@@ -35,6 +34,7 @@ void boot(void)
 		:"=g"(loader_stack)
 		:"r"(&stack[INITIAL_STACK_SIZE])
 	);
+  clrscr();
 	reload_gdt();
 	reload_idt();
 	start(
