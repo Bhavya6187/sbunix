@@ -3,7 +3,31 @@
 #include <stdio.h>
 #include <sys/irq.h>
 
-uint32_t tick = 0;
+unsigned char second;
+unsigned char minute;
+unsigned char hour;
+unsigned char day;
+unsigned char month;
+unsigned int year;
+
+uint32_t tick = 0,sec = 0;
+void read_rtc();
+enum {
+      cmos_address = 0x70,
+      cmos_data    = 0x71
+};
+ 
+ 
+int get_update_in_progress_flag() {
+      outb(cmos_address, 0x0A);
+      return (inb(cmos_data) & 0x80);
+}
+ 
+ 
+unsigned char get_RTC_register(int reg) {
+      outb(cmos_address, reg);
+      return inb(cmos_data);
+}
 
 unsigned char kbdus[128] =
 {
@@ -75,7 +99,7 @@ void init_timer()
    // that the divisor must be small enough to fit into 16-bits.
    uint16_t divisor;
 //  divisor = (1193180/500);
-   divisor = 65000;
+   divisor = 59659;
 
    // Send the command byte.
    outb(0x43, 0x36);
@@ -95,9 +119,15 @@ void init_timer()
 void irq_handler_0(registers_t regs)
 {
     tick++;
+    
     //printf("IRQ handler IRQ %d  %d\n", regs.interrupt_number, tick);
     // Send an EOI (end of interrupt) signal to the PICs.
     // If this interrupt involved the slave.
+    if (tick % 20 == 0)
+    {
+        read_rtc();
+        sec++;
+    }
     if (regs.interrupt_number >= 32)
     {
       //Send reset signal to slave.
@@ -125,4 +155,60 @@ void irq_handler_1(registers_t regs)
   {
     putchar(kbdus[scancode]);
   }
+}
+
+void read_rtc() {
+      unsigned char last_second;
+      unsigned char last_minute;
+      unsigned char last_hour;
+      unsigned char last_day;
+      unsigned char last_month;
+      unsigned char last_year;
+      unsigned char registerB;
+ 
+      // Note: This uses the "read registers until you get the same values twice in a row" technique
+      //       to avoid getting dodgy/inconsistent values due to RTC updates
+ 
+      while (get_update_in_progress_flag());                // Make sure an update isn't in progress
+      second = get_RTC_register(0x00);
+      minute = get_RTC_register(0x02);
+      hour = get_RTC_register(0x04);
+      day = get_RTC_register(0x07);
+      month = get_RTC_register(0x08);
+      year = get_RTC_register(0x09);
+ 
+      do {
+            last_second = second;
+            last_minute = minute;
+            last_hour = hour;
+            last_day = day;
+            last_month = month;
+            last_year = year;
+ 
+            while (get_update_in_progress_flag());           // Make sure an update isn't in progress
+            second = get_RTC_register(0x00);
+            minute = get_RTC_register(0x02);
+            hour = get_RTC_register(0x04);
+            day = get_RTC_register(0x07);
+            month = get_RTC_register(0x08);
+            year = get_RTC_register(0x09);
+            }
+       while( (last_second != second) || (last_minute != minute) || (last_hour != hour) ||
+               (last_day != day) || (last_month != month) || (last_year != year)  );
+ 
+      registerB = get_RTC_register(0x0B);
+ 
+      // Convert BCD to binary values if necessary
+ 
+      if (!(registerB & 0x04)) {
+            second = (second & 0x0F) + ((second / 16) * 10);
+            minute = (minute & 0x0F) + ((minute / 16) * 10);
+            hour = ( (hour & 0x0F) + (((hour & 0x70) / 16) * 10) ) | (hour & 0x80);
+            day = (day & 0x0F) + ((day / 16) * 10);
+            month = (month & 0x0F) + ((month / 16) * 10);
+            year = (year & 0x0F) + ((year / 16) * 10);
+      }
+
+      printtime(hour,minute,second);
+      //printf("%d:%d:%d\n",hour,minute,second);
 }

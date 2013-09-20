@@ -85,6 +85,7 @@ int putchar(char a )
   *(video++ + 2*position) = a;
 	*video++ = color;
   position++;
+  update_cursor(position/COLUMN, position%COLUMN);
   return 1;
 }
 
@@ -275,3 +276,40 @@ int printf(const char* format, ...)
   return total;
 }
 
+void printtime(unsigned char hour, unsigned char minute, unsigned char seconds)
+{
+  int color = 0x07;
+  //hour = hour-4;
+	volatile char *video = (volatile char*)0xB8F90;
+  
+  hour = (hour-4)%24;
+
+  char a = (hour/10) + '0';
+  *(video++) = a;
+	*video++ = color;
+  a = (hour%10)+'0';
+  *(video++) = a;
+	*video++ = color;
+
+  a = ':';
+  *(video++) = a;
+	*video++ = color;
+  
+  a = (minute/10)+'0';
+  *(video++) = a;
+	*video++ = color;
+  a = (minute%10)+'0';
+  *(video++) = a;
+	*video++ = color;
+  
+  a = ':';
+  *(video++) = a;
+	*video++ = color;
+  
+  a = (seconds/10)+'0';
+  *(video++) = a;
+	*video++ = color;
+  a = (seconds%10)+'0';
+  *(video++) = a;
+	*video++ = color;
+}
