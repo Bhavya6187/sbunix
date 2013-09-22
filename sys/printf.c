@@ -80,6 +80,7 @@ int putchar(char a )
   if(a=='\n')
   {
     position = ((position/80)+1)*80; 
+    update_cursor(position/COLUMN, position%COLUMN);
     return 0;
   }
   *(video++ + 2*position) = a;
@@ -281,8 +282,11 @@ void printtime(unsigned char hour, unsigned char minute, unsigned char seconds)
   int color = 0x07;
   //hour = hour-4;
 	volatile char *video = (volatile char*)0xB8F90;
-  
-  hour = (hour-4)%24;
+ 
+  if(hour >= 4)
+    hour = (hour)-4;
+  else
+    hour = hour + 20;
 
   char a = (hour/10) + '0';
   *(video++) = a;
