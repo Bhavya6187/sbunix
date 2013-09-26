@@ -317,3 +317,12 @@ void printtime(unsigned char hour, unsigned char minute, unsigned char seconds)
   *(video++) = a;
 	*video++ = color;
 }
+
+void printtoside(char a)
+{
+  int color = 0x07;
+	volatile char *video = (volatile char*)0xB8F8C;
+  //update_cursor(70, 25);
+  *(video++) = a;
+	*video++ = color;
+}

@@ -7,16 +7,16 @@
 
 void start(void* modulep, void* physbase, void* physfree)
 {
-  int a, b,c;
-  a=5;
-  b=0;
-  c = 9;
+ // int a, b,c;
+ // a=5;
+ // b=0;
+ // c = 9;
 	// kernel starts here
-  printf("Checking printf before ISR()\n");
+//  printf("Checking printf before ISR()\n");
 //  c= a/b;
-  printf("Checking printf after ISR() %d %d %d\n", a,b,c);
-  printf("Checking printf\n");
-  printf("Checking printf\n");
+//  printf("Checking printf after ISR() %d %d %d\n", a,b,c);
+//  printf("Checking printf\n");
+  printf("Project has been made by Bhavya Agarwal and Dushyant Goyal\n");
 }
 
 #define INITIAL_STACK_SIZE 4096
