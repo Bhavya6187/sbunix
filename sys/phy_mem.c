@@ -6,9 +6,9 @@
 
 //static uint64_t phy_addr_map;
 free_list *head_fl = NULL;
-
+uint64_t i=0;
 // Setting up the available memory into free pages
-void phy_mem_init(uint64_t sbase, uint64_t slength, void *kernmem) 
+void phy_mem_init(uint64_t sbase, uint64_t slength, void *kernmem, uint64_t physbase) 
 {
   uint64_t *physfree = (uint64_t *)kernmem;
   free_list *newp = NULL;
@@ -22,15 +22,38 @@ void phy_mem_init(uint64_t sbase, uint64_t slength, void *kernmem)
   }
   for( page=sbase ; page < (sbase + slength) ; page+=PAGE_SIZE )
   {
+    if(page>=physbase && page<=(uint64_t)physfree+(1024*1024))
+    {
+      //printf("p=%x pf=%x pb=%x", page, physfree, physbase);
+      //page = page + (uint64_t)physfree - physbase; 
+      continue;
+    }
     physfree +=2;
     newp = (free_list *)physfree;
     newp->addr = page;
     newp->next = head_fl;
     head_fl = newp;
-    printf("pf=%x h=%x hn=%x ha=%x pg=%x b=%x l=%x\n",physfree,head_fl, head_fl->next, head_fl->addr, page, sbase, slength);
+    i++;
+    //printf("pf=%x h=%x hn=%x ha=%x pg=%x b=%x l=%x\n",physfree,head_fl, head_fl->next, head_fl->addr, page, sbase, slength);
   }
+    printf("pf=%x h=%x hn=%x ha=%x pg=%x b=%x l=%x\n",physfree,head_fl, head_fl->next, head_fl->addr, page, sbase, slength);
+    printf("No of Free Pages = %d\n", i);
+    printf("Location of Head = %x\n", head_fl);
 
 }
 
+uint64_t allocate_free_phy_page()
+{
+  free_list *temp = NULL;
+  temp = head_fl;
+  head_fl = head_fl->next;
+  return temp->addr;
+}
 
-
+void free_phy_page(uint64_t temp_addr)
+{
+  free_list *temp = NULL;
+  temp->addr = temp_addr;
+  temp->next = head_fl;
+  head_fl = temp;
+}
