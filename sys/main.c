@@ -30,7 +30,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	}
    
   printf("old physfree = %x", physfree);
-  physfree = physfree + (1024*1024);
+  //physfree = physfree + (1024*1024);
   printf("New physfree = %x", physfree);
   
   /*
@@ -48,8 +48,9 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   
   uint64_t a;
   a = (uint64_t)&kernmem;
-  printf("kernmem %ld", a);
-  printf("kernmem %p", a);
+  printf("kernmem %ld ", a);
+  printf("kernmem %p \n", a);
+  printf("pf = %p pb = %p \n", physfree, physbase);
   set_paging((void *)&kernmem, physfree, physbase);
   //printf("REturn from Paging :P\n");
 	// kernel starts here
