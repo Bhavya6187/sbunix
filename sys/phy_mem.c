@@ -8,9 +8,10 @@
 free_list *head_fl = NULL;
 uint64_t i=0;
 // Setting up the available memory into free pages
-void phy_mem_init(uint64_t sbase, uint64_t slength, void *kernmem, uint64_t physbase) 
+void phy_mem_init(uint64_t sbase, uint64_t slength, void *pf, uint64_t physbase) 
 {
-  uint64_t *physfree = (uint64_t *)kernmem;
+  uint64_t *physfree = (uint64_t *)pf;
+  uint64_t *pff = (uint64_t *)pf;
   free_list *newp = NULL;
   uint64_t page;
   if(!head_fl) //head in free list is NULL
@@ -22,7 +23,7 @@ void phy_mem_init(uint64_t sbase, uint64_t slength, void *kernmem, uint64_t phys
   }
   for( page=sbase ; page < (sbase + slength) ; page+=PAGE_SIZE )
   {
-    if(page>=physbase && page<=(uint64_t)physfree+(1024*1024))
+    if(page>=physbase && page<=(uint64_t)pff+(1024*1024))
     {
       //printf("p=%x pf=%x pb=%x", page, physfree, physbase);
       //page = page + (uint64_t)physfree - physbase; 
