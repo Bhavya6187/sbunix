@@ -24,12 +24,11 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
 		if (smap->type == 1 /* memory */ && smap->length != 0) {
 			printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
-      //phy_mem_init(smap->base, smap->length, physfree, (uint64_t)(physbase));
+      phy_mem_init(smap->base, smap->length, physfree, (uint64_t)(physbase));
 	    printf("physfree %x\n", (uint64_t)physfree);
-      
 		}
 	}
-  /* 
+   
   printf("old physfree = %x", physfree);
   physfree = physfree + (1024*1024);
   printf("New physfree = %x", physfree);
@@ -44,12 +43,12 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   t2= allocate_free_phy_page();
   t4= allocate_free_phy_page();
   printf("t1=%x t2=%x t4=%x\n", t1, t2, t4);
-*/
+
   uint64_t a;
   a = (uint64_t)&kernmem;
   printf("kernmem %ld", a);
   printf("kernmem %p", a);
-  //set_paging((void *)&kernmem, physfree, physbase);
+  set_paging((void *)&kernmem, physfree, physbase);
   printf("REturn from Paging :P\n");
 
 
