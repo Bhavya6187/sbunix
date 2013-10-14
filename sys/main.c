@@ -30,7 +30,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	}
    
   printf("old physfree = %x", physfree);
-  //physfree = physfree + (1024*1024);
+  physfree = physfree + (1024*1024);
   printf("New physfree = %x", physfree);
   
   /*
