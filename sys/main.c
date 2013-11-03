@@ -13,11 +13,12 @@ char stack[INITIAL_STACK_SIZE];
 uint32_t* loader_stack;
 extern char kernmem, physbase;
 
+//int infinite_loop=1; /* global variable */
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
   struct smap_t *smap;
   clrscr();
-	printf("physbase-%x\n physfree %x\n", (uint64_t)physbase, (uint64_t)physfree);
+	//printf("physbase-%x\n physfree %x\n", (uint64_t)physbase, (uint64_t)physfree);
 	
   //printf("modeulep = %x %x %x\n", (uint64_t)modulep[0], (uint64_t)modulep[1], (uint64_t)&modulep);
 	while(modulep[0] != 0x9001) modulep += modulep[1]+2;
@@ -25,7 +26,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 		if (smap->type == 1 /* memory */ && smap->length != 0) {
 			printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
       phy_mem_init(smap->base, smap->length, physfree, (uint64_t)(physbase));
-	    printf("physfree %x\n", (uint64_t)physfree);
+	    //printf("physfree %x\n", (uint64_t)physfree);
 		}
 	}
    
@@ -46,21 +47,25 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   printf("t1=%x t2=%x t4=%x\n", t1, t2, t4);
   */
   
-  uint64_t a;
-  a = (uint64_t)&kernmem;
-  printf("kernmem %ld ", a);
-  printf("kernmem %p \n", a);
-  printf("pf = %p pb = %p \n", physfree, physbase);
+  //uint64_t a;
+  //a = (uint64_t)&kernmem;
+  //printf("kernmem %ld ", a);
+  //printf("kernmem %p \n", a);
+  //printf("pf = %p pb = %p \n", physfree, physbase);
   set_paging((void *)&kernmem, physfree, physbase);
+  //set_virtual_video_memory((void*)0xFFFFFFFF000B8000);
+  //clrscr();
+  //while(infinite_loop);
+  //putchar('D');
   //printf("REturn from Paging :P\n");
 	// kernel starts here
-	//while(1);
+	while(1);
 }
 
 void boot(void)
 {
 	// note: function changes rsp, local stack variables can't be practically used
-	//register char *temp1, *temp2;
+	register char *temp1, *temp2;
 	__asm__(
 		"movq %%rsp, %0;"
 		"movq %1, %%rsp;"
@@ -75,10 +80,11 @@ void boot(void)
 		&physbase,
 		(void*)(uint64_t)loader_stack[4]
 	);
-	/*for(
+	for(
+		//temp1 = "!!!!! start() returned !!!!!", temp2 = (char*)0xb8000;
 		temp1 = "!!!!! start() returned !!!!!", temp2 = (char*)0xb8000;
 		*temp1;
 		temp1 += 1, temp2 += 2
-	) *temp2 = *temp1;*/
+	) *temp2 = *temp1;
 	while(1);
 }

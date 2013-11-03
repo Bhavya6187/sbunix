@@ -17,7 +17,7 @@ void phy_mem_init(uint64_t sbase, uint64_t slength, void *pf, uint64_t physbase)
   if(!head_fl) //head in free list is NULL
   {
     head_fl = (free_list *)physfree;
-    printf("pf=%x h=%x hn=%x \n",physfree,head_fl, head_fl->next);
+    //printf("pf=%x h=%x hn=%x \n",physfree,head_fl, head_fl->next);
     head_fl->next = NULL;
     head_fl->addr = NULL;  //Dummy node
   }
@@ -37,9 +37,9 @@ void phy_mem_init(uint64_t sbase, uint64_t slength, void *pf, uint64_t physbase)
     i++;
     //printf("pf=%x h=%x hn=%x ha=%x pg=%x b=%x l=%x\n",physfree,head_fl, head_fl->next, head_fl->addr, page, sbase, slength);
   }
-    printf("pf=%x h=%x hn=%x ha=%x pg=%x b=%x l=%x\n",physfree,head_fl, head_fl->next, head_fl->addr, page, sbase, slength);
-    printf("No of Free Pages = %d\n", i);
-    printf("Location of Head = %x\n", head_fl);
+    //printf("pf=%x h=%x hn=%x ha=%x pg=%x b=%x l=%x\n",physfree,head_fl, head_fl->next, head_fl->addr, page, sbase, slength);
+    //printf("No of Free Pages = %d\n", i);
+    //printf("Location of Head = %x\n", head_fl);
 
 }
 
