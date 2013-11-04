@@ -6,7 +6,7 @@
 //#include <unistd.h>
 #define ROW 25
 #define COLUMN 80
-#define VIDEO_VM 0x0000000000000000
+#define VIDEO_VM 0xFFFF800000000000
 int position=0;
 int scanf(const char *format, ...);
 
@@ -37,8 +37,8 @@ int clrscr()
 {
   int i;
 	int color = 0x07;
-	volatile char *video = (volatile char*)(0xB8000);
-	//volatile char *video = (volatile char*)(VIDEO_VM | 0xB8000);
+	//volatile char *video = (volatile char*)(0xB8000);
+	volatile char *video = (volatile char*)(VIDEO_VM | 0xB8000);
   for(i=0; i<ROW*COLUMN; i++)
   {
     *video++ = 0;
@@ -54,7 +54,7 @@ int scrollup(int dist)
   int i;
   //int j;
 	int color = 0x07;
-	volatile char *video = (volatile char*)(0xB8000);
+	volatile char *video = (volatile char*)(VIDEO_VM | 0xB8000);
   //volatile char *temp = (volatile char*)(video + dist*COLUMN);
   for(i=0; i<(ROW-dist)*COLUMN; i++)
   {
@@ -76,8 +76,8 @@ int scrollup(int dist)
 int putchar(char a )
 {
   int color = 0x07;
-	volatile char *video = (volatile char*)(0xB8000);
-	//volatile char *video = (volatile char*)(VIDEO_VM | 0xB8000);
+	//volatile char *video = (volatile char*)(0xB8000);
+	volatile char *video = (volatile char*)(VIDEO_VM | 0xB8000);
   if(position>=ROW*COLUMN)
     scrollup(1);
   if(a=='\n')
@@ -284,8 +284,8 @@ void printtime(unsigned char hour, unsigned char minute, unsigned char seconds)
 {
   int color = 0x07;
   //hour = hour-4;
-	volatile char *video = (volatile char*)(0xB8F90);
-	//volatile char *video = (volatile char*)(VIDEO_VM | 0xB8F90);
+	//volatile char *video = (volatile char*)(0xB8F90);
+	volatile char *video = (volatile char*)(VIDEO_VM | 0xB8F90);
  
   if(hour >= 4)
     hour = (hour)-4;
@@ -325,8 +325,8 @@ void printtime(unsigned char hour, unsigned char minute, unsigned char seconds)
 void printtoside(char a)
 {
   int color = 0x07;
-	volatile char *video = (volatile char*)(0xB8F8C);
-	//volatile char *video = (volatile char*)(VIDEO_VM | 0xB8F8C);
+	//volatile char *video = (volatile char*)(0xB8F8C);
+	volatile char *video = (volatile char*)(VIDEO_VM | 0xB8F8C);
   //update_cursor(70, 25);
   *(video++) = a;
 	*video++ = color;

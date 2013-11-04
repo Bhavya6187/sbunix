@@ -17,22 +17,22 @@ extern char kernmem, physbase;
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
   struct smap_t *smap;
-  clrscr();
+  //clrscr();
 	//printf("physbase-%x\n physfree %x\n", (uint64_t)physbase, (uint64_t)physfree);
 	
   //printf("modeulep = %x %x %x\n", (uint64_t)modulep[0], (uint64_t)modulep[1], (uint64_t)&modulep);
 	while(modulep[0] != 0x9001) modulep += modulep[1]+2;
 	for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
 		if (smap->type == 1 /* memory */ && smap->length != 0) {
-			printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
+			//printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
       phy_mem_init(smap->base, smap->length, physfree, (uint64_t)(physbase));
 	    //printf("physfree %x\n", (uint64_t)physfree);
 		}
 	}
    
-  printf("old physfree = %x", physfree);
+  //printf("old physfree = %x", physfree);
   physfree = physfree + (1024*1024);
-  printf("New physfree = %x", physfree);
+  //printf("New physfree = %x", physfree);
   
   /*
   uint64_t t1, t2,t3,t4;
@@ -53,6 +53,8 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   //printf("kernmem %p \n", a);
   //printf("pf = %p pb = %p \n", physfree, physbase);
   set_paging((void *)&kernmem, physfree, physbase);
+  char* x = (char*)0xFFFF8000000B8000;
+  *x++ = 'A';
   //set_virtual_video_memory((void*)0xFFFFFFFF000B8000);
   //clrscr();
   //while(infinite_loop);
