@@ -12,7 +12,7 @@
 char stack[INITIAL_STACK_SIZE];
 uint32_t* loader_stack;
 extern char kernmem, physbase;
-
+uint64_t physfree;
 //int infinite_loop=1; /* global variable */
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
@@ -53,12 +53,15 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   //printf("kernmem %p \n", a);
   //printf("pf = %p pb = %p \n", physfree, physbase);
   set_paging((void *)&kernmem, physfree, physbase);
-  char* x = (char*)0xFFFF8000000B8000;
+  
+  //char* x = (char*)0xFFFF8000000B8000;
+  volatile char *x = (char*)(0xffffffff80000000|(uint64_t)physfree );
   *x++ = 'A';
+  *x++ = 0x1F; 
   //set_virtual_video_memory((void*)0xFFFFFFFF000B8000);
   //clrscr();
   //while(infinite_loop);
-  //putchar('D');
+  putchar('D');
   //printf("REturn from Paging :P\n");
 	// kernel starts here
 	while(1);
@@ -77,6 +80,7 @@ void boot(void)
 	reload_gdt();
 	setup_tss();
 	//reload_idt();
+  physfree =(uint64_t) loader_stack[4];
 	start(
 		(uint32_t*)((char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase),
 		&physbase,

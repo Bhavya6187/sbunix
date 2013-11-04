@@ -3,6 +3,7 @@
 #endif
 
 #include <stdarg.h>
+#include<defs.h>
 //#include <unistd.h>
 #define ROW 25
 #define COLUMN 80
@@ -10,6 +11,7 @@
 int position=0;
 int scanf(const char *format, ...);
 
+extern uint64_t physfree;
 inline void outb( unsigned short port, unsigned char val )
 {
    asm volatile( "outb %0, %1": : "a"(val), "Nd"(port) );
@@ -38,7 +40,8 @@ int clrscr()
   int i;
 	int color = 0x07;
 	//volatile char *video = (volatile char*)(0xB8000);
-	volatile char *video = (volatile char*)(VIDEO_VM | 0xB8000);
+	volatile char *video = (volatile char*)(0xffffffff80000000|physfree );
+	//volatile char *video = (volatile char*)(VIDEO_VM | 0xB8000);
   for(i=0; i<ROW*COLUMN; i++)
   {
     *video++ = 0;
@@ -54,7 +57,8 @@ int scrollup(int dist)
   int i;
   //int j;
 	int color = 0x07;
-	volatile char *video = (volatile char*)(VIDEO_VM | 0xB8000);
+	volatile char *video = (volatile char*)(0xffffffff80000000|physfree );
+	//volatile char *video = (volatile char*)(VIDEO_VM | 0xB8000);
   //volatile char *temp = (volatile char*)(video + dist*COLUMN);
   for(i=0; i<(ROW-dist)*COLUMN; i++)
   {
@@ -77,7 +81,7 @@ int putchar(char a )
 {
   int color = 0x07;
 	//volatile char *video = (volatile char*)(0xB8000);
-	volatile char *video = (volatile char*)(VIDEO_VM | 0xB8000);
+	volatile char *video = (volatile char*)(0xffffffff80000000|physfree );
   if(position>=ROW*COLUMN)
     scrollup(1);
   if(a=='\n')

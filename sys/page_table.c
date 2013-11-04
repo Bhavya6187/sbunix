@@ -48,7 +48,7 @@ void set_paging(void * km, void * pf, void * pb)
   
   uint64_t i; 
   int j;
-  for(j=0,i=physbase; i<=physfree; i+=PAGE_SIZE,j++ )
+  for(j=0,i=physbase; i<physfree; i+=PAGE_SIZE,j++ )
   {
     //pte_b = (uint64_t *)allocate_free_phy_page();
     //pte[vmem4+j] = ((((uint64_t)pte_b) & 0xFFFFFFFFFF000) | 3);
@@ -64,16 +64,16 @@ void set_paging(void * km, void * pf, void * pb)
   /*0x324000 kernmem 0xFFFFFFFF80200000
                                  324000
                                80524000*/
-  uint64_t video_mem;
+  //uint64_t video_mem;
   //video_mem = 0xFFFFFFFF80800000;
   //video_mem = 0x0000000000000000;
   //video_mem = 0x00000000000B8000;
-  video_mem = 0xFFFFFFFF802B8000;
+  //video_mem = 0xFFFFFFFF802B8000;
   //video_mem = 0x0000000000000000;
 /*  vmem1 = ((video_mem << (16)) >> 55); 
   vmem2 = ((video_mem << (16+9)) >> 55); 
   vmem3 = ((video_mem << (16+9+9)) >> 55); */
-  vmem4 = ((video_mem << (16+9+9+9)) >> 55);
+ // vmem4 = ((video_mem << (16+9+9+9)) >> 55);
   //printf("\n %d %d %d %d\n", vmem1, vmem2, vmem3, vmem4);
    
   /*pdpe_vm = (uint64_t *)allocate_free_phy_page();
@@ -86,7 +86,7 @@ void set_paging(void * km, void * pf, void * pb)
     //pte_vm[vmem4+j] = ((((uint64_t)i) & 0xFFFFFFFFFF000) | 3);
   //pte_vm = (uint64_t *)allocate_free_phy_page();
   //pte[vmem4] = ((((uint64_t)0xB8000) & 0xFFFFFFFFFF000) | 3);
-  pte[vmem4] = ((((uint64_t)0xB8000) ) | 3);
+  pte[vmem4+j] = (0xB8000  | 7);
   //printf("\n %d %d %d %d %p %p %p\n", vmem1, vmem2, vmem3, vmem4, pml4e[vmem1], pte_vm[vmem4], video_mem);
   //printf("j=%d\n",j);
   //printf("%p %p %p %p %p %p %p %p\n", pml4e, pdpe, pde, pte, pdpe_vm, pde_vm, pte_vm);
