@@ -45,6 +45,8 @@ void set_paging(void * km, void * pf, void * pb)
   pml4e[vmem1] = (((uint64_t)pdpe) & 0xFFFFFFFFFF000) | 3;
   pdpe[vmem2]  = (((uint64_t)pde)  & 0xFFFFFFFFFF000) | 3;
   pde[vmem3]   = (((uint64_t)pte)  & 0xFFFFFFFFFF000) | 3;
+  pml4e[63] = (((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 3;
+
   
   uint64_t i; 
   int j;
@@ -106,6 +108,8 @@ void set_paging(void * km, void * pf, void * pb)
   // Setting the Page Tables
   _ptcr3(cr3); //setting cr3 register to kick start paging
   //_ptcr0(cr0); //setting cr3 register to kick start paging
+  video_vm = (0xffffffff80000000|(uint64_t)physfree );
+
 }
 
 // Setting Virtual Address for //printf()

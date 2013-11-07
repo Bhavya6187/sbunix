@@ -55,14 +55,14 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   set_paging((void *)&kernmem, physfree, physbase);
   
   //char* x = (char*)0xFFFF8000000B8000;
-  volatile char *x = (char*)(0xffffffff80000000|(uint64_t)physfree );
+  /*volatile char *x = (char*)(0xffffffff80000000|(uint64_t)physfree );
   *x++ = 'A';
-  *x++ = 0x1F; 
+  *x++ = 0x1F; */
   //set_virtual_video_memory((void*)0xFFFFFFFF000B8000);
   //clrscr();
   //while(infinite_loop);
   putchar('D');
-  //printf("REturn from Paging :P\n");
+  printf("REturn from Paging :P\n");
 	// kernel starts here
 	while(1);
 }

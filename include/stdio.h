@@ -1,7 +1,10 @@
 #ifndef _STDIO_H
 #define _STDIO_H
 
-//#include <unistd.h>
+
+#include<defs.h>
+
+extern uint64_t video_vm;
 
 inline void outb( unsigned short port, unsigned char val );
 inline unsigned char inb( unsigned short port );
