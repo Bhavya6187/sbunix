@@ -13,10 +13,10 @@ void bar();
 //void _asm_context(uint64_t);
 void call_first()
 {
-	bar_p.rsp_p = (uint64_t)&(bar_p.k_stack);
-	bar_p.k_stack[0] = (uint64_t)&bar;
-	foo_p.rsp_p = (uint64_t)&(foo_p.k_stack);
-	foo_p.k_stack[0] = (uint64_t)&foo;
+	bar_p.rsp_p = (uint64_t)&(bar_p.k_stack[63]);
+	bar_p.k_stack[63] = (uint64_t)&bar;
+	foo_p.rsp_p = (uint64_t)&(foo_p.k_stack[63]);
+	foo_p.k_stack[63] = (uint64_t)&foo;
 	printf("\n Inside call");
 //	_asm_context((foo_p.rsp_p));
 
@@ -30,12 +30,12 @@ void call_first()
 	);
 }
 
-void schedule(struct pcb pt1, struct pcb pt2)
+void schedule(uint64_t* pt1, uint64_t pt2)
 {
 	// Should save state of caller here 
 	__asm__(
 		"movq %%rsp, %0"
-		:"=g"(pt1.rsp_p)
+		:"=g"(*pt1)
 		:
 	);
 
@@ -43,8 +43,7 @@ void schedule(struct pcb pt1, struct pcb pt2)
 	__asm__(
 		"movq %0, %%rsp;"
 		:
-		:"r"((pt2.rsp_p))
-		
+		:"r"((pt2))
 	);
 	__asm__(
 		"retq;"
@@ -53,39 +52,21 @@ void schedule(struct pcb pt1, struct pcb pt2)
 
 void foo()
 {
-//	printf("\n In foo");
-
-//	printf("\n Hello:");
+	printf("\n Hello:");
 	while (1)
 	{
-//		schedule(foo_p, bar_p);
-//	}
- __asm__(
-		"movq %0, %%rsp;"
-		:
-		:"r"((bar_p.rsp_p))
-	);
-	 __asm__(
-	 	"retq;"
-        );      
-  }
+    printf("HI");
+		schedule(&foo_p.rsp_p, bar_p.rsp_p);
+	}
 }
 
 void bar()
 {
-
-//	printf("\n World:");
+	printf("\n World:");
 	while(1)
 	{
-    __asm__(
-		"movq %0, %%rsp;"
-		:
-		:"r"((foo_p.rsp_p))
-	  );
-	  __asm__(
-	 	"retq;"
-    );      
-//		schedule(bar_p, foo_p);
-	}
+    printf("BI\n");
+		schedule(&bar_p.rsp_p, foo_p.rsp_p);
+  }
 }
 
