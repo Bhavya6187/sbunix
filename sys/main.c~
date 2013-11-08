@@ -6,7 +6,7 @@
 #include <sys/irq.h>
 #include <sys/phy_mem.h>
 #include <sys/page_table.h>
-#include <sys/tasking.h>
+
 
 #define INITIAL_STACK_SIZE 4096
 char stack[INITIAL_STACK_SIZE];
@@ -63,7 +63,6 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   //while(infinite_loop);
   putchar('D');
   printf("REturn from Paging :P\n");
-  call_first();
 	// kernel starts here
 	while(1);
 }
