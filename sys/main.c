@@ -52,6 +52,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   //printf("kernmem %ld ", a);
   //printf("kernmem %p \n", a);
   //printf("pf = %p pb = %p \n", physfree, physbase);
+  putint(100);
   set_paging((void *)&kernmem, physfree, physbase);
   
   //char* x = (char*)0xFFFF8000000B8000;
@@ -62,6 +63,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   //clrscr();
   //while(infinite_loop);
   putchar('D');
+  puts("hey");
   //putint(100);
   //printf("",100);
   //call_first();
