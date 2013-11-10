@@ -6,6 +6,10 @@
 
 struct pcb foo_p;
 struct pcb bar_p;
+//struct pcb *f1;
+//struct pcb *f2;
+struct pcb *current[2];
+int flag = 0;
 void foo();
 void bar();
 
@@ -13,13 +17,16 @@ void bar();
 //void _asm_context(uint64_t);
 void call_first()
 {
-	bar_p.rsp_p = (uint64_t)&(bar_p.k_stack[63]);
+  clrscr();
+	bar_p.rsp_p = (uint64_t)&(bar_p.k_stack[51]);
 	bar_p.k_stack[63] = (uint64_t)&bar;
 	foo_p.rsp_p = (uint64_t)&(foo_p.k_stack[63]);
 	foo_p.k_stack[63] = (uint64_t)&foo;
+	current[0] = &(foo_p);
+	current[1] = &(bar_p);
 	printf("\n Inside call");
 //	_asm_context((foo_p.rsp_p));
-
+	 
 	__asm__(
 		"movq %0, %%rsp;"
 		:
@@ -30,43 +37,145 @@ void call_first()
 	);
 }
 
-void schedule(uint64_t* pt1, uint64_t pt2)
+void schedule()
 {
+	struct pcb *pt1, *pt2;
+
+	if (flag)
+	{
+		pt1 = (current[1]);
+		pt2 = (current[0]);
+	}
+	else
+	{	
+		pt1 = current[0];
+		pt2 = (current[1]);
+	}	
 	// Should save state of caller here 
-	__asm__(
+
+	asm volatile(
+		"push %rax"
+		);
+	asm volatile(
+		"push %rbx"
+		);
+	asm volatile(
+		"push %rcx"
+		);
+	asm volatile(
+		"push %rdx"
+		);
+
+	asm volatile(
+		"push %rbp"
+		);
+	asm volatile(
+		"push %r8"
+		);
+	asm volatile(
+		"push %r9"
+		);
+	asm volatile(
+		"push %r10"
+		);
+	asm volatile(
+		"push %r11"
+		);
+	asm volatile(
+		"push %r12"
+		);
+	asm volatile(
+		"push %r13"
+		);
+	asm volatile(
+		"push %r14"
+		);
+	asm volatile(
 		"movq %%rsp, %0"
-		:"=g"(*pt1)
+		:"=g"(pt1->rsp_p)
 		:
+	        :"memory"
 	);
 
 	/* Now change the %rsp to callee rsp */
-	__asm__(
+	asm volatile(
 		"movq %0, %%rsp;"
 		:
-		:"r"((pt2))
+		:"r"((pt2->rsp_p))
+	        :"memory"
 	);
-	__asm__(
+	asm volatile(
+		"pop %r14"
+		);
+	asm volatile(
+		"pop %r13"
+		);
+	asm volatile(
+		"pop %r12"
+		);
+	asm volatile(
+		"pop %r11"
+		);
+
+	asm volatile(
+		"pop %r10"
+		);
+	asm volatile(
+		"pop %r9"
+		);
+	asm volatile(
+		"pop %r8"
+		);
+	asm volatile(
+		"pop %rbp"
+		);
+	asm volatile(
+		"pop %rdx"
+		);
+	asm volatile(
+		"pop %rcx"
+		);
+	asm volatile(
+		"pop %rbx"
+		);
+	asm volatile(
+		"pop %rax"
+		);
+
+
+	asm volatile(
 		"retq;"
 	);	
 }
 
 void foo()
 {
-	printf("\n Hello:");
-	while (1)
+	flag = 0;
+	printf("\n In foo");
+	int i = 0;
+	while (i < 5)
 	{
-    printf("HI");
-		schedule(&foo_p.rsp_p, bar_p.rsp_p);
+		i++;
+//		printf(" Hello: %d\n", i);
+		schedule();
+		flag = 0;
 	}
+	while(1);
 }
 
 void bar()
 {
-	printf("\n World:");
-	while(1)
+	flag = 1;
+	int i = 20;
+	printf("\n In bar");
+	while(i < 25)
 	{
-    printf("BI\n");
-		schedule(&bar_p.rsp_p, foo_p.rsp_p);
-  }
+		i++;
+		printf("World:\n", i);
+		schedule();
+		flag = 1;
+	}
+
+	while(1);
 }
 

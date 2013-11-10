@@ -8,7 +8,7 @@ struct pcb
 };
 
 void call_first();
-void schedule(uint64_t* , uint64_t );
+void schedule();
 
 #endif
 

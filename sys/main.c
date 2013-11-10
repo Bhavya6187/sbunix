@@ -62,8 +62,9 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   //clrscr();
   //while(infinite_loop);
   putchar('D');
-  printf("REturn from Paging :P\n");
-  call_first();
+  //putint(100);
+  //printf("",100);
+  //call_first();
 	// kernel starts here
 	while(1);
 }
