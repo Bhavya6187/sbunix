@@ -24,9 +24,9 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	while(modulep[0] != 0x9001) modulep += modulep[1]+2;
 	for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
 		if (smap->type == 1 /* memory */ && smap->length != 0) {
-			//printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
+			printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
       phy_mem_init(smap->base, smap->length, physfree, (uint64_t)(physbase));
-	    //printf("physfree %x\n", (uint64_t)physfree);
+	    printf("physfree %x\n", (uint64_t)physfree);
 		}
 	}
    
@@ -62,6 +62,17 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   //set_virtual_video_memory((void*)0xFFFFFFFF000B8000);
   //clrscr();
   //while(infinite_loop);
+  
+  char* x1 = (char*)0x00000000000B8000;
+  *x1 = 'C';
+  putchar(*x1);
+  /*
+  int a, b,c ;
+  b =0;
+  a = 5;
+  c = a/b;
+  putint(c);
+  */
   putchar('D');
   puts("hey");
   //putint(100);
@@ -83,7 +94,7 @@ void boot(void)
 	);
 	reload_gdt();
 	setup_tss();
-	//reload_idt();
+	reload_idt();
   physfree =(uint64_t) loader_stack[4];
 	start(
 		(uint32_t*)((char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase),
