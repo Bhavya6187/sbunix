@@ -52,9 +52,8 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   //printf("kernmem %ld ", a);
   //printf("kernmem %p \n", a);
   //printf("pf = %p pb = %p \n", physfree, physbase);
-  //putint(100);
-  //uint64_t cr3;
-   set_paging((void *)&kernmem, physfree, physbase);
+  putint(100);
+  //set_paging((void *)&kernmem, physfree, physbase);
   
   //char* x = (char*)0xFFFF8000000B8000;
   /*volatile char *x = (char*)(0xffffffff80000000|(uint64_t)physfree );
@@ -64,6 +63,12 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   //clrscr();
   //while(infinite_loop);
   
+  //page_mapping((uint64_t)0xFFFFFFFF80200000);
+  /*page_mapping((uint64_t)0x00000000000B8000);
+  char* x1 = (char*)0x00000000000B8000;
+  *x1 = 'C';
+  putchar(*x1);
+*/
   /*
   int a, b,c ;
   b =0;
@@ -73,9 +78,10 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   */
   putchar('D');
   puts("hey");
-  putint(-100);
+  //putint(100);
   //printf("",100);
-  call_first((void *)&kernmem, physfree, physbase);
+  //call_first();
+    call_first((void *)&kernmem, physfree, physbase);
 	// kernel starts here
 	while(1);
 }
