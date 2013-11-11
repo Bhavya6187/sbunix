@@ -3,6 +3,7 @@
 # include <stdio.h>
 # include <defs.h>
 # include <sys/tasking.h>
+#include <sys/page_table.h>
 
 struct pcb foo_p;
 struct pcb bar_p;
@@ -12,16 +13,30 @@ struct pcb *current[2];
 int flag = 0;
 void foo();
 void bar();
+uint64_t kernmem; 
+void *km, *pf, *pb;
 
+void alloc_page_dir(struct pcb* p )
+{
+  
+  //p->cr3 = set_paging(km, pf, pb);
+
+  return ;
+
+}
 
 //void _asm_context(uint64_t);
-void call_first()
+void call_first(void * kmem, void * pfree, void * pbase)
 {
+  km = kmem;
+  pf = pfree;
+  pb=pbase;
   clrscr();
 	bar_p.rsp_p = (uint64_t)&(bar_p.k_stack[51]);
 	bar_p.k_stack[63] = (uint64_t)&bar;
 	foo_p.rsp_p = (uint64_t)&(foo_p.k_stack[63]);
 	foo_p.k_stack[63] = (uint64_t)&foo;
+  //alloc_page_dir(&(foo_p));
 	current[0] = &(foo_p);
 	current[1] = &(bar_p);
 	printf("\n Inside call");
@@ -156,7 +171,7 @@ void foo()
 	while (i < 5)
 	{
 		i++;
-//		printf(" Hello: %d\n", i);
+		printf(" Hello: %d\n", i);
 		schedule();
 		flag = 0;
 	}
@@ -171,7 +186,7 @@ void bar()
 	while(i < 25)
 	{
 		i++;
-		printf("World:\n", i);
+		printf("World: %d\n",i );
 		schedule();
 		flag = 1;
 	}
