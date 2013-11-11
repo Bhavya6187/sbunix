@@ -109,127 +109,127 @@ int puts(char* str)
 
 int putint(int value)
 {
-  char * ptr=((void *)0);
-  char * low=((void *)0);
-  char * rc=((void *)0);
-  rc = ptr;
+  char ptr[30];
+  char rc[30];
+  int index = 0;
+  int neg = 0;
+  int j = 0;
+  char vals[10] = "0123456789";
   if ( value < 0 )
   {
-    *ptr++ = '-';
+    value*=-1;
+    neg = 1;
   }
-  low =ptr;
   do
   {
     // Modulo is negative for negative value. This trick makes abs() unnecessary.
-    *ptr++ = "9876543210123456789"[9+ value%10];
+    ptr[index] = vals[value%10];
     value /= 10;
+    index++;
   } while ( value );
-  
-  *ptr-- = '\0';
-  while ( low < ptr )
+  if(neg)
+    ptr[index]='-';
+  else
+    index--;
+  while ( index >= 0 )
   {
-    char tmp = *low;
-    *low++ = *ptr;
-    *ptr-- = tmp;
+    rc[j]=ptr[index];
+    j++;
+    index--;
   }
+  rc[j]= '\0';
   return puts(rc);
 }
 
 int int2hex(int value)
 {
-  char * ptr=((void *)0);
-  char * low=((void *)0);
-  char *rc=((void *)0);
-  rc = ptr;
-  low =ptr;
-   
+  char ptr[16];
+  char rc[16];
+  int index =0, j= 0; 
   do
   {
     int temp = value & 0x0f;
     if(temp < 10)
-        *ptr++ = temp + '0';
+        ptr[index] = temp + '0';
      else
-        *ptr++ = (temp) - 10 + 'A';
+        ptr[index] = (temp) - 10 + 'A';
      value = value >> 4;
+     index++;
 
   } while ( value );
   
-  *ptr++ = 'x';
-  *ptr++ = '0';
-  *ptr-- = '\0';
-  while ( low < ptr )
+  ptr[index] = 'x';
+  index++;
+  ptr[index] = '0';
+  while ( index >= 0 )
   {
-    char tmp = *low;
-    *low++ = *ptr;
-    *ptr-- = tmp;
-  }
-  while ( low < ptr )
-  {
-    char tmp = *low;
-    *low++ = *ptr;
-    *ptr-- = tmp;
+    rc[j]=ptr[index];
+    j++;
+    index--;
   }
   return puts(rc);
 }
 
 int long2hex(unsigned long value)
 {
-  char * ptr=((void *)0);
-  char * low=((void *)0);
-  char *rc=((void *)0);
-  rc = ptr;
-  low =ptr;
-   
+  char ptr[16];
+  char rc[16];
+  int index =0, j= 0; 
   do
   {
     int temp = value & 0x0f;
     if(temp < 10)
-        *ptr++ = temp + '0';
+        ptr[index] = temp + '0';
      else
-        *ptr++ = (temp) - 10 + 'A';
+        ptr[index] = (temp) - 10 + 'A';
      value = value >> 4;
+     index++;
 
   } while ( value );
   
-  *ptr++ = 'x';
-  *ptr++ = '0';
-  *ptr-- = '\0';
-  while ( low < ptr )
+  ptr[index] = 'x';
+  index++;
+  ptr[index] = '0';
+  while ( index >= 0 )
   {
-    char tmp = *low;
-    *low++ = *ptr;
-    *ptr-- = tmp;
-  }
-  while ( low < ptr )
-  {
-    char tmp = *low;
-    *low++ = *ptr;
-    *ptr-- = tmp;
+    rc[j]=ptr[index];
+    j++;
+    index--;
   }
   return puts(rc);
 }
 
 int putlong(unsigned long value)
 {
-  char * ptr=((void *)0);
-  char * low=((void *)0);
-  char *rc=((void *)0);
-  rc = ptr;
-  low =ptr;
+  char ptr[30];
+  char rc[30];
+  int index = 0;
+  int neg = 0;
+  int j = 0;
+  char vals[10] = "0123456789";
+  if ( value < 0 )
+  {
+    value*=-1;
+    neg = 1;
+  }
   do
   {
     // Modulo is negative for negative value. This trick makes abs() unnecessary.
-    *ptr++ = "0123456789"[value%10];
+    ptr[index] = vals[value%10];
     value /= 10;
+    index++;
   } while ( value );
-  
-  *ptr-- = '\0';
-  while ( low < ptr )
+  if(neg)
+    ptr[index]='-';
+  else
+    index--;
+  while ( index >= 0 )
   {
-    char tmp = *low;
-    *low++ = *ptr;
-    *ptr-- = tmp;
+    rc[j]=ptr[index];
+    j++;
+    index--;
   }
+  rc[j]= '\0';
   return puts(rc);
 }
 

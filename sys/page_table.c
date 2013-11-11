@@ -8,7 +8,7 @@ void _ptcr0(uint64_t ); //set 32nd bit and enables paging
 void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 
 // Setting Virtual Page Tables
-void set_paging(void * km, void * pf, void * pb)
+uint64_t set_paging(void * km, void * pf, void * pb)
 {
   uint64_t kernmem, physfree, physbase;
   uint64_t *pml4e, *pdpe, *pde, *pte;
@@ -109,7 +109,7 @@ void set_paging(void * km, void * pf, void * pb)
   _ptcr3(cr3); //setting cr3 register to kick start paging
   //_ptcr0(cr0); //setting cr3 register to kick start paging
   video_vm = (0xffffffff80000000|(uint64_t)physfree );
-
+  return cr3;
 }
 
 // Setting Virtual Address for //printf()
