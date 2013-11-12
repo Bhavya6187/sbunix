@@ -47,11 +47,11 @@ void reload_gdt() {
 void setup_tss() {
 	struct sys_segment_descriptor* sd = (struct sys_segment_descriptor*)&gdt[5]; // 6th&7th entry in GDT
 	sd->sd_lolimit = sizeof(struct tss_t)-1;
-	sd->sd_lobase = ((uint64_t)&tss);
+	//sd->sd_lobase = ((uint64_t)&tss);
 	sd->sd_type = 9; // 386 TSS
 	sd->sd_dpl = 0;
 	sd->sd_p = 1;
 	sd->sd_hilimit = 0;
 	sd->sd_gran = 0;
-	sd->sd_hibase = ((uint64_t)&tss) >> 24;
+	//sd->sd_hibase = ((uint64_t)&tss) >> 24;
 }

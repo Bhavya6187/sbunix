@@ -143,8 +143,8 @@ int putint(int value)
 
 int int2hex(int value)
 {
-  char ptr[16];
-  char rc[16];
+  char ptr[32];
+  char rc[32];
   int index =0, j= 0; 
   do
   {
@@ -172,8 +172,8 @@ int int2hex(int value)
 
 int long2hex(unsigned long value)
 {
-  char ptr[16];
-  char rc[16];
+  char ptr[40];
+  char rc[40];
   int index =0, j= 0; 
   do
   {

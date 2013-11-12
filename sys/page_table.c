@@ -29,7 +29,7 @@ int getPML4Eindex(uint64_t vadd)
 }
 
 // Setting Virtual Page Tables
-void set_paging(void * km, void * pf, void * pb)
+uint64_t set_paging(void * km, void * pf, void * pb)
 {
   uint64_t kernmem, physfree, physbase;
   uint64_t *pml4e, *pdpe, *pde, *pte;
@@ -96,6 +96,7 @@ void set_paging(void * km, void * pf, void * pb)
   
   // Mapping video memory
   video_vm = (0xffffffff80000000|(uint64_t)physfree );
+  return cr3;
 
 }
 
