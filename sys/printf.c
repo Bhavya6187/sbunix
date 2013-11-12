@@ -11,17 +11,6 @@ uint64_t video_vm = 0xB8000;
 int scanf(const char *format, ...);
 
 extern uint64_t physfree;
-inline void outb( unsigned short port, unsigned char val )
-{
-   asm volatile( "outb %0, %1": : "a"(val), "Nd"(port) );
-}
-
-inline unsigned char inb( unsigned short port )
-{
-    unsigned char ret;
-    asm volatile( "inb %1, %0" : "=a"(ret) : "Nd"(port) );
-    return ret;
-}
 
 void update_cursor(int row, int col)
 {
@@ -167,6 +156,8 @@ int int2hex(int value)
     j++;
     index--;
   }
+  rc[j]='\0';
+
   return puts(rc);
 }
 
@@ -196,6 +187,7 @@ int long2hex(unsigned long value)
     j++;
     index--;
   }
+  rc[j]='\0';
   return puts(rc);
 }
 
