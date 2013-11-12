@@ -36,36 +36,6 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   physfree = physfree + (1024*1024);
 
   set_paging((void *)&kernmem, physfree, physbase);
-  putint(100);
-  set_paging((void *)&kernmem, physfree, physbase);
-  
-  //char* x = (char*)0xFFFF8000000B8000;
-  /*volatile char *x = (char*)(0xffffffff80000000|(uint64_t)physfree );
-  *x++ = 'A';
-  *x++ = 0x1F; */
-  //set_virtual_video_memory((void*)0xFFFFFFFF000B8000);
-  //clrscr();
-  //while(infinite_loop);
-  
-  //page_mapping((uint64_t)0xFFFFFFFF80200000);
-  page_mapping((uint64_t)0xFFFFFF00802FF000);
-  //page_mapping((uint64_t)0xFFFFFFFF00000000);
-  printf("%d \n", 5454);
-  /*page_mapping((uint64_t)0x00000000000B8000);
-  char* x1 = (char*)0x00000000000B8000;
-  *x1 = 'C';
-  putchar(*x1);
-  */
-  /*
-  int a, b,c ;
-  b =0;
-  a = 5;
-  c = a/b;
-  putint(c);
-  */
-  putchar('D');
-  puts("hey");
-
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
 	read_tarfs();
 	while(1);
@@ -82,6 +52,7 @@ void boot(void)
 		:"r"(&stack[INITIAL_STACK_SIZE])
 	);
 	reload_gdt();
+  reload_idt();
 	setup_tss();
 	start(
 		(uint32_t*)((char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase),
