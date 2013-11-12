@@ -4,6 +4,7 @@
 # include <defs.h>
 # include <sys/tasking.h>
 #include <sys/page_table.h>
+#include <sys/phy_mem.h>
 
 struct pcb foo_p;
 struct pcb bar_p;
@@ -16,11 +17,13 @@ void bar();
 uint64_t kernmem; 
 void *km, *pf, *pb;
 
+void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 void alloc_page_dir(struct pcb* p )
 {
   
-  //p->cr3 = set_paging(km, pf, pb);
-
+  printf("Before");	 
+  p->cr3 = set_paging(km, pf, pb);
+  printf("After");	 
   return ;
 
 }
@@ -36,12 +39,13 @@ void call_first(void * kmem, void * pfree, void * pbase)
 	bar_p.k_stack[63] = (uint64_t)&bar;
 	foo_p.rsp_p = (uint64_t)&(foo_p.k_stack[63]);
 	foo_p.k_stack[63] = (uint64_t)&foo;
-  //alloc_page_dir(&(foo_p));
 	current[0] = &(foo_p);
 	current[1] = &(bar_p);
 	printf("\n Inside call");
 //	_asm_context((foo_p.rsp_p));
-	 
+  alloc_page_dir(&(bar_p));
+//  alloc_page_dir(&(foo_p));
+  while(1);
 	__asm__(
 		"movq %0, %%rsp;"
 		:
@@ -109,9 +113,16 @@ void schedule()
 		"movq %%rsp, %0"
 		:"=g"(pt1->rsp_p)
 		:
-	        :"memory"
+	  :"memory"
 	);
 
+	/* Now change the %rsp to callee rsp */
+	asm volatile(
+		"movq %0, %%cr3;"
+		:
+		:"r"((pt2->cr3))
+    :"memory"
+	);
 	/* Now change the %rsp to callee rsp */
 	asm volatile(
 		"movq %0, %%rsp;"
