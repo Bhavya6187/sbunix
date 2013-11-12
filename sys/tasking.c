@@ -72,44 +72,44 @@ void schedule()
 	}	
 	// Should save state of caller here 
 
-	asm volatile(
+	__asm volatile(
 		"push %rax"
 		);
-	asm volatile(
+	__asm volatile(
 		"push %rbx"
 		);
-	asm volatile(
+	__asm volatile(
 		"push %rcx"
 		);
-	asm volatile(
+	__asm volatile(
 		"push %rdx"
 		);
 
-	asm volatile(
+	__asm volatile(
 		"push %rbp"
 		);
-	asm volatile(
+	__asm volatile(
 		"push %r8"
 		);
-	asm volatile(
+	__asm volatile(
 		"push %r9"
 		);
-	asm volatile(
+	__asm volatile(
 		"push %r10"
 		);
-	asm volatile(
+	__asm volatile(
 		"push %r11"
 		);
-	asm volatile(
+	__asm volatile(
 		"push %r12"
 		);
-	asm volatile(
+	__asm volatile(
 		"push %r13"
 		);
-	asm volatile(
+	__asm volatile(
 		"push %r14"
 		);
-	asm volatile(
+	__asm volatile(
 		"movq %%rsp, %0"
 		:"=g"(pt1->rsp_p)
 		:
@@ -117,59 +117,59 @@ void schedule()
 	);
 
 	/* Now change the %rsp to callee rsp */
-	asm volatile(
+	__asm volatile(
 		"movq %0, %%cr3;"
 		:
 		:"r"((pt2->cr3))
     :"memory"
 	);
 	/* Now change the %rsp to callee rsp */
-	asm volatile(
+	__asm volatile(
 		"movq %0, %%rsp;"
 		:
 		:"r"((pt2->rsp_p))
 	        :"memory"
 	);
-	asm volatile(
+	__asm volatile(
 		"pop %r14"
 		);
-	asm volatile(
+	__asm volatile(
 		"pop %r13"
 		);
-	asm volatile(
+	__asm volatile(
 		"pop %r12"
 		);
-	asm volatile(
+	__asm volatile(
 		"pop %r11"
 		);
 
-	asm volatile(
+	__asm volatile(
 		"pop %r10"
 		);
-	asm volatile(
+	__asm volatile(
 		"pop %r9"
 		);
-	asm volatile(
+	__asm volatile(
 		"pop %r8"
 		);
-	asm volatile(
+	__asm volatile(
 		"pop %rbp"
 		);
-	asm volatile(
+	__asm volatile(
 		"pop %rdx"
 		);
-	asm volatile(
+	__asm volatile(
 		"pop %rcx"
 		);
-	asm volatile(
+	__asm volatile(
 		"pop %rbx"
 		);
-	asm volatile(
+	__asm volatile(
 		"pop %rax"
 		);
 
 
-	asm volatile(
+	__asm volatile(
 		"retq;"
 	);	
 }
