@@ -10,10 +10,10 @@
 #include <sys/tarfs.h>
 
 char zero_size[12] = "000000000000";
-uint64_t size_to_int(char* size)
+int size_to_int(char* size)
 {
-  uint64_t ret = 0;
-  uint64_t base = 1;
+  int ret = 0;
+  int base = 1;
   int i =11;
   while(size[i] <= '0' || size[i] > '9'  )
     i--;
@@ -26,19 +26,13 @@ uint64_t size_to_int(char* size)
 }
  
 void read_tarfs(){
- struct posix_header_ustar *header;
- char* end_pos =(char*) (&_binary_tarfs_end);
- 
- printf("\n size in tarfs= %ld  for %s\n ", size_to_int(header->size),header->size);
-
- uint64_t temp_size = size_to_int(header->size) ;
- char* new_pos = (char*)(&_binary_tarfs_start);
- new_pos+=512;
- new_pos+=512;
- header =  (struct posix_header_ustar*)new_pos;
-
+ //char* end_pos =(char*) (&_binary_tarfs_end);
+  int temp_size; 
+  struct posix_header_ustar *header =  (struct posix_header_ustar*)(&_binary_tarfs_start);
+  struct posix_header_ustar *end =  (struct posix_header_ustar*)(&_binary_tarfs_end);
+  
 // while(header < (struct posix_header_ustar*)(&_binary_tarfs_end))
- while(new_pos< end_pos)
+ while(header < end)
  {
     printf("name = %s\n",header->name);
     printf("size = %s\n",header->size);
@@ -59,9 +53,10 @@ void read_tarfs(){
     printf("pad = %s\n",header->pad);*/
     temp_size = size_to_int(header->size) ;
     printf("size given by function = %ld\n",temp_size);
-    new_pos = new_pos + temp_size + sizeof(struct posix_header_ustar);
-    printf("header = %p, new_pos = %p, size of struct = %d\n",header, new_pos, sizeof(struct posix_header_ustar));
-    header =  (struct posix_header_ustar*)new_pos;
+    //new_pos = new_pos + temp_size + sizeof(struct posix_header_ustar);
+    //printf("header = %p, new_pos = %p, size of struct = %d\n",header, new_pos, sizeof(struct posix_header_ustar));
+    header =  (struct posix_header_ustar*)((char*)header + sizeof(struct posix_header_ustar) + temp_size);
+    //header =  (struct posix_header_ustar*)new_pos;
  }
 }
 
