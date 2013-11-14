@@ -56,8 +56,12 @@ void readelf(char* addr)
   //printf("name = %s\n",elf_base->e_ident);
   //printf("name = %s\n",elf_base->e_type);
   //printf("name = %s\n",elf_base->e_machine);
-  pheader = (addr)+(size_elf(elf_base->e_ehsize)+size_offset(elf_base->e_phoff));
+  pheader = (addr)+size_offset(elf_base->e_phoff);
+
+  //pheader = (addr)+(size_elf(elf_base->e_ehsize)+size_offset(elf_base->e_phoff));
   printf("\nsize of elf  = %ld  size of offset = %ld\n",size_elf(elf_base->e_ehsize), size_offset(elf_base->e_phoff));
+  read_pheader(pheader);
+  pheader = (addr)+size_offset(elf_base->e_phoff)+size_elf(elf_base->e_phentsize);
   read_pheader(pheader);
 /*  for(int i=0;  i <= 24; i++)
   {
