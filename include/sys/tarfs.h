@@ -23,5 +23,35 @@ struct posix_header_ustar {
 	char prefix[155];
 	char pad[12];
 };
+
+struct elf_header
+{
+  unsigned char e_ident[16]; /* ELF identification */
+  char e_type[2]; /* Object file type */
+  char e_machine[2]; /* Machine type */
+  char e_version[4]; /* Object file version */
+  char e_entry[8]; /* Entry point address */
+  char e_phoff[8]; /* Program header offset */
+  char e_shoff[8]; /* Section header offset */
+  char e_flags[4]; /* Processor-specific flags */
+  char e_ehsize[2]; /* ELF header size */
+  char e_phentsize[2]; /* Size of program header entry */
+  char e_phnum[2]; /* Number of program header entries */
+  char e_shentsize[2]; /* Size of section header entry */
+  char e_shnum[2]; /* Number of section header entries */
+  char e_shstrndx[2]; /* Section name string table index */
+};
+
+struct pheader
+{
+  char p_type[4]; /* Type of segment */
+  char p_flags[4]; /* Segment attributes */
+  char p_offset[8]; /* Offset in file */
+  char p_vaddr[8]; /* Virtual address in memory */
+  char p_paddr[8]; /* Reserved */
+  char p_filesz[8]; /* Size of segment in file */
+  char p_memsz[8]; /* Size of segment in memory */
+  char p_align[8]; /* Alignment of segment */
+};
 void read_tarfs();
 #endif
