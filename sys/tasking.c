@@ -43,9 +43,9 @@ void call_first(void * kmem, void * pfree, void * pbase)
 	current[1] = &(bar_p);
 	printf("\n Inside call");
 //	_asm_context((foo_p.rsp_p));
-  alloc_page_dir(&(bar_p));
+ // alloc_page_dir(&(bar_p));
 //  alloc_page_dir(&(foo_p));
-  while(1);
+//  while(1);
 	__asm__(
 		"movq %0, %%rsp;"
 		:
@@ -117,12 +117,12 @@ void schedule()
 	);
 
 	/* Now change the %rsp to callee rsp */
-	__asm volatile(
+/*	__asm volatile(
 		"movq %0, %%cr3;"
 		:
 		:"r"((pt2->cr3))
     :"memory"
-	);
+	);*/
 	/* Now change the %rsp to callee rsp */
 	__asm volatile(
 		"movq %0, %%rsp;"

@@ -92,89 +92,184 @@ uint64_t set_paging(void * km, void * pf, void * pb)
 
   cr3 = ((uint64_t)pml4e);
   // Setting the Page Tables
+  //printf("%x %x\n", head_fl, head_fl->next);
   _ptcr3(cr3); //setting cr3 register to kick start paging
-  
+  vm_fl = 0xffffffff80000000;
+	//head_fl->addr = 0xffffffff80000000 + physbase;
   // Mapping video memory
-  video_vm = (0xffffffff80000000|(uint64_t)physfree );
+  /*free_list *ad = NULL;
+  ad = (free_list*)((uint64_t)head_fl | 0xffffffff80000000 );*/
+  video_vm = (0xffffffff80000000|(uint64_t)physfree);
+  //printf("head=%x ad=%p \n", head_fl,  ad);
+  //printf("adn:%p:\n", ad->next);
   return cr3;
 
 }
+/*
+void page_mapping(uint64_t v_ad)
+{
+	int p1_va, p2_va, p3_va, p4_va;	// 9 bits each from v_kern for index into Page table hiearchy -- INDEX into 4 level page tables
+	uint64_t add = 0xFFFF000000000000;	// Base address to build on
+	uint64_t *p1, *p2, *p3, *p4, *p5;		// Pointers to each level Page table p1 == PML4E
 
-//0xFFFF000000000000 | 0x0000FF7FBFDFE 
+	p1_va = (v_ad << 16) >> (9 + 9 + 9 + 12 + 16);	// Index in PML4E
+	p2_va = (v_ad << (16 +9)) >> (9 + 9 + 12 + 16 + 9); // Index in PDPE
+	p3_va = (v_ad << (16 + 9 + 9)) >> (9 + 12 + 16 + 9 + 9); // Index in PDE 
+	p4_va = (v_ad << (16 + 9 + 9 + 9)) >> (12 + 16 + 9 + 9 + 9); //Index in PTE
+
+  printf("\nIndex:p1:%d:p2:%d:p3:%d:p4:%d", p1_va, p2_va, p3_va, p4_va);
+	Creating self looping for PML4E
+// abhi Write a single function for this
+	add = (((add >> 48) << 9 | 0x1FE) << 39);  // Sets the 1st 9 bits to 510 for  self refrenccing
+	add = (((add >> 39) << 9 | 0x1FE) << 30);  // Sets the 2nd 9 bits to 510 for  self refrenccing
+	add = (((add >> 30) << 9 | 0x1FE) << 21);  // Sets the 3rd 9 bits to 510 for  self refrenccing
+	add = (((add >> 21) << 9 | 0x1FE) << 12);  // Sets the 4th 9 bits to 510 for  self refrenccing
+	p1 = (uint64_t *)add;
+	p2 = (uint64_t *)p1[p1_va];
+	printf("\n ADD:p1:%p", add);
+
+	if (!p2)
+	{
+		printf("\n p2 not found in p1:Allocating");
+		p2 = (uint64_t *) allocate_free_phy_page();
+		p1[p1_va] = ((((uint64_t)p2) & 0xFFFFFFFFFF000) | 3);
+		printf("\n p2 not found in p1:AllocatED:%p", p2);
+	}
+	
+	add = 0xFFFF000000000000;
+	add = (((add >> 48) << 9 | 0x1FE) << 39);
+	add = (((add >> 39) << 9 | 0x1FE) << 30);
+	add = (((add >> 30) << 9 | 0x1FE) << 21);
+	add = (((add >> 21) << 9 | p1_va) << 12);
+	p2 = (uint64_t*)add;
+	p3 = (uint64_t*)p2[p2_va];
+	printf("\n ADD:p2:%p", add);
+
+	if(!p3)
+	{
+		printf("\n p3 not found in p2:Allocating");
+		p3 = (uint64_t *) allocate_free_phy_page();
+		p2[p2_va] = ((((uint64_t) p3) & 0xFFFFFFFFFF000) | 3);
+		printf("\n p3 not found in p2:AllocatED:%p", p3);
+	}
+
+	add = 0xFFFF000000000000; 
+	add = (((add >> 48) << 9 | 0x1FE) << 39);
+	add = (((add >> 39) << 9 | 0x1FE) << 30);
+	add = (((add >> 30) << 9 | p1_va) << 21);
+	add = (((add >> 21) << 9 | p2_va) << 12);
+	p3 = (uint64_t*)add;
+	p4 = (uint64_t*)p3[p3_va];
+	printf("\n ADD:p3:%p", add);
+
+	if(!p4)
+	{
+		printf("\n p4 not found in p3:Allocating");
+		p4 = (uint64_t *) allocate_free_phy_page();
+		p3[p3_va] = ((((uint64_t) p4) & 0xFFFFFFFFFF000) | 3);
+		printf("\n p4 not found in p3:AllocatED:%p", p4);
+	}
+
+
+	add = 0xFFFF000000000000; 
+	add = (((add >> 48) << 9 | 0x1FE) << 39);
+	add = (((add >> 39) << 9 | p1_va) << 30);
+	add = (((add >> 30) << 9 | p2_va) << 21);
+	add = (((add >> 21) << 9 | p3_va) << 12);
+	p4 = (uint64_t*)add;
+	p5 = (uint64_t*)p4[p4_va];
+	printf("\n ADD:p4:%p", add);
+				
+	if(!p5)
+	{
+		printf("\n p5 not found in p4:Allocating");
+		p5 = (uint64_t *)allocate_free_phy_page();
+		p4[p4_va] = ((((uint64_t) p5) & 0xFFFFFFFFFF000) | 3);
+		printf("\n p5 not found in p4:AllocatED:%p", p5);
+	}
+	printf("ASTALAVISTA");
+}
+*/
 void page_mapping(uint64_t vadd)
 {
     int pml4eindex = getPML4Eindex(vadd);
     int pdpeindex = getPDPEindex(vadd);
     int pdeindex = getPDEindex(vadd);
     int pteindex = getPTEindex(vadd);
-    
-    uint64_t *pml4e, *pdpe, *pde, *pte, *paddr;
+    uint64_t *pml4e=0, *pdpe=0, *pde=0, *pte=0, *paddr=0;
     //Read cr3 here -
-  	/*asm volatile(
-		"movq %%cr3, %0"
-		:"=g"(pml4e)
-		:
-	  :"memory"
-	  );*/
-    uint64_t base;
+  	//asm volatile(
+		//"movq %%cr3, %0"
+		//:"=g"(pml4e)
+		//:
+	  //:"memory"
+	  //);
+    uint64_t base1, base2, base3, base4;
     //, setindices1, setindices2, setindices3, setindices4;
-    printf("In page_mapping\n");
+    printf("In page_mapping:: Virtual Address is = %p\n",vadd);
     // Access PML4E table
-    base = 0xFFFF000000000000; 
-    base = (((base >> (12+9+9+9+9))<<9 | 0x1FE ) << (12+9+9+9) );
-    base = (((base >> (12+9+9+9))<<9 | 0x1FE   ) << (12+9+9) );
-    base = (((base >> (12+9+9))<<9 | 0x1FE     ) << (12+9) );
-    base = (((base >> (12+9))<<9 | 0x1FE       ) << (12) );
-    pml4e = (uint64_t*)base;
+    base1 = 0xFFFF000000000000; 
+    base1 = (((base1 >> (12+9+9+9+9))<<9 | 0x1FE ) << (12+9+9+9) );
+    base1 = (((base1 >> (12+9+9+9))<<9 | 0x1FE   ) << (12+9+9) );
+    base1 = (((base1 >> (12+9+9))<<9 | 0x1FE     ) << (12+9) );
+    base1 = (((base1 >> (12+9))<<9 | 0x1FE       ) << (12) );
+    pml4e = (uint64_t*)base1;
     pdpe = (uint64_t*)pml4e[pml4eindex];
+    printf("base pdpe = %p : ", base1);
     if(!pdpe)
     {
         pdpe = (uint64_t *)allocate_free_phy_page();
         pml4e[pml4eindex] = (((uint64_t)pdpe) & 0xFFFFFFFFFF000) | 3;
+        printf("allocating pdpe = %p\n", pdpe);
     }
     
     // Access PDPE table
-    base = 0xFFFF000000000000; 
-    base = (((base >> (12+9+9+9+9))<<9 | 0x1FE ) << (12+9+9+9) );
-    base = (((base >> (12+9+9+9))<<9 | 0x1FE   ) << (12+9+9) );
-    base = (((base >> (12+9+9))<<9 | 0x1FE     ) << (12+9) );
-    base = (((base >> (12+9))<<9 |pml4eindex   ) << (12) );
-    pdpe = (uint64_t*)base;
+    base2 = 0xFFFF000000000000; 
+    base2 = (((base2 >> (12+9+9+9+9))<<9 | 0x1FE ) << (12+9+9+9) );
+    base2 = (((base2 >> (12+9+9+9))<<9 | 0x1FE   ) << (12+9+9) );
+    base2 = (((base2 >> (12+9+9))<<9 | 0x1FE     ) << (12+9) );
+    base2 = (((base2 >> (12+9))<<9 |pml4eindex   ) << (12) );
+    pdpe = (uint64_t*)base2;
     pde = (uint64_t*)pdpe[pdpeindex];
+    printf("base pde= %p %p : ", base2, pde);
     if(!pde)
     {
         pde = (uint64_t *)allocate_free_phy_page();
         pdpe[pdpeindex] = (((uint64_t)pde) & 0xFFFFFFFFFF000) | 3;
+        printf("allocating pde = %p\n", pde);
     }
 
     // Access PDE table
-    base = 0xFFFF000000000000; 
-    base = (((base >> (12+9+9+9+9))<<9 | 0x1FE ) << (12+9+9+9) );
-    base = (((base >> (12+9+9+9))<<9 | 0x1FE   ) << (12+9+9) );
-    base = (((base >> (12+9+9))<<9 | pml4eindex) << (12+9) );
-    base = (((base >> (12+9))<<9 |pdpeindex    ) << (12) );
-    pde = (uint64_t*)base;
+    base3 = 0xFFFF000000000000; 
+    base3 = (((base3 >> (12+9+9+9+9))<<9 | 0x1FE ) << (12+9+9+9) );
+    base3 = (((base3 >> (12+9+9+9))<<9 | 0x1FE   ) << (12+9+9) );
+    base3 = (((base3 >> (12+9+9))<<9 | pml4eindex) << (12+9) );
+    base3 = (((base3 >> (12+9))<<9 |pdpeindex    ) << (12) );
+    pde = (uint64_t*)base3;
     pte = (uint64_t*)pde[pdeindex];
+    printf("base pte= %p %p : ", base3, pte);
     if(!pte)
     {
         pte = (uint64_t *)allocate_free_phy_page();
         pde[pdeindex] = (((uint64_t)pte) & 0xFFFFFFFFFF000) | 3;
+        printf("allocating pte = %p\n", pte);
     }
 
     // Access PTE table
-    base = 0xFFFF000000000000; 
-    base = (((base >> (12+9+9+9+9))<<9 | 0x1FE   ) << (12+9+9+9) );
-    base = (((base >> (12+9+9+9))<<9 | pml4eindex) << (12+9+9) );
-    base = (((base >> (12+9+9))<<9 | pdpeindex   ) << (12+9) );
-    base = (((base >> (12+9))<<9 |pdeindex       ) << (12) );
-    pte = (uint64_t*)base;
+    base4 = 0xFFFF000000000000; 
+    base4 = (((base4 >> (12+9+9+9+9))<<9 | 0x1FE   ) << (12+9+9+9) );
+    base4 = (((base4 >> (12+9+9+9))<<9 | pml4eindex) << (12+9+9) );
+    base4 = (((base4 >> (12+9+9))<<9 | pdpeindex   ) << (12+9) );
+    base4 = (((base4 >> (12+9))<<9 |pdeindex       ) << (12) );
+    pte = (uint64_t*)base4;
     paddr = (uint64_t*)pte[pteindex];
+    printf("base paddr= %p %p %d : ", base4, paddr, pteindex);
     if(!paddr)
     {
         paddr = (uint64_t *)allocate_free_phy_page();
         pte[pteindex] = (((uint64_t)paddr) & 0xFFFFFFFFFF000) | 3;
+        printf("allocating paddr = %p\n", paddr);
     }
-    printf("In page_mapping\n");
+    printf("Return from page_mapping\n");
 
 }
-
