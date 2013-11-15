@@ -22,7 +22,7 @@ void alloc_page_dir(struct pcb* p )
 {
   
   printf("Before");	 
-  p->cr3 = set_paging(km, pf, pb);
+  p->cr3 = (uint64_t)set_task_paging();
   printf("After");	 
   return ;
 
@@ -43,7 +43,7 @@ void call_first(void * kmem, void * pfree, void * pbase)
 	current[1] = &(bar_p);
 	printf("\n Inside call");
 //	_asm_context((foo_p.rsp_p));
- // alloc_page_dir(&(bar_p));
+  alloc_page_dir(&(bar_p));
 //  alloc_page_dir(&(foo_p));
 //  while(1);
 	__asm__(

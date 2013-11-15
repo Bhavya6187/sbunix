@@ -1,6 +1,7 @@
 #include <defs.h>
 #include <stdio.h>
 #include <sys/phy_mem.h>
+#include <sys/page_table.h>
 
 #define PAGE_SIZE 4096
 #define N 32768
@@ -9,6 +10,34 @@
 free_list *head_fl = NULL;
 uint64_t i=0;
 uint64_t vm_fl = 0;
+
+uint64_t set_task_paging()
+{
+    uint64_t pml4e = (uint64_t )allocate_free_phy_page();
+    uint64_t base1 = 0xFFFF000000000000; 
+    uint64_t* temp_pm;
+    base1 = (((base1 >> (12+9+9+9+9))<<9 | 0x1FE ) << (12+9+9+9) );
+    base1 = (((base1 >> (12+9+9+9))<<9 | 0x1FE   ) << (12+9+9) );
+    base1 = (((base1 >> (12+9+9))<<9 | 0x1FE     ) << (12+9) );
+    base1 = (((base1 >> (12+9))<<9 | 0x1FE     ) << (12+9) );
+    temp_pm = (uint64_t*)base1;
+    temp_pm[509] = (uint64_t)(pml4e);
+    base1 = (((base1 >> (12+9))<<9 | 0x1FD     ) << (12+9) );
+    
+    uint64_t base2 = 0xFFFF000000000000; 
+    base2 = (((base2 >> (12+9+9+9+9))<<9 | 0x1FE ) << (12+9+9+9) );
+    base2 = (((base2 >> (12+9+9+9))<<9 | 0x1FE   ) << (12+9+9) );
+    base2 = (((base2 >> (12+9+9))<<9 | 0x1FE     ) << (12+9) );
+    base2 = (((base2 >> (12+9))<<9 | 0x1FD     ) << (12+9) );
+    
+    uint64_t* page_pm = (uint64_t*)base2;
+
+    page_pm[511] = temp_pm[511];
+    page_pm[510] = base2;
+    
+    return pml4e;
+
+}
 
 // Setting up the available memory into free pages
 void phy_mem_init(uint64_t sbase, uint64_t slength, void *pf, uint64_t physbase) 
@@ -20,59 +49,22 @@ void phy_mem_init(uint64_t sbase, uint64_t slength, void *pf, uint64_t physbase)
   if(!head_fl) //head in free list is NULL
   {
     head_fl = (free_list *)physfree;
-    //printf("pf=%x h=%x hn=%x \n",physfree,head_fl, head_fl->next);
     head_fl->next = NULL;
     head_fl->addr = NULL;  //Dummy node
   }
-  //volatile char *p = NULL;
   for( page=sbase ; page < (sbase + slength) ; page+=PAGE_SIZE )
   {
     if(page>=physbase && page<=(uint64_t)pff+(1024*1024))
     {
-      //printf("p=%x pf=%x pb=%x", page, physfree, physbase);
-      //page = page + (uint64_t)physfree - physbase; 
       continue;
     }
     physfree +=2;
     newp = (free_list *)physfree;
-    /*uint64_t j=0;
-    uint64_t * test;
-    for(j=0;j<512;j++)
-    {
-      test = (uint64_t*)(page+j);
-      *(test)=0;
-    }*/
-    /*if (page == 0x40000)
-    {
-        //p = (volatile char*)(page);
-        *p = 99;
-        break;
-
-    }
-    else
-    {
-    //if((uint64_t)(p)==0x40000)
-    //  printf("Hi");
-    uint64_t j;
-    j=0;
-    p = (volatile char*)(page);
-    for(j=0; j<PAGE_SIZE; j++)
-    {
-      *(p+j) = 0;
-	  }
-    }
-    *(p) = 0;
-    printf("Trying to zero out the pages %d %p\n", i, page);
-*/
     newp->addr = page;
     newp->next = head_fl;
     head_fl = newp;
     i++;
-    //printf("pf=%x h=%x hn=%x ha=%x pg=%x b=%x l=%x\n",physfree,head_fl, head_fl->next, head_fl->addr, page, sbase, slength);
   }
-    //printf("pf=%x h=%x hn=%x ha=%x pg=%x b=%x l=%x\n",physfree,head_fl, head_fl->next, head_fl->addr, page, sbase, slength);
-    //printf("No of Free Pages = %d\n", i);
-    //printf("Location of Head = %x\n", head_fl);
 
 }
 
