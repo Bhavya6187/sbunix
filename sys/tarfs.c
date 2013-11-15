@@ -72,7 +72,8 @@ void readelf(char* addr)
 
 void read_tarfs(){
  //char* end_pos =(char*) (&_binary_tarfs_end);
-  int temp_size; 
+  int temp_size;
+  int step = 0,mod; 
   struct posix_header_ustar *header =  (struct posix_header_ustar*)(&_binary_tarfs_start);
   struct posix_header_ustar *end =  (struct posix_header_ustar*)(&_binary_tarfs_end);
   
@@ -104,12 +105,18 @@ void read_tarfs(){
       printf("\nThe address with header %p", header);
       header = (header+1);
       printf("\nThe address with elf %p\n", header);
-      readelf((char*)header) ;
-      return;
+      //readelf((char*)header) ;
+      //return;
     }
     //new_pos = new_pos + temp_size + sizeof(struct posix_header_ustar);
     //printf("header = %p, new_pos = %p, size of struct = %d\n",header, new_pos, sizeof(struct posix_header_ustar));
-    header =  (struct posix_header_ustar*)((char*)header + sizeof(struct posix_header_ustar) + temp_size);
+    mod = temp_size%(sizeof(struct posix_header_ustar));
+    if(mod == 0)
+      step = 1 +(int)( temp_size/(sizeof(struct posix_header_ustar)));
+    else
+      step = 2 +(int)( temp_size/(sizeof(struct posix_header_ustar)));
+    header = header+step;
+    //header =  (struct posix_header_ustar*)((char*)header + sizeof(struct posix_header_ustar) + temp_size);
     //header =  (struct posix_header_ustar*)new_pos;
  }
 }
