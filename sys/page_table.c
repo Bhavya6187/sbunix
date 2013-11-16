@@ -93,6 +93,8 @@ uint64_t set_paging(void * km, void * pf, void * pb)
   cr3 = ((uint64_t)pml4e);
   // Setting the Page Tables
   //printf("%x %x\n", head_fl, head_fl->next);
+  printf("current cr3 is %x\n",cr3);
+  printf("current self referencing is %x\n",pml4e[510]);
   _ptcr3(cr3); //setting cr3 register to kick start paging
   vm_fl = 0xffffffff80000000;
 	//head_fl->addr = 0xffffffff80000000 + physbase;

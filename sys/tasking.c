@@ -21,9 +21,7 @@ void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 void alloc_page_dir(struct pcb* p )
 {
   
-  printf("Before");	 
   p->cr3 = (uint64_t)set_task_paging();
-  printf("After");	 
   return ;
 
 }
@@ -34,23 +32,33 @@ void call_first(void * kmem, void * pfree, void * pbase)
   km = kmem;
   pf = pfree;
   pb=pbase;
-  clrscr();
+  //clrscr();
 	bar_p.rsp_p = (uint64_t)&(bar_p.k_stack[51]);
 	bar_p.k_stack[63] = (uint64_t)&bar;
 	foo_p.rsp_p = (uint64_t)&(foo_p.k_stack[63]);
 	foo_p.k_stack[63] = (uint64_t)&foo;
 	current[0] = &(foo_p);
 	current[1] = &(bar_p);
-	printf("\n Inside call");
-//	_asm_context((foo_p.rsp_p));
+	printf("\n Inside call\n");
+  alloc_page_dir(&(foo_p));
   alloc_page_dir(&(bar_p));
-//  alloc_page_dir(&(foo_p));
-//  while(1);
+  _ptcr3(foo_p.cr3);
+ 
+  printf("\nfoo cr3- %x\n", foo_p.cr3);
+  printf("bar cr3- %x\n", bar_p.cr3);
+	/*__asm volatile(
+		"movq %0, %%cr3;"
+		:
+		:"r"((foo_p.cr3))
+    :"memory"
+	);*/
+  //while(1);
 	__asm__(
 		"movq %0, %%rsp;"
 		:
 		:"r"((foo_p.rsp_p))
-	);	
+	);
+
 	__asm__(
 		"retq;"
 	);
@@ -117,12 +125,12 @@ void schedule()
 	);
 
 	/* Now change the %rsp to callee rsp */
-/*	__asm volatile(
+	__asm volatile(
 		"movq %0, %%cr3;"
 		:
 		:"r"((pt2->cr3))
     :"memory"
-	);*/
+	);
 	/* Now change the %rsp to callee rsp */
 	__asm volatile(
 		"movq %0, %%rsp;"
@@ -198,6 +206,7 @@ void bar()
 	{
 		i++;
 		printf("World: %d\n",i );
+    while(1);
 		schedule();
 		flag = 1;
 	}

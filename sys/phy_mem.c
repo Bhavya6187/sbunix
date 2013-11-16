@@ -16,27 +16,31 @@ uint64_t set_task_paging()
     uint64_t pml4e = (uint64_t )allocate_free_phy_page();
     uint64_t base1 = 0xFFFF000000000000; 
     uint64_t* temp_pm;
-    base1 = (((base1 >> (12+9+9+9+9))<<9 | 0x1FE ) << (12+9+9+9) );
-    base1 = (((base1 >> (12+9+9+9))<<9 | 0x1FE   ) << (12+9+9) );
-    base1 = (((base1 >> (12+9+9))<<9 | 0x1FE     ) << (12+9) );
-    base1 = (((base1 >> (12+9))<<9 | 0x1FE     ) << (12+9) );
+    base1 = 0xFFFFFF7FBFDFE000; // 510 510 510 510 
     temp_pm = (uint64_t*)base1;
-    temp_pm[509] = (uint64_t)(pml4e);
-    base1 = (((base1 >> (12+9))<<9 | 0x1FD     ) << (12+9) );
-    
-    uint64_t base2 = 0xFFFF000000000000; 
-    base2 = (((base2 >> (12+9+9+9+9))<<9 | 0x1FE ) << (12+9+9+9) );
-    base2 = (((base2 >> (12+9+9+9))<<9 | 0x1FE   ) << (12+9+9) );
-    base2 = (((base2 >> (12+9+9))<<9 | 0x1FE     ) << (12+9) );
-    base2 = (((base2 >> (12+9))<<9 | 0x1FD     ) << (12+9) );
-    
-    uint64_t* page_pm = (uint64_t*)base2;
 
-    page_pm[511] = temp_pm[511];
-    page_pm[510] = base2;
-    
+    if(temp_pm[509] == 0x0)
+    {
+      temp_pm[509] =(((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 3;// (uint64_t)(pml4e);
+      uint64_t base2 = 0xFFFFFF7FBFDFD000;//  510 510 510 509 000 
+      uint64_t* page_pm =(uint64_t *) base2;
+      page_pm[511] = temp_pm[511];
+      page_pm[510] = temp_pm[509];
+      printf("returning pml4e to be - %x\n",pml4e);
+      return pml4e;
+    }
+
+    if(temp_pm[508] == 0x0)
+    {
+      temp_pm[508] =(((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 3;// (uint64_t)(pml4e);
+      uint64_t base2 = 0xFFFFFF7FBFDFC000;//  510 510 510 508 000 
+      uint64_t* page_pm =(uint64_t *) base2;
+      page_pm[511] = temp_pm[511];
+      page_pm[510] = temp_pm[508];
+      printf("returning pml4e to be - %x\n",pml4e);
+      return pml4e;
+    }
     return pml4e;
-
 }
 
 // Setting up the available memory into free pages
@@ -65,7 +69,6 @@ void phy_mem_init(uint64_t sbase, uint64_t slength, void *pf, uint64_t physbase)
     head_fl = newp;
     i++;
   }
-
 }
 
 uint64_t allocate_free_phy_page2()
