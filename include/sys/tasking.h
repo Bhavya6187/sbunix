@@ -17,5 +17,5 @@ struct mm_struct
 };
 void call_first();
 void schedule();
-
+void switch_to_user_mode();
 #endif

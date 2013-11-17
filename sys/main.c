@@ -77,8 +77,10 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   putint(100);
   
 
-  call_first(kernmem, physfree, physbase);
-	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
+//  call_first(kernmem, physfree, physbase);
+   switch_to_user_mode();
+
+	//printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
 	//read_tarfs();
 	while(1);
 }

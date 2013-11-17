@@ -18,6 +18,36 @@ uint64_t kernmem;
 void *km, *pf, *pb;
 
 void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
+
+void test_user_function()
+{
+}
+
+void switch_to_user_mode()
+{
+   __asm volatile(
+     "\
+     movq %rsp,%rax;\
+     push 0x23;\
+     push %rax;\
+     pushf;\
+     push 0x1B;\
+     push test_user_function;\
+     iretq;\
+    ");
+   // Set up a stack structure for switching to user mode.
+   /*__asm volatile("  \
+       mov %rsp, %rax; \
+       pushq $0x23; \
+       pushq %rax; \
+       pushf; \
+       pushq $0x1B; \
+       push $1f; \
+       iret; \
+       1: \
+       ");*/
+}
+
 void alloc_page_dir(struct pcb* p )
 {
   
