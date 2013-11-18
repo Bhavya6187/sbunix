@@ -38,6 +38,7 @@ static struct idtr_t idtr = {
 };
 
 extern void  _isr_000();
+extern void  _isr_013();
 extern void  _isr_014();
 extern void  _irq_032();
 extern void  _irq_033();
@@ -48,6 +49,7 @@ void reload_idt() {
   init_pic();
   init_timer(); 
   idt[0] = get_entry((uint64_t)&_isr_000);
+  idt[13] = get_entry((uint64_t)&_isr_013);
   idt[14] = get_entry((uint64_t)&_isr_014);
   idt[32] = get_entry((uint64_t)&_irq_032);
   idt[33] = get_entry((uint64_t)&_irq_033);
