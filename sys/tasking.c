@@ -21,18 +21,22 @@ void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 
 void test_user_function()
 {
+  while(1);
 }
 
 void switch_to_user_mode()
 {
+  uint64_t add = (uint64_t)&test_user_function;
    __asm volatile(
      "\
-     movq %rsp,%rax;\
-     push 0x23;\
-     push %rax;\
+     movq %%rsp,%%rax;\
+     push $0x23;\
+     push %%rax;\
      pushf;\
-     push 0x1B;\
-     push test_user_function;\
+     push $0x1B;\
+     push %0"::"g"(add):"memory");
+
+     __asm volatile("\
      iretq;\
     ");
    // Set up a stack structure for switching to user mode.
