@@ -96,7 +96,6 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
    printf("%d %x \n", i, test);
   }*/
 
-    printf("pml4eindex= %d : pdpeindex = %d : pdeindex = %d : pteindex= %d \n", pml4eindex, pdpeindex, pdeindex, pteindex);
 
   uint64_t base1 = 0xFFFF000000000000;
   uint64_t base2;
