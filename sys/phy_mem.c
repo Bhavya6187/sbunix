@@ -21,7 +21,7 @@ uint64_t set_task_paging()
 
     if(temp_pm[509] == 0x0)
     {
-      temp_pm[509] =(((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 3;// (uint64_t)(pml4e);
+      temp_pm[509] =(((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 7;// (uint64_t)(pml4e);
       uint64_t base2 = 0xFFFFFF7FBFDFD000;//  510 510 510 509 000 
       uint64_t* page_pm =(uint64_t *) base2;
       page_pm[511] = temp_pm[511];
@@ -32,7 +32,7 @@ uint64_t set_task_paging()
 
     if(temp_pm[508] == 0x0)
     {
-      temp_pm[508] =(((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 3;// (uint64_t)(pml4e);
+      temp_pm[508] =(((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 7;// (uint64_t)(pml4e);
       uint64_t base2 = 0xFFFFFF7FBFDFC000;//  510 510 510 508 000 
       uint64_t* page_pm =(uint64_t *) base2;
       page_pm[511] = temp_pm[511];

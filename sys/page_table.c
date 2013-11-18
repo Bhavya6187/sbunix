@@ -61,17 +61,17 @@ uint64_t set_paging(void * km, void * pf, void * pb)
   //Creating Page Table heirarchy - Page Table Translation
   //Mapping is done as per AMD manual PML4E, PDPE, PDE structure
   //First 12 bits are 0, Next 40 bits are address bits, last 3 bits are set to 011
-  pml4e[vmem1] = (((uint64_t)pdpe) & 0xFFFFFFFFFF000) | 3;
-  pdpe[vmem2]  = (((uint64_t)pde)  & 0xFFFFFFFFFF000) | 3;
-  pde[vmem3]   = (((uint64_t)pte)  & 0xFFFFFFFFFF000) | 3;
-  pml4e[510] = (((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 3;
+  pml4e[vmem1] = (((uint64_t)pdpe) & 0xFFFFFFFFFF000) | 7;
+  pdpe[vmem2]  = (((uint64_t)pde)  & 0xFFFFFFFFFF000) | 7;
+  pde[vmem3]   = (((uint64_t)pte)  & 0xFFFFFFFFFF000) | 7;
+  pml4e[510] = (((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 7;
   //pml4e[vmem4] = (((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 3;
 
   uint64_t i; 
   int j;
   for(j=0,i=physbase; i<physfree; i+=PAGE_SIZE,j++ )
   {
-    pte[vmem4+j] = ((((uint64_t)i) & 0xFFFFFFFFFF000) | 3);
+    pte[vmem4+j] = ((((uint64_t)i) & 0xFFFFFFFFFF000) | 7);
   }
   //printf("\n %d %d %d %d\n", vmem1, vmem2, vmem3, vmem4);
    
@@ -221,7 +221,7 @@ void page_mapping(uint64_t vadd)
     if(!pdpe)
     {
         pdpe = (uint64_t *)allocate_free_phy_page();
-        pml4e[pml4eindex] = (((uint64_t)pdpe) & 0xFFFFFFFFFF000) | 3;
+        pml4e[pml4eindex] = (((uint64_t)pdpe) & 0xFFFFFFFFFF000) | 7;
         printf("allocating pdpe = %p\n", pdpe);
     }
     
@@ -237,7 +237,7 @@ void page_mapping(uint64_t vadd)
     if(!pde)
     {
         pde = (uint64_t *)allocate_free_phy_page();
-        pdpe[pdpeindex] = (((uint64_t)pde) & 0xFFFFFFFFFF000) | 3;
+        pdpe[pdpeindex] = (((uint64_t)pde) & 0xFFFFFFFFFF000) | 7;
         printf("allocating pde = %p\n", pde);
     }
 
@@ -253,7 +253,7 @@ void page_mapping(uint64_t vadd)
     if(!pte)
     {
         pte = (uint64_t *)allocate_free_phy_page();
-        pde[pdeindex] = (((uint64_t)pte) & 0xFFFFFFFFFF000) | 3;
+        pde[pdeindex] = (((uint64_t)pte) & 0xFFFFFFFFFF000) | 7;
         printf("allocating pte = %p\n", pte);
     }
 
@@ -269,7 +269,7 @@ void page_mapping(uint64_t vadd)
     if(!paddr)
     {
         paddr = (uint64_t *)allocate_free_phy_page();
-        pte[pteindex] = (((uint64_t)paddr) & 0xFFFFFFFFFF000) | 3;
+        pte[pteindex] = (((uint64_t)paddr) & 0xFFFFFFFFFF000) | 7;
         printf("allocating paddr = %p\n", paddr);
     }
     printf("Return from page_mapping\n");
