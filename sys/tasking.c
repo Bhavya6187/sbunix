@@ -24,34 +24,6 @@ void test_user_function()
   while(1);
 }
 
-void switch_to_user_mode()
-{
-  uint64_t add = (uint64_t)&test_user_function;
-   __asm volatile(
-     "\
-     movq %%rsp,%%rax;\
-     push $0x23;\
-     push %%rax;\
-     pushf;\
-     push $0x1B;\
-     push %0"::"g"(add):"memory");
-
-     __asm volatile("\
-     iretq;\
-    ");
-   // Set up a stack structure for switching to user mode.
-   /*__asm volatile("  \
-       mov %rsp, %rax; \
-       pushq $0x23; \
-       pushq %rax; \
-       pushf; \
-       pushq $0x1B; \
-       push $1f; \
-       iret; \
-       1: \
-       ");*/
-}
-
 void alloc_page_dir(struct pcb* p )
 {
   
@@ -59,6 +31,26 @@ void alloc_page_dir(struct pcb* p )
   return ;
 
 }
+
+void switch_to_user_mode()
+{
+
+	bar_p.rsp_p = (uint64_t)&(bar_p.k_stack[63]);
+	bar_p.k_stack[63] = (uint64_t)&bar;
+	printf("\n Inside call\n");
+  alloc_page_dir(&(bar_p));
+   __asm volatile("\
+       movq %%rsp,%%rax;\
+       push $0x23;\
+       push %%rax;\
+       pushf;\
+       push $0x1B;\
+       push %0"::"g"(bar_p.k_stack[63]):"memory");
+     __asm volatile("\
+     iretq;\
+    ");
+}
+
 
 //void _asm_context(uint64_t);
 void call_first(void * kmem, void * pfree, void * pbase)
