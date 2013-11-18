@@ -93,8 +93,6 @@ uint64_t set_paging(void * km, void * pf, void * pb)
   cr3 = ((uint64_t)pml4e);
   // Setting the Page Tables
   //printf("%x %x\n", head_fl, head_fl->next);
-  printf("current cr3 is %x\n",cr3);
-  printf("current self referencing is %x\n",pml4e[510]);
   _ptcr3(cr3); //setting cr3 register to kick start paging
   vm_fl = 0xffffffff80000000;
 	//head_fl->addr = 0xffffffff80000000 + physbase;
@@ -207,6 +205,7 @@ void page_mapping(uint64_t vadd)
 	  //:"memory"
 	  //);
     uint64_t base1, base2, base3, base4;
+    printf("pml4eindex= %d : pdpeindex = %d : pdeindex = %d : pteindex= %d \n", pml4eindex, pdpeindex, pdeindex, pteindex);
     //, setindices1, setindices2, setindices3, setindices4;
     printf("In page_mapping:: Virtual Address is = %p\n",vadd);
     // Access PML4E table
@@ -217,7 +216,7 @@ void page_mapping(uint64_t vadd)
     base1 = (((base1 >> (12+9))<<9 | 0x1FE       ) << (12) );
     pml4e = (uint64_t*)base1;
     pdpe = (uint64_t*)pml4e[pml4eindex];
-    printf("base pdpe = %p : ", base1);
+    printf("base pdpe = %p %p : ", base1, pdpe);
     if(!pdpe)
     {
         pdpe = (uint64_t *)allocate_free_phy_page();
