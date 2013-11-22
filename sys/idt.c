@@ -42,6 +42,7 @@ extern void  _isr_013();
 extern void  _isr_014();
 extern void  _irq_032();
 extern void  _irq_033();
+extern void  _isr_080();
 
 void _x86_64_asm_lidt(struct idtr_t* idtr);
 void reload_idt() {
@@ -53,6 +54,7 @@ void reload_idt() {
   idt[14] = get_entry((uint64_t)&_isr_014);
   idt[32] = get_entry((uint64_t)&_irq_032);
   idt[33] = get_entry((uint64_t)&_irq_033);
+  idt[33] = get_entry((uint64_t)&_isr_080);
  	_x86_64_asm_lidt(&idtr);
 }
 
