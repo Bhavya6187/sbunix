@@ -6,7 +6,7 @@
 #include <sys/irq.h>
 #include <sys/phy_mem.h>
 #include <sys/page_table.h>
-#include <sys/tasking.h>
+#include <sys/task_management.h>
 #include <sys/tarfs.h>
 
 char zero_size[12] = "000000000000";
@@ -25,10 +25,38 @@ int size_to_int(char* size)
   return ret;
 }
  
-void read_pheader(char* addr)
+int psize_to_int(char* size)
+{
+  int ret = 0;
+  int base = 1;
+  int i =7;
+  while(size[i] <= '0' || size[i] > '9'  )
+    i--;
+  for(i=i;  i >= 0; i--)
+  {
+    ret += base*(size[i] - '0');
+    base*=8;
+  }
+  return ret;
+}
+VMA* read_pheader(char* addr, struct elf_header* elf_base)
 {
    struct pheader* pbase = (struct pheader*)(addr);
-   printf("name = %s\n",pbase->p_type);
+   uint64_t filesz,memsz,vaddr,offset;
+   VMA* vma = NULL;
+   filesz = pbase->p_filesz;//psize_to_int(pbase->p_filesz);
+   memsz = pbase->p_memsz;
+   vaddr = pbase->p_vaddr;
+   offset = pbase->p_offset;
+   printf("filesz = %x filesz = %x vaddr = %x %x\n",filesz,memsz,vaddr,offset);
+   uint64_t base = (uint64_t) elf_base;
+   uint64_t contents = base + offset;
+
+   uint32_t ret = m_map(vaddr, contents, filesz, memsz);
+   if(ret == 0)
+   	vma = create_vma(vaddr,memsz);
+   //printf("name = %s\n",pbase->p_type);
+   return vma;
 
 }
 
@@ -49,28 +77,56 @@ int size_offset(char* size)
   }
   return off;
 }
-void readelf(char* addr)
+
+int get_num_segs(char* num)
 {
+  return 10*((num[1]) ) + (num[0]);
+}
+
+void readelf(char* addr, PCB *task)
+{
+//  clear_screen();
   struct elf_header* elf_base = (struct elf_header*)(addr);
   char* pheader;
-  //printf("name = %s\n",elf_base->e_ident);
-  //printf("name = %s\n",elf_base->e_type);
-  //printf("name = %s\n",elf_base->e_machine);
+  //printf("ident = %s\n",elf_base->e_ident);
+  //printf("type = %s\n",elf_base->e_type);
+  //printf("e_machine = %s\n",elf_base->e_machine);
   pheader = (addr)+size_offset(elf_base->e_phoff);
 
   //pheader = (addr)+(size_elf(elf_base->e_ehsize)+size_offset(elf_base->e_phoff));
-  printf("\nsize of elf  = %ld  size of offset = %ld\n",size_elf(elf_base->e_ehsize), size_offset(elf_base->e_phoff));
-  read_pheader(pheader);
-  pheader = (addr)+size_offset(elf_base->e_phoff)+size_elf(elf_base->e_phentsize);
-  read_pheader(pheader);
-/*  for(int i=0;  i <= 24; i++)
+  //printf("\nsize of elf  = %d  size of offset = %d num_entries=%d %c %c\n",size_elf(elf_base->e_ehsize), size_offset(elf_base->e_phoff), get_num_segs(elf_base->e_phnum), (elf_base->e_phnum[0] - '0'), (elf_base->e_phnum[1]-'0') );
+  int i = 0;
+  int num_entries = get_num_segs(elf_base->e_phnum);
+  task->rip = elf_base->e_entry;
+  VMA* local = NULL;
+  VMA* ht = NULL;
+
+  for(i = 0; i < num_entries; i++ )
+  {
+  	if (i == 0)
+	{
+		local = read_pheader(pheader, elf_base);
+		task->mm_st = local; 
+	}	
+	else 
+	{
+  		ht  = read_pheader(pheader, elf_base);
+		local->vma_next = ht;
+		local = local->vma_next;
+	  	pheader = pheader+size_elf(elf_base->e_phentsize);
+  	}
+   }
+   local = NULL;
+
+//  while(1);
+  for(int i=0;  i <= 24; i++)
   {
     printf("%d = %x ",i,elf_base[i]);
-    //elf_base = elf_base+1;
-  }*/
+    elf_base = elf_base+1;
+  }
 }
 
-void read_tarfs(){
+void read_tarfs(PCB* task){
  //char* end_pos =(char*) (&_binary_tarfs_end);
   int temp_size;
   int step = 0,mod; 
@@ -98,15 +154,15 @@ void read_tarfs(){
     printf("devminor = %s\n",header->devminor);
     printf("pad = %s\n",header->pad);*/
     temp_size = size_to_int(header->size) ;
-    printf("size given by function = %ld\n",temp_size);
+    printf("size given by function = %d\n",temp_size);
     if(temp_size > 0)
     {
 
       printf("\nThe address with header %p", header);
       header = (header+1);
       printf("\nThe address with elf %p\n", header);
-      //readelf((char*)header) ;
-      //return;
+      readelf((char*)header, task) ;
+      return;
     }
     //new_pos = new_pos + temp_size + sizeof(struct posix_header_ustar);
     //printf("header = %p, new_pos = %p, size of struct = %d\n",header, new_pos, sizeof(struct posix_header_ustar));

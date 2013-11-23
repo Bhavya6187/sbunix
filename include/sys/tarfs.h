@@ -1,6 +1,9 @@
 #ifndef _TARFS_H
 #define _TARFS_H
 
+#include<sys/task_management.h>
+#include<sys/v_mem_manager.h>
+
 extern char _binary_tarfs_start;
 extern char _binary_tarfs_end;
 
@@ -23,14 +26,13 @@ struct posix_header_ustar {
 	char prefix[155];
 	char pad[12];
 };
-
 struct elf_header
 {
   unsigned char e_ident[16]; /* ELF identification */
   char e_type[2]; /* Object file type */
   char e_machine[2]; /* Machine type */
   char e_version[4]; /* Object file version */
-  char e_entry[8]; /* Entry point address */
+  uint64_t e_entry; /* Entry point address */
   char e_phoff[8]; /* Program header offset */
   char e_shoff[8]; /* Section header offset */
   char e_flags[4]; /* Processor-specific flags */
@@ -46,12 +48,13 @@ struct pheader
 {
   char p_type[4]; /* Type of segment */
   char p_flags[4]; /* Segment attributes */
-  char p_offset[8]; /* Offset in file */
-  char p_vaddr[8]; /* Virtual address in memory */
+  uint64_t p_offset; /* Offset in file */
+  uint64_t p_vaddr; /* Virtual address in memory */
   char p_paddr[8]; /* Reserved */
-  char p_filesz[8]; /* Size of segment in file */
-  char p_memsz[8]; /* Size of segment in memory */
+  uint64_t p_filesz; /* Size of segment in file */
+  uint64_t p_memsz; /* Size of segment in memory */
   char p_align[8]; /* Alignment of segment */
 };
 void read_tarfs();
+VMA* read_pheader(char* addr, struct elf_header* elf_base);
 #endif

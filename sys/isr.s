@@ -95,6 +95,7 @@ isr_common_stub_14:
   popq %rbx
   popq %rax        # Pops the general purpose registers GPR's R8-R15 also might come
   popq %rdi        # Pops the general purpose registers GPR's R8-R15 also might come
+  add $8, %rsp
   
   iretq           
 

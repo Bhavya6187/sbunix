@@ -4,8 +4,8 @@
 #include <sys/page_table.h>
 
 #define PAGE_SIZE 4096
-void _ptcr0(uint64_t ); //set 32nd bit and enables paging
-void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
+extern void _ptcr0(uint64_t ); //set 32nd bit and enables paging
+extern void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 
 
 int getPTEindex(uint64_t vadd)
