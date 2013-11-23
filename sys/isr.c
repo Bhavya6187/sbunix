@@ -58,10 +58,9 @@ void isr_handler_14(registers_t regs)
 
 void isr_handler_80(registers_t regs)
 {
+    clrscr();
      printf("Interrupt 80 for system calls .... \n");
-     // Pushed by pushq i.e. all general purpose registers
-     // printf(" r15 %x, r14 %x, r13 %x, r12 %x, r11 %x, r10 %x, r9 %x, r8 %x,\n rsp %x, rbp %x, rdi %x, rsi %x, rdx %x, rcx %x, rbx %x, rax %x \n",     regs.r15, regs.r14, regs.r13, regs.r12, regs.r11, regs.r10, regs.r9, regs.r8, regs.rsp, regs.rbp, regs.rdi, regs.rsi, regs.rdx, regs.rcx, regs.rbx, regs.rax);
-    uint64_t cr2;
+    /*uint64_t cr2;
      //Read cr2 here -
   	__asm volatile(
 		"movq %%cr2, %0"
@@ -72,7 +71,7 @@ void isr_handler_80(registers_t regs)
   
      printf("Interrupt Number = %d %d %p\n", regs.interrupt_number, regs.err_code, cr2);
      printf("Success !!\n");
-     while(1);
+     while(1);*/
 }
 
 /*

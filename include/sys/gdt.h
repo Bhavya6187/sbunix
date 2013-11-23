@@ -29,5 +29,5 @@ extern uint64_t gdt[];
 
 void reload_gdt();
 void setup_tss();
-
+void _x86_64_asm_ltr();
 #endif

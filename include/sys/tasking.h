@@ -5,6 +5,7 @@ struct pcb
 {
 	uint64_t rsp_p;		// rsp register for kernel stack
 	uint64_t k_stack[64];	// kernel stack for the process
+  uint64_t *u_stack;
   int pid;
   uint64_t cr3;
   struct mm_struct* mem;

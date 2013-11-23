@@ -170,6 +170,7 @@ isr_stub_80:
   pushq %r13
   pushq %r14
   pushq %r15
+  movq %rsp, %rdi
   #trying to restore the code segment, instruction pointer, flags register, stack segment and stack pointer                         
   call isr_handler_80
   popq %r15

@@ -1,10 +1,11 @@
 /* Implements process management  */
 
-# include <stdio.h>
-# include <defs.h>
-# include <sys/tasking.h>
+#include <stdio.h>
+#include <defs.h>
+#include <sys/tasking.h>
 #include <sys/page_table.h>
 #include <sys/phy_mem.h>
+#include <sys/gdt.h>
 
 struct pcb foo_p;
 struct pcb bar_p;
@@ -19,11 +20,6 @@ void *km, *pf, *pb;
 
 void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 
-void test_user_function()
-{
-  while(1);
-}
-
 void alloc_page_dir(struct pcb* p )
 {
   
@@ -32,27 +28,38 @@ void alloc_page_dir(struct pcb* p )
 
 }
 
+void alloc_user_stack(struct pcb* p)
+{
+  p->u_stack = (uint64_t*)0x0000000000800000;
+  page_mapping((uint64_t)p->u_stack);
+}
+
 void switch_to_user_mode()
 {
 
-	bar_p.rsp_p = (uint64_t)&(bar_p.k_stack[63]);
-	bar_p.k_stack[63] = (uint64_t)&bar;
-	printf("\n Inside call\n");
   alloc_page_dir(&(bar_p));
-   __asm volatile("\
-       movq %%rsp,%%rax;\
+  _ptcr3(bar_p.cr3);
+  alloc_user_stack(&(bar_p));
+	bar_p.rsp_p = (uint64_t)&(bar_p.k_stack[63]);
+	printf("\n Inside call\n");
+  tss.rsp0 = bar_p.rsp_p;
+
+  alloc_page_dir(&(bar_p));
+   uint64_t tem = 0x28; 
+  __asm volatile("mov %0,%%rax;"::"r"(tem));
+  __asm volatile("ltr %ax");
+  __asm volatile("\
        push $0x23;\
-       push %%rax;\
+       push %0;\
        pushf;\
        push $0x1B;\
-       push %0"::"g"(bar_p.k_stack[63]):"memory");
-     __asm volatile("\
+       push %1"::"g"(&bar_p.u_stack[511]),"g"(&bar):"memory");
+  __asm volatile("\
      iretq;\
     ");
 }
 
 
-//void _asm_context(uint64_t);
 void call_first(void * kmem, void * pfree, void * pbase)
 {
   km = kmem;
@@ -225,17 +232,13 @@ void foo()
 
 void bar()
 {
-	flag = 1;
-	int i = 20;
-	printf("\n In bar");
-	while(i < 25)
-	{
-		i++;
-		printf("World: %d\n",i );
-    while(1);
-		schedule();
-		flag = 1;
-	}
+	char *a=(char*)video_vm;
+  *a = 'a';
+  __asm__ volatile("int $80;");
+  *a='x';
+  //clrscr();
+  //printf("Bhavya");
+
 
 	while(1);
 }

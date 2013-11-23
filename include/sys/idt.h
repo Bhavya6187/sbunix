@@ -5,8 +5,8 @@
 
 /* adapted from Chris Stones, shovelos */
 
-#define IDT_IST           (0x0000)  /*** code segment descriptor ***/
-#define IDT_RESERVED      (0x0000)  /*** data segment descriptor ***/
+#define IDT_IST           (0x0000)  
+#define IDT_RESERVED      (0x0000) 
 #define IDT_TYPE          (0x0E00)  /*** conforming ***/
 #define IDT_ZERO          (0x0000)  /*** conforming ***/
 #define IDT_DPL0          (0x0000)  /*** descriptor privilege level 0 ***/

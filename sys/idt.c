@@ -25,6 +25,17 @@ struct idt_entry get_entry(uint64_t target)
    return ret;
 }
 
+struct idt_entry get_user_int_entry(uint64_t target)
+{
+   struct idt_entry ret;
+   ret.offset1 = (target) & 0x0000ffff;
+   ret.flags = IDT_IST | IDT_RESERVED | IDT_TYPE | IDT_ZERO | IDT_DPL3| IDT_P;
+   ret.target_selector =  8;//0x0000|0x0003|0x01B0;
+   ret.reserved = 0;
+   ret.offset2 = ((target) >> 16) & 0x0000ffff;
+   ret.offset3 = ((target) >> 32) & 0xffffffff;
+   return ret;
+}
 struct idt_entry idt[MAX_IDT];// = { get_entry((uint64_t)&_isr_000), get_entry((uint64_t)&_isr_001)};
 
 struct idtr_t {
@@ -54,7 +65,7 @@ void reload_idt() {
   idt[14] = get_entry((uint64_t)&_isr_014);
   idt[32] = get_entry((uint64_t)&_irq_032);
   idt[33] = get_entry((uint64_t)&_irq_033);
-  idt[33] = get_entry((uint64_t)&_isr_080);
+  idt[80] = get_user_int_entry((uint64_t)&_isr_080);
  	_x86_64_asm_lidt(&idtr);
 }
 
