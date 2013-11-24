@@ -63,7 +63,9 @@ void isr_handler_80(registers_t regs)
 {
     clrscr();
     regs.interrupt_number = 80;
-     printf("Interrupt 80 for system calls .... \n");
+    putint((int)regs.rax);
+    while(1);
+    // printf("Interrupt 80 for system calls .... \n");
 }
 
 /*

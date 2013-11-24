@@ -6,6 +6,7 @@
 #include <sys/page_table.h>
 #include <sys/phy_mem.h>
 #include <sys/gdt.h>
+#include <sys/syscall.h>
 
 struct pcb foo_p;
 struct pcb bar_p;
@@ -24,7 +25,7 @@ void alloc_page_dir(struct pcb* p )
 {
   
   p->cr3 = (uint64_t)set_task_paging();
-  return ;
+  return;
 
 }
 
@@ -41,10 +42,9 @@ void switch_to_user_mode()
   _ptcr3(bar_p.cr3);
   alloc_user_stack(&(bar_p));
 	bar_p.rsp_p = (uint64_t)&(bar_p.k_stack[63]);
-	printf("\n Inside call\n");
+	printf("\n Inside call %p\n",(uint64_t)video_vm);
   tss.rsp0 = bar_p.rsp_p;
 
-  alloc_page_dir(&(bar_p));
    uint64_t tem = 0x28; 
   __asm volatile("mov %0,%%rax;"::"r"(tem));
   __asm volatile("ltr %ax");
@@ -59,6 +59,16 @@ void switch_to_user_mode()
     ");
 }
 
+void bar()
+{
+  sys_putint(6187);
+  //__asm__ volatile("int $80;");
+  //clrscr();
+  //printf("Bhavya");
+
+
+	while(1);
+}
 
 void call_first(void * kmem, void * pfree, void * pbase)
 {
@@ -230,16 +240,4 @@ void foo()
 	while(1);
 }
 
-void bar()
-{
-	char *a=(char*)video_vm;
-  *a = 'a';
-  __asm__ volatile("int $80;");
-  *a='x';
-  //clrscr();
-  //printf("Bhavya");
-
-
-	while(1);
-}
 

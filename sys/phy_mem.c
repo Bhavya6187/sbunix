@@ -24,8 +24,9 @@ uint64_t set_task_paging()
       temp_pm[509] =(((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 7;// (uint64_t)(pml4e);
       uint64_t base2 = 0xFFFFFF7FBFDFD000;//  510 510 510 509 000 
       uint64_t* page_pm =(uint64_t *) base2;
-      page_pm[511] = temp_pm[511];
-      page_pm[510] = temp_pm[509];
+      //page_pm[511] = temp_pm[511];
+      page_pm[510] = (((uint64_t)temp_pm[509])  & 0xFFFFFFFFFF000) | 7;
+      page_pm[511] = (((uint64_t)temp_pm[511])  & 0xFFFFFFFFFF000) | 7;
       printf("returning pml4e to be - %x\n",pml4e);
       return pml4e;
     }

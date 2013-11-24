@@ -61,17 +61,17 @@ uint64_t set_paging(void * km, void * pf, void * pb)
   //Creating Page Table heirarchy - Page Table Translation
   //Mapping is done as per AMD manual PML4E, PDPE, PDE structure
   //First 12 bits are 0, Next 40 bits are address bits, last 3 bits are set to 011
-  pml4e[vmem1] = (((uint64_t)pdpe) & 0xFFFFFFFFFF000) | 7;
-  pdpe[vmem2]  = (((uint64_t)pde)  & 0xFFFFFFFFFF000) | 7;
-  pde[vmem3]   = (((uint64_t)pte)  & 0xFFFFFFFFFF000) | 7;
-  pml4e[510] = (((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 7;
+  pml4e[vmem1] = (((uint64_t)pdpe) & 0xFFFFFFFFFF000) | 3;
+  pdpe[vmem2]  = (((uint64_t)pde)  & 0xFFFFFFFFFF000) | 3;
+  pde[vmem3]   = (((uint64_t)pte)  & 0xFFFFFFFFFF000) | 3;
+  pml4e[510] = (((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 3;
   //pml4e[vmem4] = (((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 3;
 
   uint64_t i; 
   int j;
   for(j=0,i=physbase; i<physfree; i+=PAGE_SIZE,j++ )
   {
-    pte[vmem4+j] = ((((uint64_t)i) & 0xFFFFFFFFFF000) | 7);
+    pte[vmem4+j] = ((((uint64_t)i) & 0xFFFFFFFFFF000) | 3);
   }
   //printf("\n %d %d %d %d\n", vmem1, vmem2, vmem3, vmem4);
    
@@ -85,7 +85,7 @@ uint64_t set_paging(void * km, void * pf, void * pb)
     //pte_vm[vmem4+j] = ((((uint64_t)i) & 0xFFFFFFFFFF000) | 3);
   //pte_vm = (uint64_t *)allocate_free_phy_page();
   //pte[vmem4] = ((((uint64_t)0xB8000) & 0xFFFFFFFFFF000) | 3);
-  pte[vmem4+j] = (0xB8000  | 7);
+  pte[vmem4+j] = (0xB8000  | 3);
   //printf("\n %d %d %d %d %p %p %p\n", vmem1, vmem2, vmem3, vmem4, pml4e[vmem1], pte_vm[vmem4], video_mem);
   //printf("j=%d\n",j);
   //printf("%p %p %p %p %p %p %p %p\n", pml4e, pdpe, pde, pte, pdpe_vm, pde_vm, pte_vm);
