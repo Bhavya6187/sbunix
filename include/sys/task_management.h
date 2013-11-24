@@ -21,7 +21,7 @@ struct pcb_t
 {
 	uint64_t pid;	// Process ID
 	struct pcb_t *prev;
-	struct pct_t *next;
+	struct pcb_t *next;
 	VMA *mm_st;	// Pointer to First VMA Block of the Process 
 	uint64_t cr3;	// Coontents of CR3 Register. (add of PML4E page table)
 	uint64_t rip;

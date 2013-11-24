@@ -1,5 +1,6 @@
 #include <sys/idt.h>
 #include <sys/isr.h>
+#include <sys/page_table.h>
 #include <stdio.h>
 
 void isr_handler_0(registers_t regs)
@@ -7,6 +8,7 @@ void isr_handler_0(registers_t regs)
      printf("Error: Divide by zero.. !! Grrr.... \n");
      // Pushed by pushq i.e. all general purpose registers
      //printf(" r15 %x, r14 %x, r13 %x, r12 %x, r11 %x, r10 %x, r9 %x, r8 %x,\n rsp %x, rbp %x, rdi %x, rsi %x, rdx %x, rcx %x, rbx %x, rax %x \n",     regs.r15, regs.r14, regs.r13, regs.r12, regs.r11, regs.r10, regs.r9, regs.r8, regs.rsp, regs.rbp, regs.rdi, regs.rsi, regs.rdx, regs.rcx, regs.rbx, regs.rax);
+    regs.interrupt_number = 0;
      printf("Interrupt Number = %d %d\n", regs.interrupt_number, regs.err_code);
      //printf("rds = %x\n", regs.ds);
      //printf(" rip %x, cs %x, eflags %x, usersp %x\n", regs.rip, regs.cs, regs.eflags, regs.usersp);
@@ -27,12 +29,10 @@ void isr_handler_13(registers_t regs)
 		:
 	  :"memory"
 	  );
-  
-     printf("Interrupt Number = %d errCode=%d cr=%p\n", regs.interrupt_number, regs.err_code, cr2);
-     //printf("rds = %x\n", regs.ds);
-     //printf(" rip %x, cs %x, eflags %x, usersp %x\n", regs.rip, regs.cs, regs.eflags, regs.usersp);
-     printf("Success !!\n");
-     while(1);
+    regs.interrupt_number = 13;
+    printf("Interrupt Number = %d errCode=%d cr=%p\n", regs.interrupt_number, regs.err_code, cr2);
+    printf("Success !!\n");
+    while(1);
 }
 
 void isr_handler_14(registers_t regs)
@@ -48,30 +48,22 @@ void isr_handler_14(registers_t regs)
 		:
 	  :"memory"
 	  );
-  
-     printf("Interrupt Number = %d %d %p\n", regs.interrupt_number, regs.err_code, cr2);
-     //printf("rds = %x\n", regs.ds);
-     //printf(" rip %x, cs %x, eflags %x, usersp %x\n", regs.rip, regs.cs, regs.eflags, regs.usersp);
-     printf("Success !!\n");
-     while(1);
+    int re=0; 
+    regs.interrupt_number = 14;
+    printf("Interrupt Number = %d %d %p\n", regs.interrupt_number, regs.err_code, cr2);
+    re = (regs.err_code & 7);
+    if ((0 == re) || (2 == re) || (4 == re) || (6 == re))
+        page_mapping(cr2);
+
+    printf("Success !!\n");
+    while(1);
 }
 
 void isr_handler_80(registers_t regs)
 {
     clrscr();
+    regs.interrupt_number = 80;
      printf("Interrupt 80 for system calls .... \n");
-    /*uint64_t cr2;
-     //Read cr2 here -
-  	__asm volatile(
-		"movq %%cr2, %0"
-		:"=g"(cr2)
-		:
-	  :"memory"
-	  );
-  
-     printf("Interrupt Number = %d %d %p\n", regs.interrupt_number, regs.err_code, cr2);
-     printf("Success !!\n");
-     while(1);*/
 }
 
 /*

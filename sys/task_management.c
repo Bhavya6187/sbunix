@@ -81,4 +81,23 @@ VMA *create_vma(uint64_t start_add, uint64_t size)
 	vm->vma_next = NULL;
 
 	return vm;
-}	
+}
+
+/*uint64_t doFork()
+{
+	PCB *process = NULL;
+	process = create_pcb();
+  m_map((uint64_t)process, (uint64_t), (uint64_t)(sizeof(struct pcb_t)), (uint64_t)(sizeof(struct pcb_t)) );
+
+  process->pid = get_pid();
+  // Add it to task linked list !!
+  // update the cr3 to process->cr3
+  //
+  //
+  // return 0 to the calling process
+
+  //Add parent_pid in the structure as well
+  return 0;
+  
+
+}*/

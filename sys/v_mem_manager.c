@@ -9,7 +9,7 @@
 # define MAX_KERN 0xffffffffffffffff
 # define BASE 0x200000
 
-uint64_t cur_VK = (0x324000 + 0xffffffff80000000);		// Free Virtual Memory above Kernel starts from here
+uint64_t cur_VK = (0x326000 + 0xffffffff80000000);		// Free Virtual Memory above Kernel starts from here
 uint64_t cur_PK = 0x2097152;	// Starts at 2 MB mark (abhi confirm)
 
 //uint64_t pid_bitmap[32] = {0};
@@ -26,7 +26,12 @@ void *k_malloc(uint64_t no_bytes)
 	uint64_t pt = NULL;
 //	uint64_t 
 // abhi add check for top address boundary condition	
-	
+	if (MAX_KERN <= (cur_VK + no_bytes))
+  {
+    //exit();
+    printf("\n Kernel Virtual OVERSHOOT");
+    return NULL;
+  }
 	pt = cur_VK;
 	cur_VK += no_bytes;	// Increase current Free Virtual Memory above kernel pointer by the no of bytes asked by thread in Kernel	
 
@@ -143,7 +148,7 @@ uint64_t map_pageTable()
 	tmp2 = (uint64_t *) add;
 
 	*(tmp2 + 511) = (uint64_t)tmp1[511];	   // Mapping Kernel PML4e entry into process 
-	
+  *(tmp2 + 510) = (((uint64_t) p1) | 7);	
 	return (uint64_t) p1;			   // returns the PML4E base Physical address
 }
 
@@ -178,5 +183,17 @@ void test()
 	pro = create_pcb();
 
 	read_tarfs(pro);
+  printf("\n BACK IN TEST");
+  pro->kernel_stack[63] = pro->rip;
+  pro->rsp = (uint64_t)&(pro->kernel_stack[63]);
+  __asm__(
+     "movq %0, %%rsp;"
+     :
+     :"r"((pro->rsp))
+  );
+
+  __asm__(
+       "retq;"
+    );
 
 }	
