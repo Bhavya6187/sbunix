@@ -9,7 +9,8 @@
 # define MAX_KERN 0xffffffffffffffff
 # define BASE 0x200000
 
-uint64_t cur_VK = (0x326000 + 0xffffffff80000000);		// Free Virtual Memory above Kernel starts from here
+//uint64_t cur_VK = (0x326000 + 0xffffffff80000000);		// Free Virtual Memory above Kernel starts from here
+uint64_t cur_VK = (0x336000 + 0xffffffff80000000);		// Free Virtual Memory above Kernel starts from here
 uint64_t cur_PK = 0x2097152;	// Starts at 2 MB mark (abhi confirm)
 
 //uint64_t pid_bitmap[32] = {0};

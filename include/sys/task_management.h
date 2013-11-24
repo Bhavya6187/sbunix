@@ -20,6 +20,7 @@ typedef struct vma_struct VMA;
 struct pcb_t
 {
 	uint64_t pid;	// Process ID
+	uint64_t ppid;	// Process ID
 	struct pcb_t *prev;
 	struct pcb_t *next;
 	VMA *mm_st;	// Pointer to First VMA Block of the Process 
@@ -45,11 +46,19 @@ struct pcb_t
 };
 typedef struct pcb_t PCB;
 
+// Creating a Doubly Linked List
+struct taskList {
+  struct taskList *next;
+  struct taskList *prev;
+  struct pcb_t *task;
+};
+
 uint32_t get_pid();	// Returns a free PID from the pid bitmap
 PCB *create_pcb();	// DO initial Setup on a new process creation
 VMA *create_vma(uint64_t start, uint64_t size);	// Creates VMA structure for each segment 
 
-extern PCB *waitQ;
-extern PCB *runableQ;
+extern struct taskList *waitTaskQ;
+extern struct taskList *allTaskQ;
+extern struct taskList *runnableTaskQ;
 
 #endif
