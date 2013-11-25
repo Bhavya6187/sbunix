@@ -56,7 +56,6 @@ void isr_handler_14(registers_t regs)
         page_mapping(cr2);
 
     printf("Success !!\n");
-    while(1);
 }
 
 void isr_handler_80(registers_t regs)
@@ -64,7 +63,6 @@ void isr_handler_80(registers_t regs)
     clrscr();
     regs.interrupt_number = 80;
     putint((int)regs.rax);
-    while(1);
     // printf("Interrupt 80 for system calls .... \n");
 }
 

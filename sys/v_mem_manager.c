@@ -203,7 +203,6 @@ void test()	// sort of execve in current scenario
 {
 	PCB *pro = NULL;
   printf("Made the pcb");
-  while(1);
 	pro = create_pcb();
 	_ptcr3(pro->cr3);
 	read_tarfs(pro);
@@ -230,7 +229,7 @@ void test()	// sort of execve in current scenario
 	   "retq;"
 	);
 */
-	pro->u_stack[63] = pro->rip;
+	pro->u_stack[0] = pro->rip;
 	pro->rsp = (uint64_t)(pro->u_stack);
 	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[63]);
 	printf("\n GDT SET");

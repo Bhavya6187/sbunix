@@ -51,11 +51,12 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 		}
 	}
   physfree = physfree + (1024*1024);
-      printf("physfree %p\n", (uint64_t)physfree);
-  
+  printf("physfree %p\n", (uint64_t)physfree);
+  set_paging((void *)&kernmem, physfree, physbase); 
 	cur_VK = ((uint64_t)physfree + (8 * 1024) + 0xffffffff7fffffff) ;
 	cur_PK = 0x2097152;	// Starts at 2 MB mark 
-  printf("\n V:%x:P:%x",cur_VK, cur_PK);
+  printf("\n V:%p:P:%p",cur_VK, cur_PK);
+
   int j;
   for(j=0; j<31000; j++)
   {
@@ -70,7 +71,6 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   //call_first(kernmem, physfree, physbase);
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
 
-	while(1);
   test();
 }
 

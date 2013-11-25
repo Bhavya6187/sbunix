@@ -32,7 +32,7 @@ int getPML4Eindex(uint64_t vadd)
 uint64_t set_paging(void * km, void * pf, void * pb)
 {
   uint64_t kernmem, physfree, physbase;
-  uint64_t *pml4e, *pdpe, *pde, *pte;
+  uint64_t *pml4e, *pdpe, *pde, *pte, *thor;
   int vmem1, vmem2, vmem3, vmem4;
   uint64_t cr3;
   kernmem = (uint64_t)km;
@@ -45,6 +45,7 @@ uint64_t set_paging(void * km, void * pf, void * pb)
   pdpe = (uint64_t *)allocate_free_phy_page();
   pde = (uint64_t *)allocate_free_phy_page();
   pte = (uint64_t *)allocate_free_phy_page();
+  thor = (uint64_t *)allocate_free_phy_page();
  
   /*
   vmem1 = ((kernmem << 16) >> 55); 
@@ -61,10 +62,12 @@ uint64_t set_paging(void * km, void * pf, void * pb)
   //Creating Page Table heirarchy - Page Table Translation
   //Mapping is done as per AMD manual PML4E, PDPE, PDE structure
   //First 12 bits are 0, Next 40 bits are address bits, last 3 bits are set to 011
-  pml4e[vmem1] = (((uint64_t)pdpe) & 0xFFFFFFFFFF000) | 3;
-  pdpe[vmem2]  = (((uint64_t)pde)  & 0xFFFFFFFFFF000) | 3;
-  pde[vmem3]   = (((uint64_t)pte)  & 0xFFFFFFFFFF000) | 3;
-  pml4e[510] = (((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 3;
+  pml4e[vmem1] = (((uint64_t)pdpe) & 0xFFFFFFFFFF000) | 7;
+  pdpe[vmem2]  = (((uint64_t)pde)  & 0xFFFFFFFFFF000) | 7;
+  pde[vmem3]   = (((uint64_t)pte)  & 0xFFFFFFFFFF000) | 7;
+  pml4e[510] = (((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 7;
+  pml4e[509] = (((uint64_t)thor) & 0xFFFFFFFFFF000) | 7;
+
   //pml4e[vmem4] = (((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 3;
 
   uint64_t i; 

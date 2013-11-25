@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 int main(int argc, char* argv[]) {
-	printf("Hello World!\n");
+  sys_putint(6187);
+    while(1);
 	return 0;
 }
