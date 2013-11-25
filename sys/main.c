@@ -70,7 +70,6 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 
   //call_first(kernmem, physfree, physbase);
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
-
   test();
 }
 

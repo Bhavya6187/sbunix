@@ -233,7 +233,6 @@ void test()	// sort of execve in current scenario
 	pro->rsp = (uint64_t)(pro->u_stack);
 	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[63]);
 	printf("\n GDT SET");
-	
 	uint64_t tem = 0x28; 
 	__asm volatile("mov %0,%%rax;"::"r"(tem));
 	__asm volatile("ltr %ax");
