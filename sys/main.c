@@ -8,6 +8,7 @@
 #include <sys/page_table.h>
 #include <sys/tasking.h>
 #include <sys/tarfs.h>
+#include <sys/v_mem_manager.h>
 
 
 
@@ -51,7 +52,10 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	}
   physfree = physfree + (1024*1024);
       printf("physfree %p\n", (uint64_t)physfree);
-
+  
+	cur_VK = ((uint64_t)physfree + (8 * 1024) + 0xffffffff7fffffff) ;
+	cur_PK = 0x2097152;	// Starts at 2 MB mark 
+  printf("\n V:%x:P:%x",cur_VK, cur_PK);
   int j;
   for(j=0; j<31000; j++)
   {
@@ -63,95 +67,11 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
     }
   }
 
-
-  uint64_t *test;
-  int i=0;
-  for(i=0;i<1;i++)
-  {
-   test = (uint64_t*)allocate_free_phy_page();
-   printf("%d %p\n",i, test);
-  }
-
-  printf("kernmem %p\n", (uint64_t)kernmem);
-  set_paging((void *)&kernmem, physfree, physbase);
-  putint(100);
-  
-  //char* x = (char*)0xFFFF8000000B8000;
-  /*volatile char *x = (char*)(0xffffffff80000000|(uint64_t)physfree );
-  *x++ = 'A';
-  *x++ = 0x1F; */
-  //set_virtual_video_memory((void*)0xFFFFFFFF000B8000);
-  //clrscr();
-  //while(infinite_loop);
-  page_mapping((uint64_t)0xFFFFFFFF80200000);
-  page_mapping((uint64_t)0xFFFFFFFF80200000);
-  //page_mapping((uint64_t)0xFFFFFF00802FF000);
-  //page_mapping((uint64_t)0xFFFFEE00802FF000);
-  //page_mapping((uint64_t)0xFFFF00FF80000000);
-  
-  /*intf("%d \n", 5454);
-  for(i=0;i<4;i++)
-  {
-   test = (uint64_t*)allocate_free_phy_page();
-   printf("%d %x \n", i, test);
-  }*/
-
-
-  uint64_t base1 = 0xFFFF000000000000;
-  uint64_t base2;
-  int jj=0;
-  for(jj=508; jj>0 ; jj--)
-  //for(jj=4; jj<254 ; jj++)
-  {
-    base1 = 0xFFFF000000000000;
-    if(jj<=255 && jj>=1)
-      base1 = 0x0000000000000000;
-      
-    base2 = ((base1 << (16+9))<<(16+9));
-    base1 = (((base1 >> (12+9+9+9+9))<<9 | jj ) << (12+9+9+9) ) | base2;
-    uint64_t *test1 = (uint64_t*)(base1);
-    printf("Checking mapping %d %p ", jj, test1);
-    page_mapping((uint64_t)test1);
-    *test1 = jj;
-    printf("value =%d", *test1);
-  }
-  //uint64_t *test1 = (uint64_t*)0xFFFF000000000000;
-  //uint64_t *test1 = (uint64_t*)0xFFFF00FF80000000;
-  //for (int
-  //uint64_t *test1 = (uint64_t*)0xFFFFEDFF80000000;
-  //uint64_t *test1 = (uint64_t*)0xFFFFFF00802FF000;
-  //uint64_t *test1 = (uint64_t*)0xFFFFFFFF80000000;
-  //page_mapping((uint64_t)0xFFFFFFFF00000000);
-  printf("Checking mapping\n");
-  //page_mapping((uint64_t)test1);
-  //page_mapping((uint64_t)test1);
-
-  //printf("test = %x", *test1);
-  printf("Checking mapping again\n");
-  //page_mapping((uint64_t)0xFFFFFFFF80000000);
-
-  //*test1 = 5;
-  //printf("test = %x", *test1);
-
-  printf("Stack address=%p", stack);
-  /*page_mapping((uint64_t)0x00000000000B8000);
-  char* x1 = (char*)0x00000000000B8000;
-  *x1 = 'C';
-  putchar(*x1);
-  */
-  /*
-  int a, b,c ;
-  b =0;
-  a = 5;
-  c = a/b;
-  putint(c);
-  */
-  
-
   //call_first(kernmem, physfree, physbase);
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
-	//read_tarfs();
+
 	while(1);
+  test();
 }
 
 void boot(void)

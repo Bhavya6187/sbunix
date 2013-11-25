@@ -167,7 +167,7 @@ PCB *create_pcb()
 
 	if ((pro->pid = get_pid()) == 0)
 	{
-		printf("\n Error No Free PID found");	// abhi abort ?
+		printf("\n Error No Free PID found");	
 		return (PCB *) 0;
 	}
 	pro->cr3 = map_pageTable();		// Storing Base Physical address of PML4e for new process

@@ -1,6 +1,11 @@
 #ifndef _V_MEM_MANAGER
 #define _V_MEM_MANAGER
 
+
+# define MAX_KERN 0xFFFFFFFFFFFFFFFF
+# define BASE 0x200000
+# define PAGE_SIZE 4096
+
 uint64_t opfree;
 extern uint64_t cur_VK;		// Current free Virtual Memory above Physfree;
 void *k_malloc(uint64_t no);	// VM allocator
@@ -17,5 +22,7 @@ uint64_t map_pageTable();
 /* Creates Process Stack */
 uint64_t *process_stack();	
 
+void init_VM(uint64_t pfree);		// Initializes the Virtual Memory Manager
 void test();
+
 #endif

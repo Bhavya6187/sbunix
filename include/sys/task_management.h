@@ -20,7 +20,8 @@ typedef struct vma_struct VMA;
 struct pcb_t
 {
 	uint64_t pid;	// Process ID
-	uint64_t ppid;	// Process ID
+	uint64_t ppid;	// Process ID	uint64_t ppid;	// Process ID
+	uint64_t* u_stack;	// Process ID
 	struct pcb_t *prev;
 	struct pcb_t *next;
 	VMA *mm_st;	// Pointer to First VMA Block of the Process 

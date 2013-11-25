@@ -1,18 +1,31 @@
-// Code for Virtual Memory Manager
-#include <stdio.h>
+/*
+* Code for Virtual Memory Manager
+* 
+*
+*/
+
+# include <stdio.h>
 #include <sys/phy_mem.h>
-#include <sys/v_mem_manager.h>
-#include <sys/task_management.h>
-#include <sys/tarfs.h>
+#include <sys/page_table.h>
+# include <sys/v_mem_manager.h>
+# include <sys/task_management.h>
+# include <sys/tarfs.h>
+# include <sys/gdt.h>
 
-# define PAGE_SIZE 4096
-# define MAX_KERN 0xffffffffffffffff
-# define BASE 0x200000
-
+uint64_t cur_VK;
+uint64_t cur_PK;
+extern void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 //uint64_t cur_VK = (0x326000 + 0xffffffff80000000);		// Free Virtual Memory above Kernel starts from here
-uint64_t cur_VK = (0x336000 + 0xffffffff80000000);		// Free Virtual Memory above Kernel starts from here
-uint64_t cur_PK = 0x2097152;	// Starts at 2 MB mark (abhi confirm)
 
+/*
+* Initializes the Virtual Memory Manager
+*/
+void init_VM(uint64_t phfree)
+{
+	cur_VK = (phfree + (16 * 1024) + 0xffffffff7fffffff) ;
+	cur_PK = 0x2097152;	// Starts at 2 MB mark (abhi confirm)
+	printf("\n VK:%X:PK:%x", cur_VK, cur_PK);
+}
 //uint64_t pid_bitmap[32] = {0};
 /*
 * Kernel Malloc- Virtual Memory- Uses get_page() to get 4Kb physical pages
@@ -28,16 +41,23 @@ void *k_malloc(uint64_t no_bytes)
 //	uint64_t 
 // abhi add check for top address boundary condition	
 	if (MAX_KERN <= (cur_VK + no_bytes))
-  {
-    //exit();
-    printf("\n Kernel Virtual OVERSHOOT");
-    return NULL;
-  }
+	{
+		//exit();
+		printf("\n Kernel Virtual OVERSHOOT");
+		return NULL;
+	}
 	pt = cur_VK;
 	cur_VK += no_bytes;	// Increase current Free Virtual Memory above kernel pointer by the no of bytes asked by thread in Kernel	
 
 	return (void *)pt;
 }
+
+
+/*
+* Code for Virtual Memory Free called from within exit
+* param: VM address to be freed 
+* Return:
+*/
 
 
 /*
@@ -87,7 +107,7 @@ uint32_t m_map(uint64_t start_Vadd, uint64_t source_add, uint64_t f_size, uint64
 
 	check = (char *) start_Vadd;
 	source = (char *) source_add;
-	*check = 0;						// abhi Will try to derefrence and trigger a Page Fault if Physical page is not mapped.
+//	*check = 0;						// abhi Will try to derefrence and trigger a Page Fault if Physical page is not mapped.
 
 /* Page fault handler will be called which should use Self Refrencing to allocate a new Physical page to the process and return back to the next instruction */
 
@@ -116,20 +136,18 @@ uint64_t map_pageTable()
 {
 	uint64_t *p1, *tmp, *tmp1, *tmp2;
 	uint64_t add = 0xFFFF000000000000;	// Base address to build on
-	p1 = (uint64_t *)  allocate_free_phy_page();
+	p1 = (uint64_t *) allocate_free_phy_page();
 	
 	if (p1 == NULL)
 	{
 		return NULL;
 	}	
 	
-//	tmp = (uint64_t *) ((0xffffffff80000000 | (uint64_t) p1));	
-	
+/* Looking into kernel page table */	
 	add = (((add >> 48) << 9 | 0x1FE) << 39);  // Sets the 1st 9 bits to 510 for  self refrenccing
 	add = (((add >> 39) << 9 | 0x1FE) << 30);  // Sets the 2nd 9 bits to 510 for  self refrenccing
 	add = (((add >> 30) << 9 | 0x1FE) << 21);  // Sets the 3rd 9 bits to 510 for  self refrenccing
 	add = (((add >> 21) << 9 | 0x1FE) << 12);  // Sets the 4th 9 bits to 510 for  self refrenccing
-	// abhi check for kernel page table U/S bit setting currently S(0)
 	tmp1 = (uint64_t *) add;
 
 	add = 0xFFFF000000000000;
@@ -139,6 +157,7 @@ uint64_t map_pageTable()
 	add = (((add >> 21) << 9 | 0x1FD) << 12);  // Sets the 4th 9 bits to 509 to point to the extra page used to init the new process page table
 	tmp = (uint64_t *) add;
 
+/* Mapping New Process Page table at the tmp page(kernel PML4e[509]s 0th index */
 	*(tmp + 0) = (((uint64_t) p1) | 7);
 	 
 	add = 0xFFFF000000000000;
@@ -149,7 +168,8 @@ uint64_t map_pageTable()
 	tmp2 = (uint64_t *) add;
 
 	*(tmp2 + 511) = (uint64_t)tmp1[511];	   // Mapping Kernel PML4e entry into process 
-  *(tmp2 + 510) = (((uint64_t) p1) | 7);	
+	*(tmp2 + 510) = (((uint64_t) p1) | 7);	  // Self Refrencing Trick	
+	
 	return (uint64_t) p1;			   // returns the PML4E base Physical address
 }
 
@@ -178,23 +198,53 @@ uint64_t *process_stack()
 	return top;	//returns the top of the virtual page 4KB page as stack grows downwards
 }	
 
-void test()
+
+void test()	// sort of execve in current scenario
 {
 	PCB *pro = NULL;
+  printf("Made the pcb");
+  while(1);
 	pro = create_pcb();
-
+	_ptcr3(pro->cr3);
 	read_tarfs(pro);
-  printf("\n BACK IN TEST");
-  pro->kernel_stack[63] = pro->rip;
-  pro->rsp = (uint64_t)&(pro->kernel_stack[63]);
-  __asm__(
-     "movq %0, %%rsp;"
-     :
-     :"r"((pro->rsp))
-  );
+	printf("\n BACK IN TEST");
+	if ((pro->u_stack = process_stack()) == NULL)
+	{
+		printf("\n Cant allocate memory for process User stack");
+		//exit();
+	}	
+	/* Setting the CR3 with the new process PML4E */	
+	printf("\n CR3 set done");
+	/* Running new process */
+	
+//	running = pro;	// Pointer which keeps track of currently running process	
+/*	pro->kernel_stack[63] = pro->rip;
+	pro->rsp = (uint64_t)&(pro->kernel_stack[63]);
+	__asm__(
+	   "movq %0, %%rsp;"
+	   :
+	   :"r"((pro->rsp))
+	);
 
-  __asm__(
-       "retq;"
-    );
-
-}	
+	__asm__(
+	   "retq;"
+	);
+*/
+	pro->u_stack[63] = pro->rip;
+	pro->rsp = (uint64_t)(pro->u_stack);
+	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[63]);
+	printf("\n GDT SET");
+	
+	uint64_t tem = 0x28; 
+	__asm volatile("mov %0,%%rax;"::"r"(tem));
+	__asm volatile("ltr %ax");
+	__asm volatile("\
+	push $0x23;\
+	push %0;\
+	pushf;\
+	push $0x1B;\
+	push %1"::"g"(&pro->u_stack[0]),"g"(pro->rip):"memory");
+	__asm volatile("\
+	iretq;\
+	");
+}
