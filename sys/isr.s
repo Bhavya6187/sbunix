@@ -18,8 +18,6 @@ isr_common_stub:
   pushq %rdx
   pushq %rsi
   pushq %rdi
-  pushq %rbp
-  pushq %rsp           # Pushes the general purpose registers GPR's R8-R15 also might come
   pushq %r8
   pushq %r9
   pushq %r10
@@ -38,8 +36,6 @@ isr_common_stub:
   popq %r10
   popq %r9
   popq %r8
-  popq %rsp
-  popq %rbp
   popq %rdi
   popq %rsi
   popq %rdx
@@ -66,8 +62,8 @@ isr_common_stub_14:
   pushq %rdx
   pushq %rsi
   pushq %rdi
-  pushq %rbp
-  pushq %rsp           # Pushes the general purpose registers GPR's R8-R15 also might come
+# pushq %rbp
+# pushq %rsp           # Pushes the general purpose registers GPR's R8-R15 also might come
   pushq %r8
   pushq %r9
   pushq %r10
@@ -86,8 +82,8 @@ isr_common_stub_14:
   popq %r10
   popq %r9
   popq %r8
-  popq %rsp
-  popq %rbp
+# popq %rsp
+# popq %rbp
   popq %rdi
   popq %rsi
   popq %rdx
@@ -114,8 +110,6 @@ isr_common_stub_13:
   pushq %rdx
   pushq %rsi
   pushq %rdi
-  pushq %rbp
-  pushq %rsp           # Pushes the general purpose registers GPR's R8-R15 also might come
   pushq %r8
   pushq %r9
   pushq %r10
@@ -134,8 +128,6 @@ isr_common_stub_13:
   popq %r10
   popq %r9
   popq %r8
-  popq %rsp
-  popq %rbp
   popq %rdi
   popq %rsi
   popq %rdx
@@ -143,13 +135,11 @@ isr_common_stub_13:
   popq %rbx
   popq %rax        # Pops the general purpose registers GPR's R8-R15 also might come
   #popq %rdi        # Pops the general purpose registers GPR's R8-R15 also might come
-  
+#  add $8, %rsp
   iretq           
 
 _isr_080:
   cli
-  movq $80, %rdi
-  pushq %rdi      # Push the interrupt number 0
   jmp isr_stub_80  # Go to our common handler. 
   sti
   iretq
@@ -161,8 +151,6 @@ isr_stub_80:
   pushq %rdx
   pushq %rsi
   pushq %rdi
-  pushq %rbp
-  pushq %rsp           # Pushes the general purpose registers GPR's R8-R15 also might come
   pushq %r8
   pushq %r9
   pushq %r10
@@ -182,16 +170,10 @@ isr_stub_80:
   popq %r10
   popq %r9
   popq %r8
-  popq %rsp
-  popq %rbp
   popq %rdi
   popq %rsi
   popq %rdx
   popq %rcx
   popq %rbx
   popq %rax        # Pops the general purpose registers GPR's R8-R15 also might come
-  popq %rdi        # Pops the general purpose registers GPR's R8-R15 also might come
-  
-  iretq           
-
-
+  iretq

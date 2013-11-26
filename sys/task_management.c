@@ -172,7 +172,6 @@ PCB *create_pcb()
 	}
 	pro->cr3 = map_pageTable();		// Storing Base Physical address of PML4e for new process
 	printf("\n PCR3:%x", pro->cr3);
-	_ptcr3((uint64_t)pro->cr3);
 	printf("\n Process CR3 switch done");
 
   //Adding the PCB into Queue of Running process

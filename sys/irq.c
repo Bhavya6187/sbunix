@@ -176,11 +176,11 @@ void irq_handler_0(registers_t regs)
         read_rtc();
         sec++;
     }
-    if (regs.interrupt_number >= 32)
+    /*if (regs.interrupt_number >= 32)
     {
       //Send reset signal to slave.
       outb(0xA0, 0x20);
-    }
+    }*/
     // Send reset signal to master. (As well as slave, if necessary).
     outb(0x20, 0x20);
 }
