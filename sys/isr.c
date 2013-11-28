@@ -71,7 +71,7 @@ void isr_handler_14(registers_t regs)
 
 void isr_handler_80(registers_t regs )
 {
-   uint64_t rdi1;
+   //uint64_t rdi1;
    int f=-1;
    //__asm__ volatile("movq %%rdi,%0;":"=m"(rdi1)::);
    //registers_t* regs = (registers_t*)rdi1;
