@@ -1,16 +1,12 @@
-/*
-* Code for Virtual Memory Manager
-* 
-*
-*/
+//Code for Virtual Memory Manager
 
-# include <stdio.h>
-#include <sys/phy_mem.h>
-#include <sys/page_table.h>
-# include <sys/v_mem_manager.h>
-# include <sys/task_management.h>
-# include <sys/tarfs.h>
-# include <sys/gdt.h>
+#include<stdio.h>
+#include<sys/phy_mem.h>
+#include<sys/page_table.h>
+#include<sys/v_mem_manager.h>
+#include<sys/task_management.h>
+#include<sys/tarfs.h>
+#include<sys/gdt.h>
 
 uint64_t cur_VK;
 uint64_t cur_PK;
@@ -126,16 +122,26 @@ uint32_t m_map(uint64_t start_Vadd, uint64_t source_add, uint64_t f_size, uint64
 	return 0;
 }
 
+uint64_t selfRef(uint64_t pml4e, uint64_t pdpe, uint64_t pde, uint64_t pte)
+{
+  uint64_t base;
+  base = 0xFFFF000000000000; 
+  base = (((base >> (12+9+9+9+9))<<9 | pml4e ) << (12+9+9+9) );
+  base = (((base >> (12+9+9+9))<<9   | pdpe  ) << (12+9+9) );
+  base = (((base >> (12+9+9))<<9     | pde   ) << (12+9) );
+  base = (((base >> (12+9))<<9       | pte   ) << (12) );
+  return base;
+}
+
 /*
 * Maps the kernel Page Tables in Process Page Table by copying kernel PML4E 511 entry into Process Page Table 
 * Also creates Page Table for the new process 
 * returns: uint64_t base Physical Address of the PML4e page table for the new process 
 */
 
-uint64_t map_pageTable()
+uint64_t map_pageTable(PCB *np)
 {
-	uint64_t *p1, *tmp, *tmp1, *tmp2;
-	uint64_t add = 0xFFFF000000000000;	// Base address to build on
+	uint64_t *p1, *tmp, *tmp1;
 	p1 = (uint64_t *) allocate_free_phy_page();
 	
 	if (p1 == NULL)
@@ -143,34 +149,106 @@ uint64_t map_pageTable()
 		return NULL;
 	}	
 	
-/* Looking into kernel page table */	
-	add = (((add >> 48) << 9 | 0x1FE) << 39);  // Sets the 1st 9 bits to 510 for  self refrenccing
-	add = (((add >> 39) << 9 | 0x1FE) << 30);  // Sets the 2nd 9 bits to 510 for  self refrenccing
-	add = (((add >> 30) << 9 | 0x1FE) << 21);  // Sets the 3rd 9 bits to 510 for  self refrenccing
-	add = (((add >> 21) << 9 | 0x1FE) << 12);  // Sets the 4th 9 bits to 510 for  self refrenccing
-	tmp1 = (uint64_t *) add;
+  //Looking into kernel page table
+  tmp1 = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, 0x1FE)); // 510
 
-	add = 0xFFFF000000000000;
-	add = (((add >> 48) << 9 | 0x1FE) << 39);  // Sets the 1st 9 bits to 510 for  self refrenccing
-	add = (((add >> 39) << 9 | 0x1FE) << 30);  // Sets the 2nd 9 bits to 510 for  self refrenccing
-	add = (((add >> 30) << 9 | 0x1FE) << 21);  // Sets the 3rd 9 bits to 510 for  self refrenccing
-	add = (((add >> 21) << 9 | 0x1FD) << 12);  // Sets the 4th 9 bits to 509 to point to the extra page used to init the new process page table
-	tmp = (uint64_t *) add;
+  uint64_t i=509;
+  while( *(tmp1+i) )
+  { 
+    i--;
+  }
+  *(tmp1+i) = (((uint64_t) p1) | 7);
 
-/* Mapping New Process Page table at the tmp page(kernel PML4e[509]s 0th index */
-	*(tmp + 0) = (((uint64_t) p1) | 7);
-	 
-	add = 0xFFFF000000000000;
-	add = (((add >> 48) << 9 | 0x1FE) << 39);  // Sets the 1st 9 bits to 510 for  self refrenccing
-	add = (((add >> 39) << 9 | 0x1FE) << 30);  // Sets the 2nd 9 bits to 0 for  self refrenccing
-	add = (((add >> 30) << 9 | 0x1FD) << 21);  // Sets the 3rd 9 bits to 509  entry for  self refrenccing
-	add = (((add >> 21) << 9 | 0x0) << 12);    // Sets the 4th 9 bits to 509 to point to the extra page used to init the new process page table
-	tmp2 = (uint64_t *) add;
+  tmp = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, i));  // 509
 
-	*(tmp2 + 511) = (uint64_t)tmp1[511];	   // Mapping Kernel PML4e entry into process 
-	*(tmp2 + 510) = (((uint64_t) p1) | 7);	  // Self Refrencing Trick	
+  //Mapping New Process Page table at the tmp page(kernel PML4e[509]s 0th index */
+	//*(tmp + 0) = (((uint64_t) p1) | 7);
+
+  //tmp2 = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FD, 0x0)); // 510 510 509 0
+  //tmp2 = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, 0x1FD)); // 510 510 510 509
+
+	*(tmp + 511) = (uint64_t)tmp1[511];	   // Mapping Kernel PML4e entry into process 
+	*(tmp + 510) = (((uint64_t) p1) | 7);	 // Self Refrencing Trick	
+  np->pml4e_entry = i;
+  np->cr3 = (uint64_t) p1;
 	
 	return (uint64_t) p1;			   // returns the PML4E base Physical address
+}
+
+#define  R0 0xFFFFFFFFFFFFFFD //1 bit set as read bit, so no write access
+#define COW 0x008000000000000 //52 bit set as COW bit
+// Copying pagetables and setting COW bits for the present physical pages !!
+void copyPageTables(PCB *child, PCB *parent)
+{
+  uint64_t i, j, k, l; // iterators for pml4e, pdpe, pde, pte
+  uint64_t *pml4eAdd, *pdpeAdd, *pdeAdd, *pteAdd;
+  uint64_t *new_pml4eAdd, *new_pdpeAdd, *new_pdeAdd, *new_pteAdd;
+  uint64_t child_pml4e_entry;
+  uint64_t total_count=0, tp1=0, tp2=0, tp3=0;
+  
+  child_pml4e_entry = child->pml4e_entry;
+  printf("Child PML4E entry =%p\n", child_pml4e_entry);
+  pml4eAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, 0x1FE));
+  new_pml4eAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, child_pml4e_entry ));
+  printf("pml4e=%p, new=%p\n", pml4eAdd, new_pml4eAdd);
+
+  // Iterate through all the page table entries in the PML4E of the Parent process 
+  for(i=0; i<510; i++)
+  {
+    if( i==child_pml4e_entry)
+      continue;
+
+    if(pml4eAdd[i]!=0) // if some entry exists we have to copy
+    {
+      //new_pml4eAdd[i] = pml4eAdd[i];
+	    new_pml4eAdd[i] = (((uint64_t) allocate_free_phy_page()) | 7);
+      tp1++;
+      pdpeAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, i));
+      new_pdpeAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, child_pml4e_entry, i));
+      printf("pdpe=%p, new=%p\n", pdpeAdd, new_pdpeAdd);
+      
+      for( j=0; j<512; j++)
+      {
+        if(pdpeAdd[j])
+        {
+          //new_pdpeAdd[j] = pdpeAdd[j];
+	        new_pdpeAdd[j] = (((uint64_t) allocate_free_phy_page()) | 7);
+          tp2++;
+          pdeAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, i, j));
+          new_pdeAdd = (uint64_t *)(selfRef(0x1FE, child_pml4e_entry, i, j));
+          printf("pde=%p, new=%p\n", pdeAdd, new_pdeAdd);
+
+          for( k=0; k<512; k++)
+          {
+            if(pdeAdd[k])
+            {
+              //new_pdeAdd[j] = pdeAdd[j];
+	            new_pdeAdd[k] = (((uint64_t) allocate_free_phy_page()) | 7);
+              tp3++;
+              pteAdd = (uint64_t *)(selfRef(0x1FE, i, j, k));
+              new_pteAdd = (uint64_t *)(selfRef(child_pml4e_entry, i, j, k));
+              printf("pte=%p, new=%p\n", pteAdd, new_pteAdd);
+
+              for(l=0; l<512; l++)
+              {
+                if(pteAdd[l])
+                {
+                  // setting COW 52 bit as 1 and give read only access to the physical page
+                  // for both parent and child
+                  new_pteAdd[l] = ((((uint64_t)pteAdd[l]) & R0) | COW);
+                  pteAdd[l]     = ((((uint64_t)pteAdd[l]) & R0) | COW);
+                  total_count++;
+                }
+              }
+            }
+          }
+
+        }
+      }
+    }
+  }
+  printf("Total no of entries finally added in PTE's :: %p",total_count);
+  printf("Total no of pages allocated for PageTables :: %p %p %p",tp1, tp2, tp3);
 }
 
 
@@ -184,14 +262,18 @@ uint64_t *process_stack()
 {
 	uint64_t *st = NULL;
 	uint64_t *top = NULL;
-
-	st = (uint64_t *) p_malloc(4096);
-	if (st == NULL)
-	{
-		printf("\n Cant allocate Process Stack");
-		//exit();
-		return (void *)0;
-	}
+  uint64_t i=0;
+  while(i<8)
+  {
+    st = (uint64_t *) p_malloc(4096);
+	  if (st == NULL)
+	  {
+		  printf("\n Cant allocate Process Stack");
+		  //exit();
+		  return (void *)0;
+	  }
+    i++;
+  }
 
 	top = (uint64_t *) (st + 4096);
 
@@ -204,6 +286,17 @@ void test()	// sort of execve in current scenario
 	PCB *pro = NULL;
   printf("Made the pcb");
 	pro = create_pcb();
+ 	if ((pro->pid = get_pid()) == 0)
+	{
+		printf("\n Error No Free PID found");	
+	}
+	pro->cr3 = map_pageTable(pro);		// Storing Base Physical address of PML4e for new process
+	printf("\n PCR3:%x", pro->cr3);
+  //Adding the PCB into Queue of Running process
+  allTaskQ = addToHeadTaskList(allTaskQ, pro); 
+
+
+  pro->ppid=0;
 	_ptcr3(pro->cr3);
 	read_tarfs(pro);
 	printf("\n BACK IN TEST");
@@ -214,6 +307,8 @@ void test()	// sort of execve in current scenario
 	}	
 	/* Setting the CR3 with the new process PML4E */	
 	printf("\n CR3 set done");
+  runnableTaskQ = addToHeadTaskList(runnableTaskQ, pro); 
+  running = pro;
 	/* Running new process */
 	
 //	running = pro;	// Pointer which keeps track of currently running process	
@@ -231,7 +326,7 @@ void test()	// sort of execve in current scenario
 */
 	pro->u_stack[0] = pro->rip;
 	pro->rsp = (uint64_t)(pro->u_stack);
-	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[63]);
+	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[511]);
 	printf("\n GDT SET");
 	uint64_t tem = 0x28; 
 	__asm volatile("mov %0,%%rax;"::"r"(tem));

@@ -1,7 +1,10 @@
 #include <sys/idt.h>
 #include <sys/isr.h>
 #include <sys/page_table.h>
+#include <sys/task_management.h>
 #include <stdio.h>
+    
+#define COW 0x008000000000000 //52 bit set as COW bit
 
 void isr_handler_0(registers_t regs)
 {
@@ -54,14 +57,23 @@ void isr_handler_14(registers_t regs)
     re = (regs.err_code & 7);
     if ((0 == re) || (2 == re) || (4 == re) || (6 == re))
         page_mapping(cr2);
+    
+    int check_COW=0;
+    check_COW =  ((((uint64_t)cr2) & COW)>>51) ;
+    if(check_COW)
+    {
+      printf("COW bit is 1 i.e. fork() has been done for this process\n");
+      //Allocate new pages for the child or the parent.. yet to be done
 
+    }
     printf("Success !!\n");
 }
 
 void isr_handler_80(registers_t regs )
 {
    uint64_t rdi1;
-   __asm__ volatile("movq %%rdi,%0;":"=m"(rdi1)::);
+   int f=-1;
+   //__asm__ volatile("movq %%rdi,%0;":"=m"(rdi1)::);
    //registers_t* regs = (registers_t*)rdi1;
     //regs.interrupt_number = 80;
     int n = regs.rax,var,num;
@@ -75,6 +87,22 @@ void isr_handler_80(registers_t regs )
         addr = regs.rbx;
         num = regs.rcx;
         puts_user((char *)addr,num);
+        break;
+      case(3):
+        f = doFork();
+        if(f==0)
+        {
+          printf("bitch i m in child %d\n", f);
+        }
+        else if(f)
+        {
+          printf("yeh papa hai tere !! %d\n", f);
+        }
+        else
+        {
+          printf("najaize hai tu !!%d\n", f);
+        }
+
         break;
       default:
         return;

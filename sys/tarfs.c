@@ -104,19 +104,19 @@ void readelf(char* addr, PCB *task)
   for(i = 0; i < num_entries; i++ )
   {
   	if (i == 0)
-	{
-		local = read_pheader(pheader, elf_base);
-		task->mm_st = local; 
-	}	
-	else 
-	{
-  		ht  = read_pheader(pheader, elf_base);
-		local->vma_next = ht;
-		local = local->vma_next;
-	  	pheader = pheader+size_elf(elf_base->e_phentsize);
-  	}
-   }
-   local = NULL;
+		{
+			local = read_pheader(pheader, elf_base);
+			task->mm_st = local; 
+		}	
+		else 
+		{
+    	ht  = read_pheader(pheader, elf_base);
+			local->vma_next = ht;
+			local = local->vma_next;
+		 	pheader = pheader+size_elf(elf_base->e_phentsize);
+    }
+  }
+  local = NULL;
 
 //  while(1);
   for(int i=0;  i <= 24; i++)

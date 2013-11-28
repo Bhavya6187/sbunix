@@ -21,6 +21,7 @@ struct pcb_t
 {
 	uint64_t pid;	// Process ID
 	uint64_t ppid;	// Process ID	uint64_t ppid;	// Process ID
+	uint64_t pml4e_entry;	// Entry of process in pml4e table
 	uint64_t* u_stack;	// Process ID
 	struct pcb_t *prev;
 	struct pcb_t *next;
@@ -43,7 +44,7 @@ struct pcb_t
 	uint64_t r13;
 	uint64_t r14;
 	uint64_t r15;
-	uint64_t kernel_stack[64];	//abhi check for the size
+	uint64_t kernel_stack[512];	//abhi check for the size
 };
 typedef struct pcb_t PCB;
 
@@ -54,12 +55,22 @@ struct taskList {
   struct pcb_t *task;
 };
 
-uint32_t get_pid();	// Returns a free PID from the pid bitmap
+struct taskList *addToHeadTaskList(struct taskList *list, struct pcb_t *new_pcb);
+struct taskList *addToTailTaskList(struct taskList *list, struct pcb_t *new_pcb);
+struct taskList *removeFromTaskList(struct taskList *list, struct pcb_t *rem_pcb);
+struct taskList *moveTaskToEndOfList(struct taskList *list);
+
+uint64_t get_curr_PID();
+uint64_t get_pid();	// Returns a free PID from the pid bitmap
+uint64_t get_PID_PCB(struct pcb_t * gpcb);
+PCB *get_curr_PCB();
 PCB *create_pcb();	// DO initial Setup on a new process creation
 VMA *create_vma(uint64_t start, uint64_t size);	// Creates VMA structure for each segment 
+uint64_t doFork();
 
 extern struct taskList *waitTaskQ;
 extern struct taskList *allTaskQ;
 extern struct taskList *runnableTaskQ;
+extern PCB * running;
 
 #endif

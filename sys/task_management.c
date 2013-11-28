@@ -5,19 +5,22 @@
 # include <sys/tasking.h>
 # include <sys/v_mem_manager.h>
 # include <stdio.h>
+# include <sys/gdt.h>
+# include <sys/tarfs.h>
 
 extern void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 
 struct taskList *waitTaskQ;
 struct taskList *allTaskQ;
 struct taskList *runnableTaskQ;
-
+PCB * running;
 uint64_t pid_bitmap[32] = {0};
-
+extern uint64_t id;
+uint64_t id =0;
 //Returns a free pid (32 bit unsigned integer for the new process)
-uint32_t get_pid()
+uint64_t get_pid()
 {
-	uint32_t i = 1;
+  uint64_t i = 1;
 	while (pid_bitmap[i++] != 0 && i < MAXPID);	// abhi convert that to bitmap with bit manipulation
 	if (MAXPID < i && pid_bitmap[MAXPID] != 0)
 	{
@@ -118,14 +121,14 @@ struct taskList *moveTaskToEndOfList(struct taskList *list)
     return list;
 }
 
-int get_curr_PID()
+uint64_t get_curr_PID()
 {
   // returning the pid from the current task
-  return (int)allTaskQ->task->pid;
+  return (uint64_t)allTaskQ->task->pid;
   //return runnableTaskQ->task->pid;
 }
 
-int get_PID_PCB(struct pcb_t * gpcb)
+uint64_t get_PID_PCB(struct pcb_t * gpcb)
 {
   // returning the pid from the current task
   struct taskList * temp;
@@ -162,9 +165,11 @@ PCB *create_pcb()
 		printf("\n Can't Allocate Memory for PCB");
 		return (PCB *) 0;
 	}
+  allTaskQ = addToTailTaskList(allTaskQ, pro);
 	
 	/* Update Values in the PCB sturct for the new process */
 
+  /*
 	if ((pro->pid = get_pid()) == 0)
 	{
 		printf("\n Error No Free PID found");	
@@ -172,10 +177,9 @@ PCB *create_pcb()
 	}
 	pro->cr3 = map_pageTable();		// Storing Base Physical address of PML4e for new process
 	printf("\n PCR3:%x", pro->cr3);
-	printf("\n Process CR3 switch done");
 
   //Adding the PCB into Queue of Running process
-  //allTaskQ = addToTailTaskList(allTaskQ, pro);
+  */
 
   //	pro->mm_st = create_vma();
 	return pro;
@@ -202,17 +206,66 @@ VMA *create_vma(uint64_t start_add, uint64_t size)
 // Fork() Creating a child process from a parent
 uint64_t doFork()
 {
-	PCB *process = NULL;
-	process = create_pcb();
-  m_map((uint64_t)process, (uint64_t)(get_curr_PCB), (uint64_t)(sizeof(struct pcb_t)), (uint64_t)(sizeof(struct pcb_t)) );
+	PCB *pro = NULL;
+	PCB *parent_process;
+  parent_process = get_curr_PCB();
+	pro = create_pcb();
 
-  process->pid = get_pid();
+  m_map((uint64_t)pro, (uint64_t)(get_curr_PCB()), (uint64_t)(sizeof(struct pcb_t)), (uint64_t)(sizeof(struct pcb_t)) );
+ 
+  // Getting new pid -------------------------------------------------------------------------
+  if ((pro->pid = get_pid()) == 0)
+	{
+		printf("\n Error No Free PID found");	
+		return -1;
+	}
+	pro->cr3 = map_pageTable(pro);		   // Storing Base Physical address of PML4e for new process
+  pro->ppid = parent_process->pid;
+	printf("\n PCR3:%x", pro->cr3);
+  /// -----------------------------------------------------------------------------------------
+
+  //copy the page tables of parent process !!
+  copyPageTables(pro, parent_process);
+  printf("PageTable copying done\n");
+
+  uint64_t pid = pro->pid;
+  printf("Child PID=%p\n", pro->pid);
+  printf("Parent PID=%p\n", pro->ppid);
+  printf("Current PID=%p\n", get_curr_PID());
+  printf("Current Process=%p \n", get_curr_PCB());
+  printf("Current Process from RUNNING=%p \n", running);
   // Add it to task linked list !!
-  // update the cr3 to process->cr3
-  allTaskQ = addToTailTaskList(allTaskQ, process); 
+  runnableTaskQ = addToTailTaskList(runnableTaskQ, pro); 
   // return 0 to the calling process
+  //m_map( (uint64_t)pro->u_stack, (uint64_t)(parent_process->u_stack), (uint64_t)(4096), (uint64_t)(4096) );
+	printf("\n Trying to Fork()\n");
 
+  // update the cr3 to process->cr3
+  /*
+  _ptcr3(pro->cr3);
+	printf("\n CR3 set done");
+  runnableTaskQ = addToHeadTaskList(runnableTaskQ, pro); 
+	// Running new process 
+	pro->u_stack[0] = pro->rip;
+	pro->rsp = (uint64_t)(pro->u_stack);
+	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[63]);
+	printf("\n GDT SET");
+	uint64_t tem = 0x28; 
+	__asm volatile("mov %0,%%rax;"::"r"(tem));
+	__asm volatile("ltr %ax");
+	__asm volatile("\
+	push $0x23;\
+	push %0;\
+	pushf;\
+	push $0x1B;\
+	push %1"::"g"(&pro->u_stack[0]),"g"(pro->rip):"memory");
+	__asm volatile("\
+	iretq;\
+	");
+  */
   //Add parent_pid in the structure as well
-  return 0;
+  if (pid == running->pid)
+     pid = 0;
+  return pid;
 
 }

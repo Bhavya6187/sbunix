@@ -1,6 +1,7 @@
 #ifndef _V_MEM_MANAGER
 #define _V_MEM_MANAGER
 
+#include <sys/task_management.h>
 
 # define MAX_KERN 0xFFFFFFFFFFFFFFFF
 # define BASE 0x200000
@@ -18,6 +19,9 @@ uint32_t m_map(uint64_t start, uint64_t source, uint64_t f_size, uint64_t m_size
 
 /* creates and map Process page table (only PML4E) */
 uint64_t map_pageTable();
+
+// Copying pagetables for fork() implementation
+void copyPageTables(PCB *child, PCB *parent);
 
 /* Creates Process Stack */
 uint64_t *process_stack();	
