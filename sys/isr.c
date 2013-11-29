@@ -86,7 +86,7 @@ uint64_t isr_handler_80(myregs_t *regs )
       case(2):
         addr = regs->rbx;
         num = regs->rcx;
-        puts_user((char *)addr,num);
+        ret = puts_user((char *)addr,num);
         regs->rax = ret;
         break;
       case(3):

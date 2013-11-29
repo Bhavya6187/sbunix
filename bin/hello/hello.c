@@ -226,29 +226,30 @@ uint64_t u_printf(const char* fmt, ...)
 }*/
 int main(int argc, char* argv[]) 
 {
-
+  volatile uint64_t ret=0;
 	//sys_putint(6187);
-//  int a = 6187;
-//  __syscall1(SYSCALL_PUTINT,a);
-//  __syscall1(SYSCALL_PUTINT,986);
+  int a = 6187;
+  __syscall1(SYSCALL_PUTINT,a);
+  __syscall1(SYSCALL_PUTINT,986);
  // __syscall1(SYSCALL_PUTINT,1234);
 //  __syscall1(SYSCALL_PUTINT,4321);
  char s[4] = "abcd";
 
-//  __syscall2(SYSCALL_PUTS,(uint64_t)s,4);
+  __syscall2(SYSCALL_PUTS,(uint64_t)s,4);
  // __syscall2(SYSCALL_PUTS,(uint64_t)"xkcd",4);
  // char s2[4] = "xxxx";
 
  // __syscall2(SYSCALL_PUTS,(uint64_t)s2,4);
  //u_printf("hello",200);
  // u_printf("hello %d %c %s %d\n",50,'a',s,200);
-  u_printf("hey %d %s %c %p\n",6187,s,'a',(uint64_t)s);
+  ret=u_printf("hey %d %s %c %p\n",6187,s,'a',(uint64_t)s);
  //ret = u_printf("hey bitch %d\n",1234);
-  u_printf("bhavya %d\n",6187);
-  u_printf("hi i am not bhavya\n");
+  ret =  u_printf("bhavya %d\n",6187);
+  ret = u_printf("hi i am not bhavya\n");
   //u_printf("hey %d %c %s %d\n",50,'a',s,200);
   //u_printf("hi %d %c %s %d\n",50,'a',s,200);
-//  __syscall2(SYSCALL_PUTS,(uint64_t)"xkcd",4);
+  __syscall1(SYSCALL_PUTINT,ret);
+  __syscall2(SYSCALL_PUTS,(uint64_t)"xkcd",4);
   while(1);
 	return 0;
 }

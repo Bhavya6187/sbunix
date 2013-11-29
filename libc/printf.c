@@ -174,6 +174,7 @@ uint64_t u_printf(const char* fmt, ...)
 {
 	va_list parameters;
   char buffer[100] = {'\0'}; //= (char*)malloc(512) ;
+  uint64_t ret = 0;
   volatile int total=0;
   const char* str = fmt;
   va_start(parameters, fmt);
@@ -220,7 +221,6 @@ uint64_t u_printf(const char* fmt, ...)
   va_end(parameters);
   buffer[total] = '\0';
   total++;
-  __syscall2(SYSCALL_PUTS,(uint64_t)buffer,total);
-
-  return (uint64_t)total;
+  ret=__syscall2(SYSCALL_PUTS,(uint64_t)buffer,total);
+  return ret;
 }

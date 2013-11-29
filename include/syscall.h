@@ -21,8 +21,8 @@ SYSCALL_PROTO(1)(uint64_t n, uint64_t a1) {
 }
 
 SYSCALL_PROTO(2)(uint64_t n, uint64_t a1, uint64_t a2) {
-/*   uint64_t ret;
-   __asm volatile("movq %1,%%rax;"
+   uint64_t ret;
+/*   __asm volatile("movq %1,%%rax;"
                   "movq %2,%%rbx;"
                   "movq %3, %%rcx;"
                   "int $80;"
@@ -38,8 +38,11 @@ SYSCALL_PROTO(2)(uint64_t n, uint64_t a1, uint64_t a2) {
                    "movq %2,%%rcx\n\t"
                   ::"r"(n),"r"(a1),"r"(a2):"memory");
   __asm__ volatile("int $80;");
+  __asm volatile( "movq %0,%%rax\n\t"
+                  :"=r"(ret)::"memory");
 
-	return 0;
+
+	return ret;
 }
 
 SYSCALL_PROTO(3)(uint64_t n, uint64_t a1, uint64_t a2, uint64_t a3) {
