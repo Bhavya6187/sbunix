@@ -176,4 +176,5 @@ isr_stub_80:
   popq %rcx
   popq %rbx
   popq %rax        # Pops the general purpose registers GPR's R8-R15 also might come
+  sti
   iretq

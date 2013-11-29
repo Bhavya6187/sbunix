@@ -96,7 +96,7 @@ int puts(char* str)
   return strlength;
 }
 
-int puts_user(char* str, int n)
+int puts_user(volatile char* str, int n)
 {
   int i = 0;
   for(i =0 ; i < n && str[i] != '\0' ; i++)
@@ -104,7 +104,7 @@ int puts_user(char* str, int n)
       putchar(str[i]);
   }
   update_cursor(position/COLUMN, position%COLUMN);
-  return i;
+  return i+1;
 }
 
 int putint(int value)

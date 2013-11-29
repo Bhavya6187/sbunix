@@ -69,24 +69,25 @@ void isr_handler_14(registers_t regs)
     printf("Success !!\n");
 }
 
-void isr_handler_80(registers_t regs )
+uint64_t isr_handler_80(myregs_t *regs )
 {
-   //uint64_t rdi1;
+   uint64_t ret = 0;
    int f=-1;
    //__asm__ volatile("movq %%rdi,%0;":"=m"(rdi1)::);
    //registers_t* regs = (registers_t*)rdi1;
     //regs.interrupt_number = 80;
-    int n = regs.rax,var,num;
+    int n = regs->rax,var,num;
     uint64_t addr;
     switch(n){
       case(1):
-        var =(int)regs.rbx;
+        var =(int)regs->rbx;
         putint(var);
         break;
       case(2):
-        addr = regs.rbx;
-        num = regs.rcx;
+        addr = regs->rbx;
+        num = regs->rcx;
         puts_user((char *)addr,num);
+        regs->rax = ret;
         break;
       case(3):
         f = doFork();
@@ -102,11 +103,11 @@ void isr_handler_80(registers_t regs )
         {
           printf("najaize hai tu !!%d\n", f);
         }
-
         break;
       default:
-        return;
+        return 0;
     }
+    return ret;
     // printf("Interrupt 80 for system calls .... \n");
 }
 
