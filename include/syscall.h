@@ -9,39 +9,32 @@
 #define SYSCALL_MALLOC 4
 
 SYSCALL_PROTO(0)(uint64_t n) {
-	return 0;
+   uint64_t ret;
+   __asm volatile( "movq %1,%%rax\n\t"
+                   "int $80\n\t"
+                   "movq %%rax,%0\n\t;"
+                   :"=r"(ret):"r"(n):"rax""memory");
+	return ret;
 }
 
 SYSCALL_PROTO(1)(uint64_t n, uint64_t a1) {
-  __asm volatile( "movq %0,%%rax\n\t"
-                  "movq %1,%%rbx\n\t"
-                  ::"r"(n),"r"(a1):"memory");
-  __asm__ volatile("int $80;");
-	return 0;
+   uint64_t ret;
+   __asm volatile( "movq %1,%%rax\n\t"
+                   "movq %2,%%rbx\n\t"
+                   "int $80\n\t"
+                   "movq %%rax,%0\n\t;"
+                   :"=r"(ret):"r"(n),"r"(a1):"rax","rbx","memory");
+	return ret;
 }
 
 SYSCALL_PROTO(2)(uint64_t n, uint64_t a1, uint64_t a2) {
    uint64_t ret;
-/*   __asm volatile("movq %1,%%rax;"
-                  "movq %2,%%rbx;"
-                  "movq %3, %%rcx;"
-                  "int $80;"
-                  "movq %%rax,%0;"
-                  :"=r"(ret)
-                  :"r"(n),"r"(a1),"r"(a2)
-                  :"memory"
-                  );
-   return ret;
-}*/
-   __asm volatile( "movq %0,%%rax\n\t"
-                   "movq %1,%%rbx\n\t"
-                   "movq %2,%%rcx\n\t"
-                  ::"r"(n),"r"(a1),"r"(a2):"memory");
-  __asm__ volatile("int $80;");
-  __asm volatile( "movq %0,%%rax\n\t"
-                  :"=r"(ret)::"memory");
-
-
+   __asm volatile( "movq %1,%%rax\n\t"
+                   "movq %2,%%rbx\n\t"
+                   "movq %3,%%rcx\n\t"
+                   "int $80\n\t"
+                   "movq %%rax,%0\n\t;"
+                   :"=r"(ret):"r"(n),"r"(a1),"r"(a2):"rax","rbx","rcx","memory");
 	return ret;
 }
 

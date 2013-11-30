@@ -1,4 +1,5 @@
 # include <stdio.h>
+# include <syscall.h>
 # include <libc/malloc.h>
 # include <sys/v_mem_manager.h>
 # include <sys/task_management.h>
@@ -20,7 +21,6 @@ void *malloc(uint64_t no_bytes)
 
 	if (!no_bytes)
 	{
-	//	printf("\n Bad value of no_bytes");
 		return NULL;
 	}
 
@@ -49,7 +49,7 @@ void *malloc(uint64_t no_bytes)
 
 	//call p_malloc(final);
 	
-	if ((tmp = 0) == NULL)// (char *) p_malloc(final)) == NULL)
+	if ((tmp = (char*) __syscall1(SYSCALL_MALLOC,final)) == NULL)
 	{
 	//	printf("\n Cant allocalte user space memory");
 		return NULL;
@@ -62,7 +62,4 @@ void *malloc(uint64_t no_bytes)
 	return ((void *) tmp);
 }	
 
-
-	
-	
 

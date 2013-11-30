@@ -175,7 +175,7 @@ uint64_t u_printf(const char* fmt, ...)
 	va_list parameters;
   char buffer[100] = {'\0'}; //= (char*)malloc(512) ;
   uint64_t ret = 0;
-  volatile int total=0;
+  int total=0;
   const char* str = fmt;
   va_start(parameters, fmt);
   str = fmt;

@@ -2,6 +2,7 @@
 #include <sys/isr.h>
 #include <sys/page_table.h>
 #include <sys/task_management.h>
+#include <sys/v_mem_manager.h>
 #include <stdio.h>
     
 #define COW 0x008000000000000 //52 bit set as COW bit
@@ -72,7 +73,9 @@ void isr_handler_14(registers_t regs)
 uint64_t isr_handler_80(myregs_t *regs )
 {
    uint64_t ret = 0;
-   int f=-1;
+   uint64_t num_bytes = 0;
+   uint64_t f=-2;
+   f++;
    //__asm__ volatile("movq %%rdi,%0;":"=m"(rdi1)::);
    //registers_t* regs = (registers_t*)rdi1;
     //regs.interrupt_number = 80;
@@ -91,18 +94,12 @@ uint64_t isr_handler_80(myregs_t *regs )
         break;
       case(3):
         f = doFork();
-        if(f==0)
-        {
-          printf("bitch i m in child %d\n", f);
-        }
-        else if(f)
-        {
-          printf("yeh papa hai tere !! %d\n", f);
-        }
-        else
-        {
-          printf("najaize hai tu !!%d\n", f);
-        }
+        regs->rax = f;
+        break;
+      case(4):
+        num_bytes = regs->rbx;
+        addr =(uint64_t)p_malloc(num_bytes);
+        regs->rax = addr;
         break;
       default:
         return 0;
