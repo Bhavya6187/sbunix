@@ -176,14 +176,14 @@ int read_tarfs(PCB* task, char* name){
     printf("pad = %s\n",header->pad);*/
     temp_size = size_to_int(header->size) ;
     printf("size given by function = %d\n",temp_size);
-    if(temp_size > 0)// && strcmp(name,header->name))
+    if(temp_size > 0 && strcmp(name,header->name))
     {
 
       printf("\nThe address with header %p", header);
       printf("\nThe address with elf %p\n", header);
       printf("\nStrcmp says %d\n", strcmp(name,header->name));
       elf_header =(char*)(header+1);
-      readelf((char*)elf_header, task) ;
+      readelf((char*)elf_header, task);
       return 0;
     }
     
@@ -191,8 +191,7 @@ int read_tarfs(PCB* task, char* name){
     {
         
       printf("\nfound consecutive 0\n");
-      while(1);
-//      return 2;
+      return 2;
     }
 
     //new_pos = new_pos + temp_size + sizeof(struct posix_header_ustar);
@@ -208,6 +207,6 @@ int read_tarfs(PCB* task, char* name){
     //header =  (struct posix_header_ustar*)((char*)header + sizeof(struct posix_header_ustar) + temp_size);
     //header =  (struct posix_header_ustar*)new_pos;
  }
- return 0;
+ return 2;
 }
 

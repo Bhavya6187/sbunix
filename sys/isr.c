@@ -74,7 +74,7 @@ uint64_t isr_handler_80(myregs_t *regs )
 {
    uint64_t ret = 0;
    uint64_t num_bytes = 0;
-   uint64_t f=-2;
+   uint64_t f=-2, str = 0;
    f++;
    //__asm__ volatile("movq %%rdi,%0;":"=m"(rdi1)::);
    //registers_t* regs = (registers_t*)rdi1;
@@ -100,6 +100,12 @@ uint64_t isr_handler_80(myregs_t *regs )
         num_bytes = regs->rbx;
         addr =(uint64_t)p_malloc(num_bytes);
         regs->rax = addr;
+        break;
+      case(5):
+        addr = regs->rcx;
+        str = regs->rbx;
+        ret =(uint64_t)scanf((char*)str,addr);
+        regs->rax = ret;
         break;
       default:
         return 0;

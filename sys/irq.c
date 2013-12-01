@@ -10,6 +10,8 @@ unsigned char day;
 unsigned char month;
 unsigned int year;
 
+volatile unsigned char kbuf[128] = {0};
+volatile int kbuf_index=-1;
 uint32_t tick = 0,sec = 0;
 void read_rtc();
 enum {
@@ -25,7 +27,7 @@ int get_update_in_progress_flag() {
  
  
 unsigned char get_RTC_register(int reg) {
-      outb(cmos_address, reg);
+outb(cmos_address, reg);
       return inb(cmos_data);
 }
 
@@ -214,6 +216,10 @@ void irq_handler_1(registers_t regs)
       if(shift_pressed)
       {
         putchar(keyboard_map_shift[scancode]);
+   //     printf("Printing at %d - %c\n",kbuf_index,keyboard_map_shift[scancode]);
+        kbuf_index++;
+        kbuf[kbuf_index] = keyboard_map_shift[scancode];
+        kbuf_index = kbuf_index%128;
         //printtoside(keyboard_map_shift[scancode]);
         /*if( keyboard_map[scancode] >=97 && keyboard_map[scancode] <=122 )
             printtoside(keyboard_map[scancode]-32);
@@ -224,8 +230,14 @@ void irq_handler_1(registers_t regs)
         shift_pressed=0;
       } 
       else
-          //printtoside(keyboard_map[scancode]);
+      {
+         //printtoside(keyboard_map[scancode]);
+        //printf("Printing at %d - %c\n",kbuf_index,keyboard_map[scancode]);
         putchar(keyboard_map[scancode]);
+        kbuf_index++;
+        kbuf[kbuf_index] = keyboard_map[scancode];
+        kbuf_index = kbuf_index%128;
+      }
     }
   }
   outb(0xA0, 0x20);

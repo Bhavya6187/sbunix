@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
   char* test_malloc1 = (char*)malloc(1600);
   test_malloc1 = "abcdefghijklmnop";
   ret = u_printf("hey %s %p\n",test_malloc1,test_malloc1);
-  struct ad *ad1 = (struct ad*) malloc(sizeof(struct ad));
+/*  struct ad *ad1 = (struct ad*) malloc(sizeof(struct ad));
   ad1->t1 = 123213213;
   ad1->t2 = 99;
   ad1->t3 = 2324564;
@@ -48,7 +48,14 @@ int main(int argc, char* argv[])
   ad1->t6 = 0;
   ad1->t7 = 2324456;
   ad1->t8 = 2324456;
-  u_printf("%d:%d:%d:\n%d:%d:%d\n:%d:%d", ad1->t1,ad1->t2,ad1->t3,ad1->t4,ad1->t5,ad1->t6,ad1->t7,ad1->t8);
+  u_printf("%d:%d:%d:\n%d:%d:%d\n:%d:%d", ad1->t1,ad1->t2,ad1->t3,ad1->t4,ad1->t5,ad1->t6,ad1->t7,ad1->t8);*/
+  uint64_t tester;
+  u_scanf("%x",(uint64_t)&tester);
+  ret = u_printf("scanf gave us %p",tester);
+  
+  char test_scan[6];
+  u_scanf("%s",(uint64_t)&test_scan);
+  ret = u_printf("scanf gave us %s",test_scan);
 
 
 

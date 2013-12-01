@@ -70,7 +70,22 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 
   //call_first(kernmem, physfree, physbase);
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
-  test();
+  uint64_t x, scanf_check;
+  scanf_check=scanf("%x",(uint64_t)&x);
+  if(scanf_check == 1)
+     printf("\n scanf returned %d",x);
+  else
+     printf("\n scanf returned error");
+/*
+  char* str = "\0";
+  scanf_check = scanf("%s",(uint64_t)str);
+  
+  if(scanf_check == 1)
+     printf("\n scanf returned %s",str);
+  else
+     printf("\n scanf returned error");*/
+  //test();
+  while(1);
 }
 
 void boot(void)

@@ -7,3 +7,5 @@ void init_pic();
 void irq_handler_0(registers_t regs);
 void PIC_sendEOI(unsigned char irq);
 void init_timer();
+extern volatile unsigned char kbuf[128];
+extern volatile int kbuf_index;

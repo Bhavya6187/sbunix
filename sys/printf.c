@@ -8,7 +8,6 @@
 #define VIDEO_VM 0xFFFF800000000000
 int position=0;
 uint64_t video_vm = 0xB8000;
-int scanf(const char *format, ...);
 
 extern uint64_t physfree;
 

@@ -7,7 +7,7 @@
 #define SYSCALL_PUTINT 1
 #define SYSCALL_PUTS 2 
 #define SYSCALL_MALLOC 4
-
+#define SYSCALL_SCANF 5
 SYSCALL_PROTO(0)(uint64_t n) {
    uint64_t ret;
    __asm volatile( "movq %1,%%rax\n\t"

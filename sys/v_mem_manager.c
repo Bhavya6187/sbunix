@@ -299,7 +299,7 @@ void test()	// sort of execve in current scenario
   pro->ppid=0;
 	_ptcr3(pro->cr3);
   char elf_file[10]="bin/hello";
-	read_tarfs(pro,"bin/hello", elf_file);
+	read_tarfs(pro,elf_file);
 	printf("\n BACK IN TEST");
 	if ((pro->u_stack = process_stack()) == NULL)
 	{
