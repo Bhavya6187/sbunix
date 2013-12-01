@@ -55,6 +55,6 @@ struct pheader
   uint64_t p_memsz; /* Size of segment in memory */
   char p_align[8]; /* Alignment of segment */
 };
-void read_tarfs();
+int read_tarfs();
 VMA* read_pheader(char* addr, struct elf_header* elf_base);
 #endif

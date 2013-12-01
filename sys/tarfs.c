@@ -9,6 +9,22 @@
 #include <sys/task_management.h>
 #include <sys/tarfs.h>
 
+int strcmp(char* str1, char*str2)
+{
+  while(*str1 !='\0' || *str2!='\0' )
+  {
+
+    if(*str1 != *str2)
+      return 0;
+    str1++;
+    str2++;
+  }
+  if(*str1=='\0'&&*str2=='\0')
+  {
+    return 1;
+  }
+  return 0;
+}
 char zero_size[12] = "000000000000";
 int size_to_int(char* size)
 {
@@ -126,10 +142,15 @@ void readelf(char* addr, PCB *task)
   }
 }
 
-void read_tarfs(PCB* task){
+int read_tarfs(PCB* task, char* name){
  //char* end_pos =(char*) (&_binary_tarfs_end);
+  if(name == NULL)
+    return 1;
   int temp_size;
   int step = 0,mod; 
+  char* elf_header = NULL;
+  char* prevname = NULL;
+  char* prevsize = NULL;
   struct posix_header_ustar *header =  (struct posix_header_ustar*)(&_binary_tarfs_start);
   struct posix_header_ustar *end =  (struct posix_header_ustar*)(&_binary_tarfs_end);
   
@@ -155,15 +176,25 @@ void read_tarfs(PCB* task){
     printf("pad = %s\n",header->pad);*/
     temp_size = size_to_int(header->size) ;
     printf("size given by function = %d\n",temp_size);
-    if(temp_size > 0)
+    if(temp_size > 0)// && strcmp(name,header->name))
     {
 
       printf("\nThe address with header %p", header);
-      header = (header+1);
       printf("\nThe address with elf %p\n", header);
-      readelf((char*)header, task) ;
-      return;
+      printf("\nStrcmp says %d\n", strcmp(name,header->name));
+      elf_header =(char*)(header+1);
+      readelf((char*)elf_header, task) ;
+      return 0;
     }
+    
+    if(header->name[0] == '\0' && header->size[0]=='\0' && prevname == '\0' && prevsize == '\0')
+    {
+        
+      printf("\nfound consecutive 0\n");
+      while(1);
+//      return 2;
+    }
+
     //new_pos = new_pos + temp_size + sizeof(struct posix_header_ustar);
     //printf("header = %p, new_pos = %p, size of struct = %d\n",header, new_pos, sizeof(struct posix_header_ustar));
     mod = temp_size%(sizeof(struct posix_header_ustar));
@@ -171,9 +202,12 @@ void read_tarfs(PCB* task){
       step = 1 +(int)( temp_size/(sizeof(struct posix_header_ustar)));
     else
       step = 2 +(int)( temp_size/(sizeof(struct posix_header_ustar)));
+    prevname = header->name;
+    prevsize = header->size;
     header = header+step;
     //header =  (struct posix_header_ustar*)((char*)header + sizeof(struct posix_header_ustar) + temp_size);
     //header =  (struct posix_header_ustar*)new_pos;
  }
+ return 0;
 }
 

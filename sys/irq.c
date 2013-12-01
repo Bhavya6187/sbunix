@@ -213,7 +213,8 @@ void irq_handler_1(registers_t regs)
     {
       if(shift_pressed)
       {
-        printtoside(keyboard_map_shift[scancode]);
+        putchar(keyboard_map_shift[scancode]);
+        //printtoside(keyboard_map_shift[scancode]);
         /*if( keyboard_map[scancode] >=97 && keyboard_map[scancode] <=122 )
             printtoside(keyboard_map[scancode]-32);
 //          putchar(keyboard_map[scancode]-32);
@@ -223,8 +224,8 @@ void irq_handler_1(registers_t regs)
         shift_pressed=0;
       } 
       else
-          printtoside(keyboard_map[scancode]);
-//        putchar(keyboard_map[scancode]);
+          //printtoside(keyboard_map[scancode]);
+        putchar(keyboard_map[scancode]);
     }
   }
   outb(0xA0, 0x20);
