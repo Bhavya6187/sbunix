@@ -323,6 +323,74 @@ uint64_t doFork()
 
 }
 
+
+void exit_process(int status)
+{
+  printf("Exit() called for process pid=%p", running->pid);
+
+  // Free the memory used by the process
+  deletePageTables();
+
+  // Bring parent from the waitlist because in waitpid the parent might be waiting for the child to finish
+  struct taskList * temp;
+  temp = waitTaskQ;
+  if(temp==NULL)
+    printf("There are no processes in the WaitQ strange ???\n");
+  while(temp->next !=NULL)
+  {
+    if(temp->task->pid == running->ppid) // parent found in the waitQ --- move it to the runnableQ 
+    {
+      waitTaskQ = removeFromTaskList(waitTaskQ, temp->task);
+      runnableTaskQ = addToTailTaskList(runnableTaskQ, temp->task);
+      //runnableTaskQ = addToHeadTaskList(runnableTaskQ, temp->task);
+      break;
+    }
+    temp=temp->next;
+  }
+
+  // REmove the process from the Queue
+  runnableTaskQ = removeFromTaskList(runnableTaskQ, running);
+
+  // call schedule() to start other process
+  //schedule()
+}
+
+
+// The parent will wait for the child pid to exit() before continuing execution
+void wait_pid(uint64_t pid)
+{
+  // just remove current running parent process to waitQ from runnableQ
+  waitTaskQ = addToTailTaskList(waitTaskQ, running);
+  runnableTaskQ = removeFromTaskList(runnableTaskQ, running);
+  // parent will pause executing and call yield
+  
+}
+
+// The parent will wait for the child pid to exit() before continuing execution
+void wait_p()
+{
+  printf("In waitp() process pid=%p", running->pid);
+
+  // Bring parent from the waitlist because in waitpid the parent might be waiting for the child to finish
+  struct taskList * temp;
+  temp = waitTaskQ;
+  if(temp==NULL)
+    printf("There are no processes in the WaitQ strange ???\n");
+  while(temp->next !=NULL)
+  {
+    if(temp->task->ppid == running->pid) // child found in the runnableQ --- move parent to the waitQ until one child exits 
+    {
+      waitTaskQ = removeFromTaskList(waitTaskQ, temp->task);
+      runnableTaskQ = addToTailTaskList(runnableTaskQ, temp->task);
+      //runnableTaskQ = addToHeadTaskList(runnableTaskQ, temp->task);
+      break;
+    }
+    temp=temp->next;
+  }
+}
+
+
+
 // Schedule function for context switching between two processes.. Hope it should work for both kernel and user processes
 void scheduler1()
 {

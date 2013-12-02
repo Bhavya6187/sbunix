@@ -69,6 +69,9 @@ PCB *get_curr_PCB();
 PCB *create_pcb();	// DO initial Setup on a new process creation
 VMA *create_vma(uint64_t start, uint64_t size);	// Creates VMA structure for each segment 
 uint64_t doFork();
+void exit_process(int status);
+void wait_pid(uint64_t pid);
+void wait_p();
 
 extern struct taskList *waitTaskQ;
 extern struct taskList *allTaskQ;
