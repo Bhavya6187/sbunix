@@ -55,18 +55,19 @@ void isr_handler_14(registers_t regs)
     int re=0; 
     //regs.interrupt_number = 14;
     printf("Interrupt Number = %d %d %p\n", 14, regs.err_code, cr2);
-    re = (regs.err_code & 7);
-    if ((0 == re) || (2 == re) || (4 == re) || (6 == re))
-        page_mapping(cr2);
-    
+
     int check_COW=0;
+    re = (regs.err_code & 7);
     check_COW =  ((((uint64_t)cr2) & COW)>>51) ;
-    if(check_COW)
+    if(check_COW && re==7)
     {
       printf("COW bit is 1 i.e. fork() has been done for this process\n");
+      //copyOnWritePageTables();
       //Allocate new pages for the child or the parent.. yet to be done
-
     }
+    if ((0 == re) || (2 == re) || (4 == re) || (6 == re))
+        page_mapping(cr2);
+
     printf("Success !!\n");
 }
 

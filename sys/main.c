@@ -57,6 +57,22 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 	cur_PK = 0x2097152;	// Starts at 2 MB mark 
   printf("\n V:%p:P:%p",cur_VK, cur_PK);
 
+  uint64_t *test1;
+  int i=0;
+  for(i=0;i<5;i++)
+  {
+   test1 = (uint64_t*)allocate_free_phy_page();
+   free_phy_page((uint64_t)test1);
+   printf("%d %p %p\n",i, test1, (uint64_t)test1);
+  }
+   test1 = (uint64_t*)allocate_free_phy_page();
+   test1 = (uint64_t*)allocate_free_phy_page();
+   test1 = (uint64_t*)allocate_free_phy_page();
+   test1 = (uint64_t*)allocate_free_phy_page();
+   free_phy_page((uint64_t)test1);
+
+
+  /*
   int j;
   for(j=0; j<31000; j++)
   {
@@ -67,15 +83,16 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
       break;
     }
   }
+  */
 
   //call_first(kernmem, physfree, physbase);
 	printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
-  uint64_t x, scanf_check;
+  /*uint64_t x, scanf_check;
   scanf_check=scanf("%x",(uint64_t)&x);
   if(scanf_check == 1)
      printf("\n scanf returned %d",x);
   else
-     printf("\n scanf returned error");
+     printf("\n scanf returned error");*/
 /*
   char* str = "\0";
   scanf_check = scanf("%s",(uint64_t)str);
@@ -84,8 +101,9 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
      printf("\n scanf returned %s",str);
   else
      printf("\n scanf returned error");*/
-  //test();
+  test();
   while(1);
+  //test();
 }
 
 void boot(void)

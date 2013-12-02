@@ -23,10 +23,11 @@ struct smap_t {
 
 void phy_mem_init(uint64_t sbase, uint64_t slength, void* physfree, uint64_t physbase);
 uint64_t allocate_free_phy_page2();
-void free_phy_page(uint64_t temp_addr);
+void free_phy_page2(uint64_t temp_addr);
 uint64_t set_task_paging();
 
 void pm_init(uint64_t sbase, uint64_t slength, void *pf, uint64_t physbase); 
 uint64_t allocate_free_phy_page();
+uint64_t free_phy_page(uint64_t temp_addr);
 
 #endif

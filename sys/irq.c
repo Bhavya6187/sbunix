@@ -2,6 +2,7 @@
 #include <sys/isr.h>
 #include <stdio.h>
 #include <sys/irq.h>
+#include <sys/task_management.h>
 
 unsigned char second;
 unsigned char minute;
@@ -9,10 +10,10 @@ unsigned char hour;
 unsigned char day;
 unsigned char month;
 unsigned int year;
-
 volatile unsigned char kbuf[128] = {0};
 volatile int kbuf_index=-1;
-uint32_t tick = 0,sec = 0;
+
+volatile uint32_t tick = 0,sec = 0;
 void read_rtc();
 enum {
       cmos_address = 0x70,
@@ -27,7 +28,7 @@ int get_update_in_progress_flag() {
  
  
 unsigned char get_RTC_register(int reg) {
-outb(cmos_address, reg);
+      outb(cmos_address, reg);
       return inb(cmos_data);
 }
 
@@ -118,7 +119,6 @@ unsigned char keyboard_map_shift[128] =
 };		
 
 
-
 void PIC_sendEOI(unsigned char irq)
 {
   if(irq >= 8)
@@ -165,18 +165,86 @@ void init_timer()
    printf("Initializing Timer... \n");
 }
 
+
+/*
+unsigned short port=0x20;
+unsigned char val =0x20;
+// Schedule function for context switching between two processes.. Hope it should work for both kernel and user processes
+void scheduler()
+{
+  if(flag_sch==0)
+  {
+	__asm volatile(
+		"pushq %rax\n\t"
+		"pushq %rbx\n\t"
+		"pushq %rcx\n\t"
+		"pushq %rdx\n\t"
+		"pushq %rsi\n\t"
+		"pushq %rdi\n\t"
+		"pushq %rbp\n\t"
+		"pushq %r8\n\t"
+		"pushq %r9\n\t"
+		"pushq %r10\n\t"
+		"pushq %r11\n\t"
+		"pushq %r12\n\t"
+		"pushq %r13\n\t"
+		"pushq %r14\n\t"
+		"pushq %r15\n\t"
+		);
+
+  //tick++;
+  if (tick % 20 == 0)
+  {
+     //read_rtc();
+     putint(sec++);
+     if(tick%20000!=0)
+      flag_sch=1;
+  }
+  // __asm volatile( "outb $32, $32" );
+  __asm volatile( "outb %0, %1": : "a"(val), "Nd"(port) );
+
+  __asm volatile(
+		"popq %r15\n\t"
+		"popq %r14\n\t"
+		"popq %r13\n\t"
+		"popq %r12\n\t"
+		"popq %r11\n\t"
+		"popq %r10\n\t"
+		"popq %r9\n\t"
+		"popq %r8\n\t"
+		"popq %rbp\n\t"
+		"popq %rdi\n\t"
+		"popq %rsi\n\t"
+		"popq %rdx\n\t"
+		"popq %rcx\n\t"
+		"popq %rbx\n\t"
+		"popq %rax\n\t"
+		);
+  __asm volatile(
+      "retq"
+    );
+  }	
+
+}
+*/
+
+registers_sch *regs_sch = NULL; 
+volatile int flag_sch=0;
 // timer_handler
-void irq_handler_0(registers_t regs)
+void irq_handler_0(registers_sch regs)
 {
     tick++;
-    
-    //printf("IRQ handler IRQ %d  %d\n", regs.interrupt_number, tick);
+    regs_sch = &regs;
+    //if(tick>200)
+    //   printf("IRQ handler%d: %d\n", regs.rip, tick);
     // Send an EOI (end of interrupt) signal to the PICs.
     // If this interrupt involved the slave.
     if (tick % 20 == 0)
     {
-        read_rtc();
+      read_rtc();
         sec++;
+       if(tick%200==0)
+         flag_sch=1;
     }
     /*if (regs.interrupt_number >= 32)
     {
@@ -185,6 +253,45 @@ void irq_handler_0(registers_t regs)
     }*/
     // Send reset signal to master. (As well as slave, if necessary).
     outb(0x20, 0x20);
+  
+  //if(flag_sch==1 && running!=NULL)
+  if(0)
+  {
+    printf("Will handle scheduling\n");
+ 	  PCB *current_process, *new_process;
+ 
+    current_process = running;
+    runnableTaskQ = moveTaskToEndOfList(runnableTaskQ);
+    new_process = runnableTaskQ->task;
+ 	  // Should save state of caller here 
+ 	  __asm volatile(
+ 	 	"movq %%rsp, %0"
+ 	 	:"=g"(current_process->rsp)
+ 	 	:
+ 	   :"memory"
+ 	  );
+    //current_process->rip = (uint64_t)(*((uint64_t*)(current_process->rsp)+12));
+ 	  //Now change the %rsp to callee rsp 
+ 	  __asm volatile(
+ 	 	"movq %0, %%cr3;"
+ 	 	:
+ 	 	:"r"((new_process->cr3))
+      :"memory"
+ 	  );
+ 
+    printf("cr3 old=%p new=%p\n", current_process->cr3, new_process->cr3);  
+    //new_process->rsp = current_process->rsp;
+    //new_process->rip = current_process->rip;
+    // Now change the %rsp to callee rsp 
+ 	  __asm volatile(
+ 	 	"movq %0, %%rsp;"
+ 	 	:
+ 	 	:"r"((new_process->rsp))
+ 	         :"memory"
+ 	  );
+    printf("new-process rsp=%p\n", new_process->rsp);  
+  }
+
 }
 
 int shift_pressed=0;
@@ -215,12 +322,13 @@ void irq_handler_1(registers_t regs)
     {
       if(shift_pressed)
       {
+    
+        //printtoside(keyboard_map_shift[scancode]);
         putchar(keyboard_map_shift[scancode]);
-   //     printf("Printing at %d - %c\n",kbuf_index,keyboard_map_shift[scancode]);
+        //printf("Printing at %d - %c\n",kbuf_index,keyboard_map_shift[scancode]);
         kbuf_index++;
         kbuf[kbuf_index] = keyboard_map_shift[scancode];
         kbuf_index = kbuf_index%128;
-        //printtoside(keyboard_map_shift[scancode]);
         /*if( keyboard_map[scancode] >=97 && keyboard_map[scancode] <=122 )
             printtoside(keyboard_map[scancode]-32);
 //          putchar(keyboard_map[scancode]-32);
@@ -231,7 +339,7 @@ void irq_handler_1(registers_t regs)
       } 
       else
       {
-         //printtoside(keyboard_map[scancode]);
+        //printtoside(keyboard_map[scancode]);
         //printf("Printing at %d - %c\n",kbuf_index,keyboard_map[scancode]);
         putchar(keyboard_map[scancode]);
         kbuf_index++;
@@ -242,7 +350,6 @@ void irq_handler_1(registers_t regs)
   }
   outb(0xA0, 0x20);
   outb(0x20, 0x20);
-
 }
 
 void read_rtc() {

@@ -9,10 +9,10 @@
 # include <sys/tarfs.h>
 
 extern void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
-
 struct taskList *waitTaskQ;
 struct taskList *allTaskQ;
 struct taskList *runnableTaskQ;
+int no_waitQ=0, no_allQ=0, no_runnableQ=0;
 PCB * running;
 uint64_t pid_bitmap[32] = {0};
 extern uint64_t id;
@@ -154,6 +154,25 @@ PCB *get_curr_PCB()
   return runnableTaskQ->task;
 }
 
+PCB *get_parent_PCB(uint64_t parent_pid)
+{
+  //return (int)allTaskQ->task;
+  struct taskList * temp;
+  temp = allTaskQ;
+  if(temp==NULL)
+  {
+    printf("NO PCB exist in allTasksQ\n");
+    return NULL;
+  }
+  while(temp->next !=NULL)
+  {
+    if(temp->task->pid == parent_pid)
+      return temp->task;
+    temp=temp->next;
+  }
+  return NULL;
+}
+
 // This function creates the PCB for each new process created
 PCB *create_pcb()
 {
@@ -166,6 +185,7 @@ PCB *create_pcb()
 		return (PCB *) 0;
 	}
   allTaskQ = addToTailTaskList(allTaskQ, pro);
+  no_allQ++;
 	
 	/* Update Values in the PCB sturct for the new process */
 
@@ -222,6 +242,8 @@ uint64_t doFork()
 	pro->cr3 = map_pageTable(pro);		   // Storing Base Physical address of PML4e for new process
   pro->ppid = parent_process->pid;
 	printf("\n PCR3:%x", pro->cr3);
+  pro->cow = 1;
+  parent_process->cow = parent_process->cow + 1;
   /// -----------------------------------------------------------------------------------------
 
   //copy the page tables of parent process !!
@@ -236,17 +258,20 @@ uint64_t doFork()
   printf("Current Process from RUNNING=%p \n", running);
   // Add it to task linked list !!
   runnableTaskQ = addToTailTaskList(runnableTaskQ, pro); 
+  no_runnableQ++;
   // return 0 to the calling process
   //m_map( (uint64_t)pro->u_stack, (uint64_t)(parent_process->u_stack), (uint64_t)(4096), (uint64_t)(4096) );
 	printf("\n Trying to Fork()\n");
-
   // update the cr3 to process->cr3
-  /*
-  _ptcr3(pro->cr3);
-	printf("\n CR3 set done");
-  runnableTaskQ = addToHeadTaskList(runnableTaskQ, pro); 
-	// Running new process 
-	pro->u_stack[0] = pro->rip;
+  if ((pro->u_stack = process_stack()) == NULL)
+	{
+		printf("\n Cant allocate memory for process User stack");
+		//exit();
+	}
+  m_map((uint64_t)pro->u_stack, (uint64_t)parent_process->u_stack, (uint64_t)(4096*8), (uint64_t)(4096*8) );
+  
+  /*  
+  pro->u_stack[0] = pro->rip;
 	pro->rsp = (uint64_t)(pro->u_stack);
 	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[63]);
 	printf("\n GDT SET");
@@ -264,8 +289,170 @@ uint64_t doFork()
 	");
   */
   //Add parent_pid in the structure as well
-  if (pid == running->pid)
-     pid = 0;
+ // if (test)
+ // {
+  //    printf("I am in child");
+ //     goto label:
+ // }
+ //pro->rip = 0xffffffff80202508;      
+// label:
+  /*__asm volatile(
+		"movq %0, %%rsp;"
+		:
+		:"r"((pro->rsp))
+	        :"memory"
+	);*/
+
+  if (pid != running->pid)
+  {
+    pid = 0;
+    printf("Returning from .. pid=%p, running pid=%p\n", pid, running->pid);
+    //scheduler();
+  }
+  printf("Returning from fork() .. pid=%p, running pid=%p\n", pid, running->pid);
   return pid;
 
+}
+
+// Schedule function for context switching between two processes.. Hope it should work for both kernel and user processes
+void scheduler1()
+{
+//  test += 1;
+	PCB *current_process, *new_process;
+  //printf("In scheduler :P\n");
+  // 0 or 1 process
+  /*if(no_runnableQ<2)
+  {
+    __asm volatile(
+		  "retq;"
+	  );
+  }*/
+  current_process = running;
+  runnableTaskQ = moveTaskToEndOfList(runnableTaskQ);
+  new_process = runnableTaskQ->task;
+	// Should save state of caller here 
+	__asm volatile(
+		"cli"
+		);
+  __asm volatile(
+		"push %rax"
+		);
+	__asm volatile(
+		"push %rbx"
+		);
+	__asm volatile(
+		"push %rcx"
+		);
+	__asm volatile(
+		"push %rdx"
+		);
+	__asm volatile(
+		"push %rbp"
+		);
+	__asm volatile(
+		"push %r8"
+		);
+	__asm volatile(
+		"push %r9"
+		);
+	__asm volatile(
+		"push %r10"
+		);
+	__asm volatile(
+		"push %r11"
+		);
+	__asm volatile(
+		"push %r12"
+		);
+	__asm volatile(
+		"push %r13"
+		);
+	__asm volatile(
+		"push %r14"
+		);
+	__asm volatile(
+		"movq %%rsp, %0"
+		:"=g"(current_process->rsp)
+		:
+	  :"memory"
+	);
+  //current_process->rip = (uint64_t)(*((uint64_t*)(current_process->rsp)+12));
+
+	/* Now change the %rsp to callee rsp */
+	__asm volatile(
+		"movq %0, %%cr3;"
+		:
+		:"r"((new_process->cr3))
+    :"memory"
+	);
+
+  //printf("cr3 old=%p new=%p\n", current_process->cr3, new_process->cr3);  
+  //new_process->rsp = current_process->rsp;
+  //new_process->rip = current_process->rip;
+	
+  /* Now change the %rsp to callee rsp */
+	__asm volatile(
+		"movq %0, %%rsp;"
+		:
+		:"r"((new_process->rsp))
+	        :"memory"
+	);
+	__asm volatile(
+		"pop %r14"
+		);
+	__asm volatile(
+		"pop %r13"
+		);
+	__asm volatile(
+		"pop %r12"
+		);
+	__asm volatile(
+		"pop %r11"
+		);
+	__asm volatile(
+		"pop %r10"
+		);
+	__asm volatile(
+		"pop %r9"
+		);
+	__asm volatile(
+		"pop %r8"
+		);
+	__asm volatile(
+		"pop %rbp"
+		);
+	__asm volatile(
+		"pop %rdx"
+		);
+	__asm volatile(
+		"pop %rcx"
+		);
+	__asm volatile(
+		"pop %rbx"
+		);
+	__asm volatile(
+		"pop %rax"
+		);
+
+  //tss.rsp0 = (uint64_t)  &(new_process->kernel_stack[63]);
+	//printf("\n GDT SET");
+	
+  /*
+  uint64_t tem = 0x2B; 
+	__asm volatile("mov %0,%%rax;"::"r"(tem));
+	__asm volatile("ltr %ax");*/
+/*	__asm volatile("\
+	push $0x23;\
+	push %0;\
+	pushf;\
+	push $0x1B;\
+	push %1"::"g"(new_process->rsp),"g"(new_process->rip):"memory");
+	
+  __asm volatile("\
+	iretq;\
+	");
+*/
+	__asm volatile(
+		"iretq;"
+	);	
 }

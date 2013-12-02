@@ -6,6 +6,7 @@
 #define SYSCALL_PROTO(n) static __inline uint64_t __syscall##n
 #define SYSCALL_PUTINT 1
 #define SYSCALL_PUTS 2 
+#define SYSCALL_FORK 3 
 #define SYSCALL_MALLOC 4
 #define SYSCALL_SCANF 5
 SYSCALL_PROTO(0)(uint64_t n) {
@@ -13,7 +14,7 @@ SYSCALL_PROTO(0)(uint64_t n) {
    __asm volatile( "movq %1,%%rax\n\t"
                    "int $80\n\t"
                    "movq %%rax,%0\n\t;"
-                   :"=r"(ret):"r"(n):"rax""memory");
+                   :"=r"(ret):"r"(n):"rax","memory");
 	return ret;
 }
 

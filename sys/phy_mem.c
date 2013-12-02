@@ -81,7 +81,7 @@ uint64_t allocate_free_phy_page2()
   return temp->addr;
 }
 
-void free_phy_page(uint64_t temp_addr)
+void free_phy_page2(uint64_t temp_addr)
 {
   free_list *temp = NULL;
   temp->addr = temp_addr;
@@ -151,3 +151,29 @@ uint64_t allocate_free_phy_page()
   }
 }
 
+uint64_t free_phy_page(uint64_t temp_addr)
+{
+  uint64_t temp=0;
+  int found=0;
+  int i;
+  for(i=0; i<N; i++)
+  {
+    if(fl[i].addr==temp_addr)
+    {
+      temp = fl[i].addr;
+      fl[i].flag = 1;
+      found =1;
+      break;
+    }
+  }
+  if(found)
+  {
+    printf("Page found and freed=%p\n", temp);
+    return 1;
+  }
+  else
+  {
+    printf("Page trying to free not found\n");
+    return 0;
+  }
+}

@@ -27,6 +27,7 @@ struct pcb_t
 	struct pcb_t *next;
 	VMA *mm_st;	// Pointer to First VMA Block of the Process 
 	uint64_t cr3;	// Coontents of CR3 Register. (add of PML4E page table)
+	uint64_t cow;	// Value of COW bit will tell how many processes with current process as parent are present 
 	uint64_t rip;
 	uint64_t rax;
 	uint64_t rbx;
@@ -63,6 +64,7 @@ struct taskList *moveTaskToEndOfList(struct taskList *list);
 uint64_t get_curr_PID();
 uint64_t get_pid();	// Returns a free PID from the pid bitmap
 uint64_t get_PID_PCB(struct pcb_t * gpcb);
+PCB *get_parent_PCB(uint64_t parent_pid);
 PCB *get_curr_PCB();
 PCB *create_pcb();	// DO initial Setup on a new process creation
 VMA *create_vma(uint64_t start, uint64_t size);	// Creates VMA structure for each segment 
@@ -72,5 +74,7 @@ extern struct taskList *waitTaskQ;
 extern struct taskList *allTaskQ;
 extern struct taskList *runnableTaskQ;
 extern PCB * running;
+extern int no_waitQ, no_allQ, no_runnableQ;
+void scheduler1();
 
 #endif

@@ -66,7 +66,7 @@ int scanf(const char *format, uint64_t ptr)
   {
      if(prev_val < kbuf_index)
      {
-     //    printf("buffer index is %d with val = %c\n",kbuf_index,kbuf[kbuf_index]);
+         printf("buffer index is %d with val = %c\n",kbuf_index,kbuf[kbuf_index]);
          prev_val = kbuf_index;
      }
      if(kbuf[kbuf_index] == '\n')
@@ -74,7 +74,7 @@ int scanf(const char *format, uint64_t ptr)
         for(i = 0; i < kbuf_index ; i++)
         {
           buf[i]=kbuf[i];
-          //printf("buffer is = %c at %d",buf[i],i);
+          printf("buffer is = %c at %d",buf[i],i);
           kbuf[i]='\0';
         }
         buf[kbuf_index]='\0';
@@ -95,7 +95,7 @@ int scanf(const char *format, uint64_t ptr)
           }
           ret = 1;
         }
-        //printf("out of scanf\n");
+        printf("out of scanf\n");
         return ret;
      }
   }
