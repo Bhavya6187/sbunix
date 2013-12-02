@@ -39,10 +39,19 @@ int main(int argc, char* argv[])
   char* test_malloc1 = (char*)malloc(1600);
   test_malloc1 = "abcdefghijklmnop";
   ret = u_printf("hey %s %p\n",test_malloc1,test_malloc1);
-/*  struct ad *ad1 = (struct ad*) malloc(sizeof(struct ad));
+  u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
+  u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
+  u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
+  u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
+  int ret1 = __syscall0(SYSCALL_FORK);
+  u_printf("fork return:%d:", ret1);
+  u_printf("FORK Hopefully is working !! ... \n");
+ 
+  u_printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"); 
+  
+  /*
   struct ad *ad1 = (struct ad*) malloc(sizeof(struct ad));
-  //int ret1 = __syscall0(SYSCALL_FORK);
-  //u_printf("fork return:%d:", ret1);
+  struct ad *ad1 = (struct ad*) malloc(sizeof(struct ad));
   ad1->t1 = 123213213;
   ad1->t2 = 99;
   ad1->t3 = 2324564;
@@ -52,22 +61,24 @@ int main(int argc, char* argv[])
   ad1->t7 = 2324456;
   ad1->t8 = 2324456;
   u_printf("%d:%d:%d:\n%d:%d:%d\n:%d:%d", ad1->t1,ad1->t2,ad1->t3,ad1->t4,ad1->t5,ad1->t6,ad1->t7,ad1->t8);*/
-  int tester;
+  
+  /*int tester;
   u_scanf("%d",(uint64_t)&tester);
   ret = u_printf("scanf gave us %d",tester);
   
   char test_scan[6];
   u_scanf("%s",(uint64_t)&test_scan);
   ret = u_printf("scanf gave us %s",test_scan);
-
-  //uint64_t i=0, j=0;
+  */
+  //while(1);
+  uint64_t i=0, j=0;
   
-  while(1);
-  /*{
+  while(1)
+  {
     for(i=0;i<500;i++)
     for(j=0;j<500;j++)
       ;
     u_printf("%c", 'D');
-  }*/
+  }
 	return 0;
 }

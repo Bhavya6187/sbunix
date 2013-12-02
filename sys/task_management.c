@@ -226,6 +226,7 @@ VMA *create_vma(uint64_t start_add, uint64_t size)
 // Fork() Creating a child process from a parent
 uint64_t doFork()
 {
+	__asm volatile("cli");
 	PCB *pro = NULL;
 	PCB *parent_process;
   parent_process = get_curr_PCB();
@@ -247,10 +248,10 @@ uint64_t doFork()
   /// -----------------------------------------------------------------------------------------
 
   //copy the page tables of parent process !!
+  copyUST(pro);
   copyPageTables(pro, parent_process);
   printf("PageTable copying done\n");
 
-  uint64_t pid = pro->pid;
   printf("Child PID=%p\n", pro->pid);
   printf("Parent PID=%p\n", pro->ppid);
   printf("Current PID=%p\n", get_curr_PID());
@@ -263,13 +264,13 @@ uint64_t doFork()
   //m_map( (uint64_t)pro->u_stack, (uint64_t)(parent_process->u_stack), (uint64_t)(4096), (uint64_t)(4096) );
 	printf("\n Trying to Fork()\n");
   // update the cr3 to process->cr3
-  if ((pro->u_stack = process_stack()) == NULL)
+  /*if ((pro->u_stack = process_stack()) == NULL)
 	{
 		printf("\n Cant allocate memory for process User stack");
 		//exit();
-	}
-  m_map((uint64_t)pro->u_stack, (uint64_t)parent_process->u_stack, (uint64_t)(4096*8), (uint64_t)(4096*8) );
-  
+	}*/
+  //check this function
+  //m_map((uint64_t)pro->u_stack, (uint64_t)parent_process->u_stack, (uint64_t)(4096*8), (uint64_t)(4096*8) );
   /*  
   pro->u_stack[0] = pro->rip;
 	pro->rsp = (uint64_t)(pro->u_stack);
@@ -303,14 +304,22 @@ uint64_t doFork()
 	        :"memory"
 	);*/
 
-  if (pid != running->pid)
+  if (running->pid == pro->ppid)
   {
-    pid = 0;
-    printf("Returning from .. pid=%p, running pid=%p\n", pid, running->pid);
-    //scheduler();
+    printf("This is the parent ! Returning with pid=%p, parent/running pid=%p\n", pro->pid, running->pid);
+    //Set everything for our child for it to execute in its registers
+    //parent_process->
+	  __asm volatile("sti");
+    //while(1);
+    return pro->pid;
   }
-  printf("Returning from fork() .. pid=%p, running pid=%p\n", pid, running->pid);
-  return pid;
+  else
+  {
+    printf("This is the CHILD !!\n");
+	  __asm volatile("sti");
+    return 0;
+  }
+  //printf("Returning from fork() .. pid=%p, running pid=%p\n", pid, running->pid);
 
 }
 

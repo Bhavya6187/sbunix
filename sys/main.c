@@ -71,6 +71,14 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
    test1 = (uint64_t*)allocate_free_phy_page();
    free_phy_page((uint64_t)test1);
 
+ 
+  page_mapping((uint64_t)0xFFFF0F0080200000);
+  uint64_t pagee=0;
+  pagee = getPhyFromVirtual((uint64_t)0xFFFF0F0080200000);
+  printf("OS banana hai :D !! = %p \n", pagee);
+  pagee = getPhyFromVirtual((uint64_t)0xFFFF1F0080200000);
+  printf("OS banana hai :D !! = %p \n", pagee);
+  //while(1);
 
   /*
   int j;
