@@ -9,7 +9,7 @@
 #include <sys/task_management.h>
 #include <sys/tarfs.h>
 
-int strcmp(char* str1, char*str2)
+int strcmp2(char* str1, char*str2)
 {
   while(*str1 !='\0' || *str2!='\0' )
   {
@@ -64,13 +64,16 @@ VMA* read_pheader(char* addr, struct elf_header* elf_base)
    memsz = pbase->p_memsz;
    vaddr = pbase->p_vaddr;
    offset = pbase->p_offset;
-   printf("filesz = %x filesz = %x vaddr = %x %x\n",filesz,memsz,vaddr,offset);
    uint64_t base = (uint64_t) elf_base;
    uint64_t contents = base + offset;
 
-   uint32_t ret = m_map(vaddr, contents, filesz, memsz);
-   if(ret == 0)
-   	vma = create_vma(vaddr,memsz);
+   printf("\n in read vadd = %p source =  %p f_size = %p m_size%p\n", vaddr, contents,filesz,memsz);
+   if(memsz != 0)
+   {
+     uint32_t ret = m_map((uint64_t)vaddr,(uint64_t)contents, filesz, memsz);
+     if(ret == 0)
+   	   vma = create_vma(vaddr,memsz);
+   }
    //printf("name = %s\n",pbase->p_type);
    return vma;
 
@@ -119,26 +122,23 @@ void readelf(char* addr, PCB *task)
 
   for(i = 0; i < num_entries; i++ )
   {
+    printf("reading entry %d out of %d entries\n",i,num_entries);
   	if (i == 0)
 		{
 			local = read_pheader(pheader, elf_base);
 			task->mm_st = local; 
+		 	pheader = pheader+size_elf(elf_base->e_phentsize);
 		}	
 		else 
 		{
     	ht  = read_pheader(pheader, elf_base);
-			local->vma_next = ht;
-			local = local->vma_next;
-		 	pheader = pheader+size_elf(elf_base->e_phentsize);
+      if(ht!=NULL)
+      {
+  			local->vma_next = ht;
+	  		local = local->vma_next;
+		   	pheader = pheader+size_elf(elf_base->e_phentsize);
+      }
     }
-  }
-  local = NULL;
-
-//  while(1);
-  for(int i=0;  i <= 24; i++)
-  {
-    printf("%d = %x ",i,elf_base[i]);
-    elf_base = elf_base+1;
   }
 }
 
@@ -158,7 +158,7 @@ int read_tarfs(PCB* task, char* name){
  while(header < end)
  {
     printf("name = %s\n",header->name);
-    printf("size = %s\n",header->size);
+ //   printf("size = %s\n",header->size);
     /*printf("mode = %s\n",header->mode);
     printf("uid = %s\n",header->uid);
     printf("gid = %s\n",header->gid);
@@ -174,17 +174,18 @@ int read_tarfs(PCB* task, char* name){
     printf("devmajor = %s\n",header->devmajor);
     printf("devminor = %s\n",header->devminor);
     printf("pad = %s\n",header->pad);*/
-    temp_size = size_to_int(header->size) ;
+    temp_size = size_to_int(header->size);
     printf("size given by function = %d\n",temp_size);
-    if(temp_size > 0 && strcmp(name,header->name))
+    if(temp_size > 0 && strcmp2(name,header->name))
     {
 
-      printf("\nThe address with header %p", header);
-      printf("\nThe address with elf %p\n", header);
-      printf("\nStrcmp says %d\n", strcmp(name,header->name));
-      elf_header =(char*)(header+1);
-      readelf((char*)elf_header, task);
-      return 0;
+        printf("\nThe address with header %p", header);
+        printf("\nThe address with elf %p\n", header);
+        printf("\nStrcmp says %d\n", strcmp2(name,header->name));
+        elf_header =(char*)(header+1);
+        readelf((char*)elf_header, task);
+//        while(1);
+        return 0;
     }
     
     if(header->name[0] == '\0' && header->size[0]=='\0' && prevname == '\0' && prevsize == '\0')
