@@ -9,9 +9,9 @@
 */
 
 _irq_032:
-  cli
+#cli
   jmp isr_common_stub  # Go to our common handler. 
-  sti
+#  sti
   iretq
 
 isr_common_stub:
@@ -46,7 +46,7 @@ isr_common_stub:
   popq %rcx
   popq %rbx
   popq %rax        # Pops the general purpose registers GPR's R8-R15 also might come
-  sti
+#sti
   iretq           
 
 
@@ -95,17 +95,17 @@ isr_common_stub:
   popq %rax        # Pops the general purpose registers GPR's R8-R15 also might come
   popq %rdi        # Pops the general purpose registers GPR's R8-R15 also might come
   popq %rdi        # Pops the general purpose registers GPR's R8-R15 also might come
-  sti
+#sti
   iretq           
 */
 
 _irq_033:
-  cli
+# cli
   pushq %rdi      # Push the interrupt number 0
   movq $33, %rdi
   pushq %rdi      # Push the interrupt number 0
   jmp isr_common_stub2  # Go to our common handler. 
-  sti
+# sti
   iretq
 
 isr_common_stub2:
