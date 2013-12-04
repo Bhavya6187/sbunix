@@ -72,15 +72,22 @@ struct taskList *moveTaskToEndOfList(struct taskList *list);
 uint64_t get_curr_PID();
 uint64_t get_pid();	// Returns a free PID from the pid bitmap
 uint64_t get_PID_PCB(struct pcb_t * gpcb);
+
 PCB *get_parent_PCB(uint64_t parent_pid);
+PCB *searchPCB(struct taskList *tlist, uint64_t pid);
 PCB *get_curr_PCB();
+
 PCB *create_pcb();	// DO initial Setup on a new process creation
 VMA *create_vma(uint64_t start, uint64_t size);	// Creates VMA structure for each segment 
+
 uint64_t doFork();
 void doExec(char* filename);
+
 void exit_process(int status);
-void wait_pid(uint64_t pid);
-void wait_p();
+uint64_t wait_pid(uint64_t pid);
+uint64_t wait_p();
+void sleep_t(uint64_t time);
+void checkAwake();
 
 extern struct taskList *waitTaskQ;
 extern struct taskList *allTaskQ;

@@ -48,11 +48,11 @@ isr_common_stub:
 
 
 _isr_014:
-  #cli
+  cli
   #movq $14, %rdi
   #pushq %rdi      # Push the interrupt number 0
   jmp isr_common_stub_14  # Go to our common handler. 
-  #sti
+  sti
   iretq
 
 isr_common_stub_14:
@@ -96,11 +96,11 @@ isr_common_stub_14:
   iretq           
 
 _isr_013:
-  #cli
+  cli
   #movq $13, %rdi
   #pushq %rdi      # Push the interrupt number 0
   jmp isr_common_stub_13  # Go to our common handler. 
-  #sti
+  sti
   iretq
 
 isr_common_stub_13:
@@ -139,9 +139,9 @@ isr_common_stub_13:
   iretq           
 
 _isr_080:
-  #cli
+  cli
   jmp isr_stub_80  # Go to our common handler. 
-  #sti
+  sti
   iretq
 
 isr_stub_80:
@@ -160,10 +160,10 @@ isr_stub_80:
   pushq %r14
   pushq %r15
   movq %rsp, %rdi
-  #sti
+  sti
   #trying to restore the code segment, instruction pointer, flags register, stack segment and stack pointer                         
   call isr_handler_80
-  #cli
+  cli
   popq %r15
   popq %r14
   popq %r13
@@ -178,5 +178,5 @@ isr_stub_80:
   popq %rcx
   popq %rbx
   popq %rax        # Pops the general purpose registers GPR's R8-R15 also might come
-  #sti
+  sti
   iretq

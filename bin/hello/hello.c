@@ -44,13 +44,17 @@ int main(int argc, char* argv[])
   //u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
   //u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
   int ret1 = __syscall0(SYSCALL_FORK);
-  
+  //int ret1 = fork(); 
+  int temp =0, i,j; 
+  temp++;
   if(ret1==0)
   {
+    temp = 20;
     u_printf("fork return:%d:", ret1);
     u_printf("This is child !! \n");
-    char filename[10] = "bin/hello\0";
-    ret1 = __syscall1(SYSCALL_EXECVE,(uint64_t)(filename));
+    //__syscall1(SYSCALL_EXIT, 0);
+    //char filename[15] = "bin/world";
+    //ret1 = __syscall1(SYSCALL_EXECVE,(uint64_t)(filename));
     while(1);
       u_printf("Hiiii\n");
   }
@@ -61,8 +65,15 @@ int main(int argc, char* argv[])
       u_printf("fork return:%d:", ret1);
       u_printf("This is parent!! \n");
       ret1 = __syscall0(SYSCALL_SCHEDULER);
-      while(1)
-        u_printf("Fuck UUUUU\n");
+      //while(1);
+      //  u_printf("Fuck UUUUU\n");
+      while(1);
+      {
+        for(i=0;i<500;i++)
+        for(j=0;j<500;j++)
+          ;
+        u_printf("%c", 'D');
+      }
       //u_printf("LALALALLALALALALLALA !! ... \n");
     }
 

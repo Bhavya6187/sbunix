@@ -14,6 +14,8 @@ extern void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 struct taskList *waitTaskQ;
 struct taskList *allTaskQ;
 struct taskList *runnableTaskQ;
+struct taskList *deadTaskQ;
+
 int no_waitQ=0, no_allQ=0, no_runnableQ=0;
 PCB * running;
 uint64_t pid_bitmap[32] = {0};
@@ -175,6 +177,21 @@ PCB *get_parent_PCB(uint64_t parent_pid)
   return NULL;
 }
 
+PCB *searchPCB(struct taskList *tlist, uint64_t pid)
+{
+    struct taskList *list = tlist;
+    if(list==NULL)
+      return NULL;
+    if( (list->task->pid !=pid) && (list->next == NULL) )
+      return NULL;
+    list = list->next;
+    while (list->next)
+      if(list->next->task->pid == pid)
+        return list->next->task;
+    return NULL;
+}
+
+
 // This function creates the PCB for each new process created
 PCB *create_pcb()
 {
@@ -268,6 +285,14 @@ uint64_t doFork()
   // return 0 to the calling process
   //m_map( (uint64_t)pro->u_stack, (uint64_t)(parent_process->u_stack), (uint64_t)(4096), (uint64_t)(4096) );
 	printf("\n Trying to Fork()\n");
+  
+  /*PCB* t;
+  t = searchPCB(runnableTaskQ, pro->pid);
+  if(t==NULL)
+    printf(">>>> PID not found\n");
+  else
+    printf(">>>> PID found \n");*/
+  
   //copyOnWritePageTables();
   // update the cr3 to process->cr3
   /*if ((pro->u_stack = process_stack()) == NULL)
@@ -354,30 +379,25 @@ void doExec(char* filename)
   //_ptcr3(pro->cr3);
   
   // ------------------------------------------- Zero out the kernel stack as well
+  /*
   int i=0;
   for(i=0; i<256; i++)
     pro->kernel_stack[i]=0x0;
+  */
 
-  //char elf_file[10]="bin/world";
-  //char elf_file[10]="bin/bash";
-	//read_tarfs(pro,elf_file);
 	read_tarfs(pro, filename);
 	printf("We will execute - %s\n", filename);
-	//printf("We will execute - %s\n", elf_file);
 	if ((pro->u_stack = process_stack()) == NULL)
 	{
 		printf("\n Cant allocate memory for process User stack");
 		//exit();
 	}	
   
-	pro->u_stack[0] = pro->rip;
+	//pro->u_stack[0] = pro->rip;
 	pro->rsp = (uint64_t)(pro->u_stack);
   printf("user_stack_rsp%p",pro->rsp);
 	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[255]);
 	printf("In Execve()  GDT SET\n");
-	uint64_t tem = 0x28; 
-	__asm volatile("mov %0,%%rax;"::"r"(tem));
-	__asm volatile("ltr %ax");
 	__asm volatile("\
 	push $0x23;\
 	push %0;\
@@ -391,12 +411,21 @@ void doExec(char* filename)
 }
 
 
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
 void exit_process(int status)
 {
   printf("Exit() called for process pid=%p", running->pid);
-
-  // Free the memory used by the process
-  deletePageTables();
 
   // Bring parent from the waitlist because in waitpid the parent might be waiting for the child to finish
   struct taskList * temp;
@@ -417,24 +446,43 @@ void exit_process(int status)
 
   // REmove the process from the Queue
   runnableTaskQ = removeFromTaskList(runnableTaskQ, running);
+  deadTaskQ = addToHeadTaskList(deadTaskQ, running);
+
+  // Set the status value to the parent ??? Where I dont know it yet !! :P
+
+  // Free the memory used by the process
+  deletePageTables();
 
   // call schedule() to start other process
-  //schedule()
+  schedule_process();
 }
 
 
+//waitpid(): on success, returns the process ID of the child whose state has changed; if WNOHANG was specified  and  one  or  more  child(ren)
+//specified by pid exist, but have not yet changed state, then 0 is returned.  On error, -1 is returned.
 // The parent will wait for the child pid to exit() before continuing execution
-void wait_pid(uint64_t pid)
+// The waitpid() system call suspends execution of the calling process until a child specified by pid argument has changed state.  By  default,
+// waitpid() waits only for terminated children, but this behavior is modifiable via the options argument, as described below.
+uint64_t wait_pid(uint64_t pid)
 {
   // just remove current running parent process to waitQ from runnableQ
+  // cheack if PID exits ??
+  if( searchPCB(runnableTaskQ, pid)==NULL )
+    return -1;
+  
   waitTaskQ = addToTailTaskList(waitTaskQ, running);
   runnableTaskQ = removeFromTaskList(runnableTaskQ, running);
-  // parent will pause executing and call yield
-  
+
+  // should i call schedule ??
+  // parent will pause executing and call yield/schedule
+  schedule_process();
+  return 0;
 }
 
+
 // The parent will wait for the child pid to exit() before continuing execution
-void wait_p()
+// wait(): on success, returns the process ID of the terminated child; on error, -1 is returned.
+uint64_t wait_p()
 {
   printf("In waitp() process pid=%p", running->pid);
 
@@ -454,13 +502,28 @@ void wait_p()
     }
     temp=temp->next;
   }
+  return 0;
+
+}
+
+void checkAwake()
+{
+  struct taskList *list = waitTaskQ;
+  while(list)
+  {
+    if ( (sec - (list->task->sleep_start)) > list->task->sleep_duration )
+    {
+      runnableTaskQ = addToHeadTaskList(runnableTaskQ, list->task);
+      waitTaskQ = removeFromTaskList(waitTaskQ, list->task);
+    }
+    list = list->next;
+  }
 }
 
 // Sleeps for a specified number of seconds (time in secs)
 // sec is a global variable which has count of number of seconds elapsed 
-void sleep(uint64_t time)
+void sleep_t(uint64_t time)
 {
-
   running->sleep_start = sec;
   running->sleep_duration = time;
   runnableTaskQ = removeFromTaskList(runnableTaskQ, running);
@@ -470,7 +533,7 @@ void sleep(uint64_t time)
 
   // call schedule here to schedule another process
   // Make sure to check for the waiting processes to move them from waitQ to the runnableQ
-  // schedule();
+  schedule_process();
 
 }
 

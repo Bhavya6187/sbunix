@@ -90,6 +90,7 @@ uint64_t isr_handler_80(myregs_t *regs )
    uint64_t ret = 0;
    uint64_t num_bytes = 0;
    uint64_t f=-2, str = 0, filename = 0;
+   uint64_t exit_status=0, pid, time_secs;
    f++;
    //__asm__ volatile("movq %%rdi,%0;":"=m"(rdi1)::);
    //registers_t* regs = (registers_t*)rdi1;
@@ -128,6 +129,23 @@ uint64_t isr_handler_80(myregs_t *regs )
       case(7):
         filename = regs->rbx;
         doExec((char*)filename);
+        break;
+      case(8):
+        exit_status = regs->rbx;
+        exit_process(exit_status);
+        break;
+      case(9):
+        pid = regs->rbx;
+        ret = wait_pid(pid);
+        regs->rax = ret;
+        break;
+      case(10):
+        ret = wait_p();
+        regs->rax = ret;
+        break;
+      case(11):
+        time_secs = regs->rbx;
+        sleep_t(time_secs);
         break;
 
       default:

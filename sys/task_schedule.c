@@ -7,6 +7,12 @@ void schedule_process()
 {
 	PCB  *next_process=NULL;
   // Add current process to runableQ
+  
+  ///-----------------WAIT() calls------------------///
+  //check if a process is sleeping and is ready to be scheduled now :)
+  checkAwake();
+  //------------------------------------------------///
+
   runnableTaskQ = moveTaskToEndOfList(runnableTaskQ);
   next_process = runnableTaskQ->task;
   printf("In schedule: Running Pid=%p, Next Pid=%p \n", running->pid, next_process->pid ); 

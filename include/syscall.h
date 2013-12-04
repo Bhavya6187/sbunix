@@ -11,6 +11,10 @@
 #define SYSCALL_SCANF 5
 #define SYSCALL_SCHEDULER 6
 #define SYSCALL_EXECVE 7
+#define SYSCALL_EXIT 8
+#define SYSCALL_WAITPID 9
+#define SYSCALL_WAIT 10
+#define SYSCALL_SLEEP 11
 
 SYSCALL_PROTO(0)(uint64_t n) {
    uint64_t ret;

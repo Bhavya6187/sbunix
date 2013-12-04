@@ -217,7 +217,7 @@ uint64_t map_pageTable(PCB *np)
   //Looking into kernel page table
   tmp1 = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, 0x1FE)); // 510
 
-  uint64_t i=509;
+  uint64_t i=500;
   while( *(tmp1+i) )
   { 
     i--;
@@ -325,6 +325,16 @@ void copyPageTables(PCB *child, PCB *parent)
 // Make sure that the CR3 is set for this process
 void deletePageTables()
 {
+  uint64_t i; // iterators for pml4e, pdpe, pde, pte
+  uint64_t *pml4eAdd;
+  pml4eAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, 0x1FE));
+  // Iterate through all the page table entries in the PML4E of the Parent process 
+  for(i=0; i<510; i++)
+     pml4eAdd[i] = ((uint64_t)0x0000000000000000) ;
+}
+
+/*void deletePageTables()
+{
   uint64_t i, j, k, l; // iterators for pml4e, pdpe, pde, pte
   uint64_t *pml4eAdd, *pdpeAdd, *pdeAdd, *pteAdd;
   int total_count=0; 
@@ -351,27 +361,23 @@ void deletePageTables()
                 {
                   // setting COW 52 bit and 12 bits as zero ... then calling free_phy_page()
                   // pteAdd[l] = ((((uint64_t)pteAdd[l]) & 0xFFFFFFFFFFFFF000) | (~COW));
-                  // pteAdd[l] = ((((uint64_t)pteAdd[l]) & 0xFFFFFFFFFFFFF000 & (~COW)) |7);
-                  pteAdd[l] = ((((uint64_t)pteAdd[l]) & 0xFFFFFFFFFFFFF000 & (~COW)));
-                  printf("free Page = %p", pteAdd[l]);
-                  free_phy_page(pteAdd[l]);
+                  pteAdd[l] = ((((uint64_t)pteAdd[l]) & 0xFFFFFFFFFFFFF000 & (~COW)) |7);
+                  //free_phy_page(pteAdd[l]);
                   total_count++;
                 }
               }
-              free_phy_page(((uint64_t)pdeAdd[k]) & 0xFFFFFFFFFFFFF000 & (~COW));
+              //free_phy_page(pdeAdd[k]);
             }
           }
-          free_phy_page(((uint64_t)pdpeAdd[j]) & 0xFFFFFFFFFFFFF000 & (~COW));
           //free_phy_page(pdpeAdd[j]);
         }
       }
-      free_phy_page(((uint64_t)pml4eAdd[i]) & 0xFFFFFFFFFFFFF000 & (~COW));
       //free_phy_page(pml4eAdd[i]);
     }
     pml4eAdd[i] = ((uint64_t)0x0000000000000000) ;
   }
   printf("total pte pages freed=%d", total_count);
-}
+}*/
 
 // Copying Actual pagetable entries for the child process and resetting COW bit for the parent if no other child process has COW bit set
 // Make sure to decreement the COW bit for parent everytime  child is allocated with new individual physical pages 
@@ -498,7 +504,7 @@ uint64_t *process_stack()
     i++;
   }
 
-	top = (uint64_t *) (st + 4096);
+	top = (uint64_t *) (st + 512);
 
 	return top;	//returns the top of the virtual page 4KB page as stack grows downwards
 }	
@@ -522,6 +528,7 @@ void test()	// sort of execve in current scenario
   pro->cow=0;
 	_ptcr3(pro->cr3);
   char elf_file[10]="bin/hello";
+  //char elf_file[10]="bin/world";
   //char elf_file[10]="bin/bash";
 	read_tarfs(pro,elf_file);
 	printf("\n BACK IN TEST");
