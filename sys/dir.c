@@ -392,14 +392,14 @@ void list()
            if(strcmp(entry->typeflag,"5")  == 0){
 				//printf("  Directory -- %s, size-%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",entry ->name, entry->size, entry-> mode , entry-> uid, entry-> gid, entry-> mtime, entry-> checksum, entry-> typeflag, entry-> linkname, entry-> magic, entry-> version, entry-> uname, entry-> gname, entry-> devmajor, entry-> devminor , entry-> prefix  , entry-> pad);
 				printf(" \n Directory -- %s, size-%s, type %s ",entry ->name, entry->size, entry-> typeflag);
-    while(1);
+    //while(1);
 			}else if(strcmp(entry->typeflag,"0")==0){
 				//printf("  file -- %s, size-%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s",entry ->name, entry->size, entry-> mode , entry-> uid, entry-> gid, entry-> mtime, entry-> checksum, entry-> typeflag, entry-> linkname, entry-> magic, entry-> version, entry-> uname, entry-> gname, entry-> devmajor, entry-> devminor , entry-> prefix  , entry-> pad);
 				printf(" \n file -- %s, size-%s, type %s ",entry ->name, entry->size, entry-> typeflag);
 			}else if(entry->typeflag == NULL){
 				printf(" typeflag null");
 			}else{
-				//printf(" entry address : %p ,entry->typeflag %s, name %s",entry,entry->typeflag,entry->name);
+				printf(" entry address : %p ,entry->typeflag %s, name %s",entry,entry->typeflag,entry->name);
 			}
            //increasing by size of the structure + size of file
            entry = (struct posix_header_ustar *)((char*)entry + sizeof(struct posix_header_ustar) + size );

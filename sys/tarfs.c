@@ -26,20 +26,37 @@ int strcmp2(char* str1, char*str2)
   return 0;
 }
 char zero_size[12] = "000000000000";
-int size_to_int(char* size)
+
+int power(int x, int y)
 {
-  int ret = 0;
-  int base = 1;
-  int i =11;
-  while(size[i] <= '0' || size[i] > '9'  )
-    i--;
-  for(i=i;  i >= 0; i--)
-  {
-    ret += base*(size[i] - '0');
-    base*=8;
-  }
-  return ret;
+   if( y == 0)
+     return 1;
+   else if (y%2 == 0)
+     return power(x, y/2)*power(x, y/2);
+   else
+     return x*power(x, y/2)*power(x, y/2);
+               
 }
+
+int size_to_int(char* p)
+{
+    int k = 0;
+   while (*p) {
+    k = (k<<3)+(k<<1)+(*p)-'0';
+    p++;
+  }
+  int decimal=0, i=0, rem; 
+  while (k!=0) 
+  { 
+     rem = k%10; 
+     k/=10; 
+     decimal += rem*power(8,i); 
+     ++i;
+  }
+      
+      return decimal;
+}
+
  
 int psize_to_int(char* size)
 {
