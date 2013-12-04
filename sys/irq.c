@@ -5,6 +5,13 @@
 #include <sys/task_management.h>
 #include <sys/task_schedule.h>
 
+#define PIC1      0x20
+#define PIC2      0xA0
+#define PIC1_CMD  PIC1
+#define PIC2_CMD  PIC2
+#define PIC1_DATA PIC1+1
+#define PIC2_DATA PIC2+1
+
 unsigned char second;
 unsigned char minute;
 unsigned char hour;
@@ -120,7 +127,21 @@ unsigned char keyboard_map_shift[128] =
  
 };		
 
-
+void IRQ_set_mask(unsigned char IRQline) {
+    uint16_t port;
+    char value;
+           
+     if(IRQline <8)  
+     {
+       port = PIC1_DATA;
+     } 
+     else {
+    port = PIC2_DATA;
+    IRQline -= 8;
+    }
+    value = inb(port) | (1 << IRQline);
+    outb(port, value);        
+}
 void PIC_sendEOI(unsigned char irq)
 {
   if(irq >= 8)

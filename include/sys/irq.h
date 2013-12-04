@@ -17,3 +17,4 @@ void PIC_sendEOI(unsigned char irq);
 void init_timer();
 extern volatile unsigned char kbuf[128];
 extern volatile int kbuf_index;
+void IRQ_set_mask(unsigned char IRQline);
