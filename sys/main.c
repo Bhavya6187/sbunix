@@ -53,9 +53,12 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   physfree = physfree + (1024*1024);
   printf("physfree %p\n", (uint64_t)physfree);
   set_paging((void *)&kernmem, physfree, physbase); 
-	cur_VK = ((uint64_t)physfree + (8 * 1024) + 0xffffffff7fffffff) ;
-	cur_PK = 0x2097152;	// Starts at 2 MB mark 
+	//cur_VK = ((uint64_t)physfree + (8 * 1024) + 0xffffffff7fffffff) ;
+	//cur_PK = 0x2097152;	// Starts at 2 MB mark 
+	cur_VK = ((uint64_t)physfree + (16 * 1024) + 0xffffffff7fffff00) ;
+	cur_PK = 0x300000;	// Starts at 2 MB mark (abhi confirm)
   printf("\n V:%p:P:%p",cur_VK, cur_PK);
+	//cur_PK = 0x2097152;	// Starts at 2 MB mark (abhi confirm)
 
   uint64_t *test1;
   int i=0;

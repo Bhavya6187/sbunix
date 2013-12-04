@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <sys/irq.h>
 #include <sys/task_management.h>
+#include <sys/task_schedule.h>
 
 unsigned char second;
 unsigned char minute;
@@ -13,7 +14,8 @@ unsigned int year;
 volatile unsigned char kbuf[128] = {0};
 volatile int kbuf_index=-1;
 
-volatile uint32_t tick = 0,sec = 0;
+volatile uint64_t tick = 0;
+volatile uint64_t sec = 0;
 void read_rtc();
 enum {
       cmos_address = 0x70,
@@ -257,9 +259,11 @@ void irq_handler_0(registers_sch regs)
   //if(flag_sch==1 && running!=NULL)
   if(0)
   {
+    flag_sch=0;
     printf("Will handle scheduling\n");
- 	  PCB *current_process, *new_process;
- 
+    schedule_process();
+ 	  /* 
+    PCB *current_process, *new_process;
     current_process = running;
     runnableTaskQ = moveTaskToEndOfList(runnableTaskQ);
     new_process = runnableTaskQ->task;
@@ -290,8 +294,8 @@ void irq_handler_0(registers_sch regs)
  	         :"memory"
  	  );
     printf("new-process rsp=%p\n", new_process->rsp);  
+   */
   }
-
 }
 
 int shift_pressed=0;

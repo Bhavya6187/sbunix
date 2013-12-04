@@ -11,7 +11,6 @@
 
 uint64_t cur_VK;
 uint64_t cur_PK;
-extern void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 //uint64_t cur_VK = (0x326000 + 0xffffffff80000000);		// Free Virtual Memory above Kernel starts from here
 
 /*
@@ -19,8 +18,10 @@ extern void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 */
 void init_VM(uint64_t phfree)
 {
-	cur_VK = (phfree + (16 * 1024) + 0xffffffff7fffffff) ;
-	cur_PK = 0x2097152;	// Starts at 2 MB mark (abhi confirm)
+	//cur_VK = (phfree + (16 * 1024) + 0xffffffff7fffffff) ;
+	cur_VK = (phfree + (16 * 1024) + 0xffffffff7fffff00) ;
+	//cur_PK = 0x2097152;	// Starts at 2 MB mark (abhi confirm)
+	cur_PK = 0x300000;	// Starts at 2 MB mark (abhi confirm)
 	printf("\n VK:%X:PK:%x", cur_VK, cur_PK);
 }
 //uint64_t pid_bitmap[32] = {0};
@@ -37,14 +38,16 @@ void *k_malloc(uint64_t no_bytes)
 	uint64_t pt = NULL;
 //	uint64_t 
 // abhi add check for top address boundary condition	
-	if (MAX_KERN <= (cur_VK + no_bytes))
+	//if (MAX_KERN <= (cur_VK + no_bytes))
+	if (MAX_KERN <= (cur_VK + 4096))
 	{
 		//exit();
 		printf("\n Kernel Virtual OVERSHOOT");
 		return NULL;
 	}
 	pt = cur_VK;
-	cur_VK += no_bytes;	// Increase current Free Virtual Memory above kernel pointer by the no of bytes asked by thread in Kernel	
+	//cur_VK += no_bytes;	// Increase current Free Virtual Memory above kernel pointer by the no of bytes asked by thread in Kernel	
+	cur_VK += 4096;	// Increase current Free Virtual Memory above kernel pointer by the no of bytes asked by thread in Kernel	
 
 	return (void *)pt;
 }
@@ -95,7 +98,8 @@ void *p_malloc(uint64_t no_bytes)
 
 uint32_t m_map(uint64_t start_Vadd, uint64_t source_add, uint64_t f_size, uint64_t m_size)
 {
-	char *check = NULL, *source = NULL;
+	printf("\n in m_map vadd = %p source =  %p f_size = %p m_size%p\n",start_Vadd,source_add,f_size,m_size );
+  char *check = NULL, *source = NULL;
 	uint64_t i = 0;
 	if (f_size < 1)
 	{
@@ -112,31 +116,45 @@ uint32_t m_map(uint64_t start_Vadd, uint64_t source_add, uint64_t f_size, uint64
 	{
 		if ( i > f_size && i < m_size)		// Need to zero out contents of page in this range
 		{
-			*check++ = 0;
+			//*check++ = 0;
+			check[i] = 0;
 		}
 		else
 		{
-			*check++ = *source++;	// Load(copy) the contents of elf segments in memory at Virtual adress specified in elf byte by byte
+			//*check++ = *source++;	// Load(copy) the contents of elf segments in memory at Virtual adress specified in elf byte by byte
+			check[i] = source[i];	// Load(copy) the contents of elf segments in memory at Virtual adress specified in elf byte by byte
 		}
 	}
 
 	return 0;
 }
 
+int checkUST(PCB *pro)
+{
+  uint64_t i = 0;
+  int count=0;
+  for( i=0; i<(512*8); i++)
+  {
+    if(*(pro->u_stack -i)>0)
+      count++;
+  }
+  printf("Non xero entries in the UST = %d\n", count);
+  return 0;
+}
 
 int copyUST(PCB *childp)
 {
   uint64_t tmp = 0;
   uint64_t i = 0;
   uint64_t count=0;
-  for(i=0; i< (512 * 8); i++)
+  for( i=0; i<(512*8); i++)
   {
     tmp = 0;
-    tmp = running->u_stack[i];
-    if(running->u_stack[i]>0)
+    tmp = *(running->u_stack -i);
+    if((running->u_stack -i)>0)
       count++;
     _ptcr3(childp->cr3);              // child cr3 
-    childp->u_stack[i] = tmp;
+    *(childp->u_stack -i) = tmp;
     _ptcr3(running->cr3);             // parent cr3
   }
     printf("%p,", count);
@@ -147,6 +165,8 @@ uint64_t selfRef(uint64_t pml4e, uint64_t pdpe, uint64_t pde, uint64_t pte)
 {
   uint64_t base;
   base = 0xFFFF000000000000; 
+  if(pml4e<256)
+    base = 0x0000000000000000;
   base = (((base >> (12+9+9+9+9))<<9 | pml4e ) << (12+9+9+9) );
   base = (((base >> (12+9+9+9))<<9   | pdpe  ) << (12+9+9) );
   base = (((base >> (12+9+9))<<9     | pde   ) << (12+9) );
@@ -221,7 +241,6 @@ uint64_t map_pageTable(PCB *np)
 }
 
 #define    R0 0xFFFFFFFFFFFFFFFD //1 bit set as read bit, so no write access
-//#define    R0 0xFFFFFFFFFFFFFFFF //1 bit set as read bit, so no write access
 #define ACCES 0xFFFFFFFFFFFFFFDF //1 bit set as read bit, so no write access
 #define DIRTY 0xFFFFFFFFFFFFFFBF //1 bit set as read bit, so no write access
 #define   COW 0x0008000000000000 //52 bit set as COW bit
@@ -331,18 +350,23 @@ void deletePageTables()
                 if(pteAdd[l])
                 {
                   // setting COW 52 bit and 12 bits as zero ... then calling free_phy_page()
-                  pteAdd[l] = ((((uint64_t)pteAdd[l]) & 0xFFFFFFFFFFFFF000) | (~COW));
+                  // pteAdd[l] = ((((uint64_t)pteAdd[l]) & 0xFFFFFFFFFFFFF000) | (~COW));
+                  // pteAdd[l] = ((((uint64_t)pteAdd[l]) & 0xFFFFFFFFFFFFF000 & (~COW)) |7);
+                  pteAdd[l] = ((((uint64_t)pteAdd[l]) & 0xFFFFFFFFFFFFF000 & (~COW)));
+                  printf("free Page = %p", pteAdd[l]);
                   free_phy_page(pteAdd[l]);
                   total_count++;
                 }
               }
-              free_phy_page(pdeAdd[k]);
+              free_phy_page(((uint64_t)pdeAdd[k]) & 0xFFFFFFFFFFFFF000 & (~COW));
             }
           }
-          free_phy_page(pdpeAdd[j]);
+          free_phy_page(((uint64_t)pdpeAdd[j]) & 0xFFFFFFFFFFFFF000 & (~COW));
+          //free_phy_page(pdpeAdd[j]);
         }
       }
-      free_phy_page(pml4eAdd[i]);
+      free_phy_page(((uint64_t)pml4eAdd[i]) & 0xFFFFFFFFFFFFF000 & (~COW));
+      //free_phy_page(pml4eAdd[i]);
     }
     pml4eAdd[i] = ((uint64_t)0x0000000000000000) ;
   }
@@ -355,8 +379,8 @@ void deletePageTables()
 void copyOnWritePageTables()
 {
   volatile uint64_t i=0, j=0, k=0, l=0, m=0 ; // iterators for pml4e, pdpe, pde, pte
-  volatile uint64_t *pml4eAdd, *pdpeAdd, *pdeAdd, *pteAdd;  // this is parent
-  volatile uint64_t *new_Add=NULL;
+  volatile uint64_t *pml4eAdd, *pdpeAdd, *pdeAdd, *pteAdd, *phyAdd;  // this is parent
+  volatile uint64_t new_Add;
   /*
   PCB *parentp=NULL;
   PCB *childp=NULL;
@@ -382,7 +406,7 @@ void copyOnWritePageTables()
   }
   uint64_t a1=1;
   a1 = i;
-  new_Add = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, a1));
+  new_Add = (uint64_t)(selfRef(0x1FE, 0x1FE, 0x1FE, a1));
   printf("pml4e=%p, new=%p\n", pml4eAdd, new_Add);
   // Iterate through all the page table entries in the PML4E of the Parent process 
   printf("Now, we will do copying\n");
@@ -408,19 +432,34 @@ void copyOnWritePageTables()
               {
                 if(pteAdd[l])
                 {
+                  phyAdd = (uint64_t *)(selfRef(i, j, k, l));
                   // allocating new physical page for the process
-                  printf("pteAdd[l]=%p ",pteAdd[l]);
-                  uint64_t temp = (uint64_t)pteAdd;
+                  printf("pteAdd[l]=%p ", pteAdd[l]);
+                  uint64_t temp = (uint64_t)phyAdd;
                   pml4eAdd[a1] = ((uint64_t)allocate_free_phy_page() | 7);
                   pteAdd[l] = ((((uint64_t)pteAdd[l]) & 0xFFFFFFFFFFFFF000 & (~COW)) |7);
                   printf("pteAdd[l]=%p ",pteAdd[l]);
+                  printf("phyAdd   =%p ",phyAdd);
                   printf("running CR3=%p\n ",running->cr3);
-                  for(m=0;m<512;m++)
+                  //for(m=0;m<512;m++)
+                  //for(m=0;m<512;m++)
+                  char* check, *source;
+     	            check = (char *) new_Add;
+	                source = (char *) temp;
+                  for(m=0;m<4096;m++)
                   {
-                    new_Add[m] = *((uint64_t*)(temp+m)) ;
+                    /**((uint64_t*)(new_Add+m)) = *((uint64_t*)(temp+m)) ;
+                    //new_Add[m] = *((uint64_t*)(temp+m)) ;
+                    if( *((uint64_t*)(temp+m)) >0)
+                    printf("A: %p : %p : %p :: %p \n", new_Add+m, (uint64_t)temp+m, *((uint64_t*)(new_Add+m)) , *((uint64_t*)(temp+m)));
                     //new_Add[m] = *(((uint64_t*)pteAdd[l])+m) ;
-                    //new_Add[m] = ((uint64_t*)pteAdd[l])[m] ;
+                    //new_Add[m] = ((uint64_t*)pteAdd[l])[m] ;*/
+		              	check[m] = source[m];
+                    //if( source[m] >0)
+                    //printf("B: %p : %p :%p :%p\n", new_Add+m, (uint64_t)temp+m, check[m], source[m]);
+                    // Load(copy) the contents of elf segments in memory at Virtual adress specified in elf byte by byte*/
                   }
+                  //while(1);
                   pteAdd[l] = ((((uint64_t)pml4eAdd[a1] >>12)<<12) | 7);
                   printf("  pteAdd[l]=%p\n",pteAdd[l]);
                 }
@@ -433,6 +472,7 @@ void copyOnWritePageTables()
     }
   }
   pml4eAdd[a1] = ((uint64_t)0x0);
+  printf("Copy On Write Successful\n");
 }
 
 /*
@@ -482,6 +522,7 @@ void test()	// sort of execve in current scenario
   pro->cow=0;
 	_ptcr3(pro->cr3);
   char elf_file[10]="bin/hello";
+  //char elf_file[10]="bin/bash";
 	read_tarfs(pro,elf_file);
 	printf("\n BACK IN TEST");
 	if ((pro->u_stack = process_stack()) == NULL)
@@ -512,7 +553,7 @@ void test()	// sort of execve in current scenario
 	pro->u_stack[0] = pro->rip;
 	pro->rsp = (uint64_t)(pro->u_stack);
   printf("user_stack_rsp%p",pro->rsp);
-	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[511]);
+	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[255]);
 	printf("\n GDT SET");
 	uint64_t tem = 0x28; 
 	__asm volatile("mov %0,%%rax;"::"r"(tem));
@@ -522,7 +563,7 @@ void test()	// sort of execve in current scenario
 	push %0;\
 	pushf;\
 	push $0x1B;\
-	push %1"::"g"(&pro->u_stack[0]),"g"(pro->rip):"memory");
+	push %1"::"g"(&pro->u_stack),"g"(pro->rip):"memory");
 	__asm volatile("\
 	iretq;\
   ");

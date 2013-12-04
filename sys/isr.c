@@ -2,6 +2,7 @@
 #include <sys/isr.h>
 #include <sys/page_table.h>
 #include <sys/task_management.h>
+#include <sys/task_schedule.h>
 #include <sys/v_mem_manager.h>
 #include <stdio.h>
     
@@ -88,7 +89,7 @@ uint64_t isr_handler_80(myregs_t *regs )
 {
    uint64_t ret = 0;
    uint64_t num_bytes = 0;
-   uint64_t f=-2, str = 0;
+   uint64_t f=-2, str = 0, filename = 0;
    f++;
    //__asm__ volatile("movq %%rdi,%0;":"=m"(rdi1)::);
    //registers_t* regs = (registers_t*)rdi1;
@@ -121,6 +122,14 @@ uint64_t isr_handler_80(myregs_t *regs )
         ret =(uint64_t)scanf((char*)str,addr);
         regs->rax = ret;
         break;
+      case(6):
+        schedule_process();
+        break;
+      case(7):
+        filename = regs->rbx;
+        doExec((char*)filename);
+        break;
+
       default:
         return 0;
     }

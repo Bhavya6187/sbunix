@@ -28,16 +28,21 @@ struct pcb_t
 	VMA *mm_st;	// Pointer to First VMA Block of the Process 
 	uint64_t cr3;	// Coontents of CR3 Register. (add of PML4E page table)
 	uint64_t cow;	// Value of COW bit will tell how many processes with current process as parent are present 
+	uint64_t sleep_start;	
+	uint64_t sleep_duration;	
 	uint64_t rip;
-	uint64_t rax;
-	uint64_t rbx;
+  uint64_t rax;
+	/*
+  uint64_t rbx;
 	uint64_t rcx;
 	uint64_t rdx;
 	uint64_t rsi;
 	uint64_t rdi;
 	uint64_t rbp;
+  */
 	uint64_t rsp;	
-	uint64_t r8;
+	/*
+  uint64_t r8;
 	uint64_t r9;
 	uint64_t r10;
 	uint64_t r11;
@@ -45,9 +50,12 @@ struct pcb_t
 	uint64_t r13;
 	uint64_t r14;
 	uint64_t r15;
-	uint64_t kernel_stack[512];	//abhi check for the size
+  */
+	uint64_t kernel_stack[256];	//abhi check for the size
 };
+
 typedef struct pcb_t PCB;
+
 
 // Creating a Doubly Linked List
 struct taskList {
@@ -69,6 +77,7 @@ PCB *get_curr_PCB();
 PCB *create_pcb();	// DO initial Setup on a new process creation
 VMA *create_vma(uint64_t start, uint64_t size);	// Creates VMA structure for each segment 
 uint64_t doFork();
+void doExec(char* filename);
 void exit_process(int status);
 void wait_pid(uint64_t pid);
 void wait_p();

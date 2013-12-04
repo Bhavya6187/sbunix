@@ -9,9 +9,9 @@
 */
 
 _irq_032:
-  cli
+  #cli
   jmp isr_common_stub  # Go to our common handler. 
-  sti
+  #sti
   iretq
 
 isr_common_stub:
@@ -19,8 +19,8 @@ isr_common_stub:
   pushq %rbx
   pushq %rcx
   pushq %rdx
+  pushq %rdi
   pushq %rsi
-  pushq %rbp
   pushq %r8
   pushq %r9
   pushq %r10
@@ -40,13 +40,12 @@ isr_common_stub:
   popq %r10
   popq %r9
   popq %r8
-  popq %rbp
+  popq %rdi
   popq %rsi
   popq %rdx
   popq %rcx
   popq %rbx
   popq %rax        # Pops the general purpose registers GPR's R8-R15 also might come
-  sti
   iretq           
 
 

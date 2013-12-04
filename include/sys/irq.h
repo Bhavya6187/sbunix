@@ -9,6 +9,7 @@ typedef struct regist
      uint64_t rip, cs, eflags, rsp, ss; // Pushed by the processor automatically.
 } registers_sch; 
 
+extern volatile uint64_t sec ;
 extern registers_sch *regs_sch; 
 void init_pic();
 void irq_handler_0(registers_sch regs);

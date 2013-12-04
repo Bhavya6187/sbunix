@@ -18,11 +18,11 @@ struct ad
 
 int main(int argc, char* argv[]) 
 {
-  /*uint64_t ret=0;
-  char s[5] = "abcd";
-  ret= u_printf("bhavya\n");
-  u_printf("ret=%d\n", ret);
-  __syscall1(SYSCALL_PUTINT,ret);
+  u_printf("dushyant says hi !!\n");
+  u_printf("ret=%d\n", 34);
+  while(1);
+  
+  /*__syscall1(SYSCALL_PUTINT,ret);
   ret = u_printf("hi i am not bhavya\n");
   u_printf("ret=%d\n", ret);
   __syscall1(SYSCALL_PUTINT,ret);
@@ -43,16 +43,14 @@ int main(int argc, char* argv[])
   //u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
   //u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
   //u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
-  int ret1 = __syscall0(SYSCALL_FORK);
+  /*int ret1 = __syscall0(SYSCALL_FORK);
   
   if(ret1==0)
   {
     u_printf("fork return:%d:", ret1);
     u_printf("This is child !! \n");
-    char filename[10] = "bin/hello\0";
-    ret1 = __syscall1(SYSCALL_EXECVE,(uint64_t)(filename));
-    while(1);
-      u_printf("Hiiii\n");
+      while(1)
+        u_printf("Hiiii\n");
   }
   else
   {
@@ -60,13 +58,13 @@ int main(int argc, char* argv[])
     {
       u_printf("fork return:%d:", ret1);
       u_printf("This is parent!! \n");
-      ret1 = __syscall0(SYSCALL_SCHEDULER);
+      //ret1 = __syscall0(SYSCALL_SCHEDULER);
       while(1)
         u_printf("Fuck UUUUU\n");
       //u_printf("LALALALLALALALALLALA !! ... \n");
     }
 
-  }
+  }*/
 
   //u_printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"); 
   

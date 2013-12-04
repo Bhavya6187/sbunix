@@ -1,11 +1,13 @@
 // Code for Task/Process Management
 
 # include <sys/task_management.h>
+# include <sys/task_schedule.h>
 # include <sys/page_table.h>
 # include <sys/tasking.h>
 # include <sys/v_mem_manager.h>
 # include <stdio.h>
 # include <sys/gdt.h>
+# include <sys/irq.h>
 # include <sys/tarfs.h>
 
 extern void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
@@ -226,10 +228,10 @@ VMA *create_vma(uint64_t start_add, uint64_t size)
 // Fork() Creating a child process from a parent
 uint64_t doFork()
 {
-	__asm volatile("cli");
 	PCB *pro = NULL;
 	PCB *parent_process;
-  parent_process = get_curr_PCB();
+  //parent_process = get_curr_PCB();
+  parent_process = running;
 	pro = create_pcb();
 
   m_map((uint64_t)pro, (uint64_t)(get_curr_PCB()), (uint64_t)(sizeof(struct pcb_t)), (uint64_t)(sizeof(struct pcb_t)) );
@@ -248,7 +250,9 @@ uint64_t doFork()
   /// -----------------------------------------------------------------------------------------
 
   //copy the page tables of parent process !!
-  copyUST(pro);
+  //copyUST(pro);
+  checkUST(pro);
+  checkUST(running);
   copyPageTables(pro, parent_process);
   printf("PageTable copying done\n");
 
@@ -257,12 +261,14 @@ uint64_t doFork()
   printf("Current PID=%p\n", get_curr_PID());
   printf("Current Process=%p \n", get_curr_PCB());
   printf("Current Process from RUNNING=%p \n", running);
+  printf("CP Cr3=%p Chid Cr3=%p\n", running->cr3, pro->cr3);
   // Add it to task linked list !!
   runnableTaskQ = addToTailTaskList(runnableTaskQ, pro); 
   no_runnableQ++;
   // return 0 to the calling process
   //m_map( (uint64_t)pro->u_stack, (uint64_t)(parent_process->u_stack), (uint64_t)(4096), (uint64_t)(4096) );
 	printf("\n Trying to Fork()\n");
+  //copyOnWritePageTables();
   // update the cr3 to process->cr3
   /*if ((pro->u_stack = process_stack()) == NULL)
 	{
@@ -303,23 +309,84 @@ uint64_t doFork()
 		:"r"((pro->rsp))
 	        :"memory"
 	);*/
-
+  
+  // Setting up the rax for both parent and child
+  GREG *pp1 = (GREG *) &(running->kernel_stack[235]);
+  GREG *cc1 = (GREG *) &(pro->kernel_stack[235]);
+  printf("\n TE:%x:%x", pp1->rax, cc1->rax);
+  pp1->rax = pro->pid;
+  cc1->rax = 0x0; 
+  printf("\n TE:%x:%x", pp1->rax, cc1->rax);
   if (running->pid == pro->ppid)
   {
     printf("This is the parent ! Returning with pid=%p, parent/running pid=%p\n", pro->pid, running->pid);
     //Set everything for our child for it to execute in its registers
     //parent_process->
-	  __asm volatile("sti");
+	  //__asm volatile("sti");
     //while(1);
     return pro->pid;
   }
   else
   {
     printf("This is the CHILD !!\n");
-	  __asm volatile("sti");
+	  //__asm volatile("sti");
     return 0;
   }
   //printf("Returning from fork() .. pid=%p, running pid=%p\n", pid, running->pid);
+
+}
+
+
+// Fork() Creating a child process from a parent
+//void doExec(char* filename, char* argv, char *en[])
+void doExec(char* filename)
+{
+ 
+  PCB *pro;
+  pro = running;
+
+  // delete all page table entries
+  deletePageTables();
+  
+  printf("In Exec :: check PID=%p, cr3=%p ppid=%p\n", pro->pid, pro->cr3, pro->ppid);
+	
+  // Hope CR3 is already switched
+  //_ptcr3(pro->cr3);
+  
+  // ------------------------------------------- Zero out the kernel stack as well
+  int i=0;
+  for(i=0; i<256; i++)
+    pro->kernel_stack[i]=0x0;
+
+  //char elf_file[10]="bin/world";
+  //char elf_file[10]="bin/bash";
+	//read_tarfs(pro,elf_file);
+	read_tarfs(pro, filename);
+	printf("We will execute - %s\n", filename);
+	//printf("We will execute - %s\n", elf_file);
+	if ((pro->u_stack = process_stack()) == NULL)
+	{
+		printf("\n Cant allocate memory for process User stack");
+		//exit();
+	}	
+  
+	pro->u_stack[0] = pro->rip;
+	pro->rsp = (uint64_t)(pro->u_stack);
+  printf("user_stack_rsp%p",pro->rsp);
+	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[255]);
+	printf("In Execve()  GDT SET\n");
+	uint64_t tem = 0x28; 
+	__asm volatile("mov %0,%%rax;"::"r"(tem));
+	__asm volatile("ltr %ax");
+	__asm volatile("\
+	push $0x23;\
+	push %0;\
+	pushf;\
+	push $0x1B;\
+	push %1"::"g"(&pro->u_stack),"g"(pro->rip):"memory");
+	__asm volatile("\
+	iretq;\
+  ");
 
 }
 
@@ -389,7 +456,23 @@ void wait_p()
   }
 }
 
+// Sleeps for a specified number of seconds (time in secs)
+// sec is a global variable which has count of number of seconds elapsed 
+void sleep(uint64_t time)
+{
 
+  running->sleep_start = sec;
+  running->sleep_duration = time;
+  runnableTaskQ = removeFromTaskList(runnableTaskQ, running);
+  waitTaskQ = addToTailTaskList(waitTaskQ, running);
+  // if(sec - sleep_start > time) 
+  //     do the following !! 
+
+  // call schedule here to schedule another process
+  // Make sure to check for the waiting processes to move them from waitQ to the runnableQ
+  // schedule();
+
+}
 
 // Schedule function for context switching between two processes.. Hope it should work for both kernel and user processes
 void scheduler1()

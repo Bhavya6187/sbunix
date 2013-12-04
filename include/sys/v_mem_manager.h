@@ -7,6 +7,7 @@
 # define BASE 0x200000
 # define PAGE_SIZE 4096
 
+extern void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 uint64_t opfree;
 extern uint64_t cur_VK;		// Current free Virtual Memory above Physfree;
 void *k_malloc(uint64_t no);	// VM allocator
@@ -16,6 +17,9 @@ void *p_malloc(uint64_t no);	// VM allocator for Process space brk()
 
 /* maps elf binaries segments into Virtual Memory*/
 uint32_t m_map(uint64_t start, uint64_t source, uint64_t f_size, uint64_t m_size);
+
+// checks the contents of userstack and returns the count of non zero entries
+int checkUST(PCB *pro);
 
 // Copies paretn userstack to child by the way of switching CR3
 int copyUST(PCB *childp);
