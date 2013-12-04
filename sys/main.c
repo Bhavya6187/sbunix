@@ -8,6 +8,9 @@
 #include <sys/page_table.h>
 #include <sys/tasking.h>
 #include <sys/tarfs.h>
+#include <sys/dirent.h>
+#include <sys/string.h>
+#include <sys/errno.h>
 #include <sys/v_mem_manager.h>
 
 
@@ -112,7 +115,13 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
      printf("\n scanf returned %s",str);
   else
      printf("\n scanf returned error");*/
-  test();
+  dirent* dirt = (dirent*)k_malloc(sizeof(dirent));
+  
+  printf("%p",dirt);
+
+  list();
+ // printf("%p\n",findfirst("bin/",'a', dirt));
+//  test();
   while(1);
   //test();
 }

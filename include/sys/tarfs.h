@@ -7,6 +7,7 @@
 extern char _binary_tarfs_start;
 extern char _binary_tarfs_end;
 
+int size_to_int(char* size);
 struct posix_header_ustar {
 	char name[100];
 	char mode[8];
