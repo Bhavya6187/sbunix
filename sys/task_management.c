@@ -16,10 +16,10 @@
 
 
 extern void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
-struct taskList *waitTaskQ;
-struct taskList *allTaskQ;
-struct taskList *runnableTaskQ;
-struct taskList *deadTaskQ;
+struct taskList *waitTaskQ = NULL;
+struct taskList *allTaskQ = NULL;
+struct taskList *runnableTaskQ = NULL;
+struct taskList *deadTaskQ = NULL;
 
 int no_waitQ=0, no_allQ=0, no_runnableQ=0;
 PCB * running;
@@ -43,9 +43,10 @@ struct taskList *addToHeadTaskList(struct taskList *list, struct pcb_t *new_pcb)
 {
     struct taskList *temp = (struct taskList *)k_malloc(sizeof(struct taskList));
     temp->task = new_pcb;
-    list->prev = temp;
     temp->next = list;
     temp->prev = NULL;
+    if(list!=NULL)
+      list->prev = temp;
     return temp;
 }
 
@@ -53,10 +54,10 @@ struct taskList *addToTailTaskList(struct taskList *list, struct pcb_t *new_pcb)
 {
     struct taskList *temp = (struct taskList *)k_malloc(sizeof(struct taskList));
     struct taskList *start = list;
-    temp->task = new_pcb;
-    list->prev = temp;
-    temp->next = list;
-    temp->prev = NULL;
+    //temp->task = new_pcb;
+    //list->prev = temp;
+    //temp->next = list;
+    //temp->prev = NULL;
     
     temp->next = NULL;
     temp->task = new_pcb;
@@ -395,7 +396,7 @@ void exit_process(int status)
   temp = waitTaskQ;
   if(temp==NULL)
     printf("There are no processes in the WaitQ strange ???\n");
-  while(temp->next !=NULL)
+  while(temp)
   {
     if(temp->task->pid == running->ppid) // parent found in the waitQ --- move it to the runnableQ 
     {
