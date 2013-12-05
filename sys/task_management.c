@@ -9,6 +9,11 @@
 # include <sys/gdt.h>
 # include <sys/irq.h>
 # include <sys/tarfs.h>
+# include <sys/string.h>
+# include <sys/errno.h>
+# include <sys/tarfs.h>
+# include <sys/dirent.h>
+
 
 extern void _ptcr3(uint64_t ); //setting cr3 register to kick start paging
 struct taskList *waitTaskQ;
@@ -284,7 +289,7 @@ uint64_t doFork()
   //m_map( (uint64_t)pro->u_stack, (uint64_t)(parent_process->u_stack), (uint64_t)(4096), (uint64_t)(4096) );
 	printf("\n Trying to Fork()\n");
   
-  copyOnWritePageTables();
+  //copyOnWritePageTables();
   _ptcr3(running->cr3);
   // update the cr3 to process->cr3
   /*if ((pro->u_stack = process_stack()) == NULL)
@@ -327,12 +332,13 @@ uint64_t doFork()
 
 // Fork() Creating a child process from a parent
 //void doExec(char* filename, char* argv, char *en[])
-void doExec(char* filename)
+void doExec(char *fn)
 {
  
   PCB *pro;
   pro = running;
-
+  char filename[40];
+  strcpy(filename, fn);
   // delete all page table entries
   deletePageTables();
   
@@ -345,6 +351,10 @@ void doExec(char* filename)
     pro->kernel_stack[i]=0x0;
   */
 
+  
+  //char *filename2;
+  //filename2 = filename;
+	//read_tarfs(pro, "bin/world");
 	read_tarfs(pro, filename);
 	printf("We will execute - %s\n", filename);
 	if ((pro->u_stack = process_stack()) == NULL)

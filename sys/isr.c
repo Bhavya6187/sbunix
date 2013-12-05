@@ -76,6 +76,7 @@ void isr_handler_14(registers_t regs)
       {
         printf("COW bit is 1 i.e. fork() has been done for this process\n");
         copyOnWritePageTables();
+        _ptcr3(running->cr3);
         //Allocate new pages for the child or the parent.. yet to be done
       }
     }

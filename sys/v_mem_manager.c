@@ -241,8 +241,8 @@ uint64_t map_pageTable(PCB *np)
 }
 
 #define    R0 0xFFFFFFFFFFFFFFFD //1 bit set as read bit, so no write access
-#define ACCES 0xFFFFFFFFFFFFFFDF //1 bit set as read bit, so no write access
-#define DIRTY 0xFFFFFFFFFFFFFFBF //1 bit set as read bit, so no write access
+#define ACCES 0xFFFFFFFFFFFFFFDF 
+#define DIRTY 0xFFFFFFFFFFFFFFBF 
 #define   COW 0x0008000000000000 //52 bit set as COW bit
 // Copying pagetables and setting COW bits for the present physical pages !!
 /*
@@ -369,10 +369,10 @@ void copyPageTables(PCB *child, PCB *parent)
                 {
                   // setting COW 52 bit as 1 and give read only access to the physical page
                   // for both parent and child
-                  //new_pteAdd[l] = ((((uint64_t)pteAdd[l]) & R0 & ACCES & DIRTY) | COW);
-                  //pteAdd[l]     = ((((uint64_t)pteAdd[l]) & R0 & ACCES & DIRTY) | COW);
-                  new_pteAdd[l] = ((uint64_t)pteAdd[l]);
-                  pteAdd[l]     = ((uint64_t)pteAdd[l]);
+                  new_pteAdd[l] = ((((uint64_t)pteAdd[l]) & R0 & ACCES & DIRTY) | COW);
+                  pteAdd[l]     = ((((uint64_t)pteAdd[l]) & R0 & ACCES & DIRTY) | COW);
+                  //new_pteAdd[l] = ((uint64_t)pteAdd[l]);
+                  //pteAdd[l]     = ((uint64_t)pteAdd[l]);
                   printf("new add=%p, old add=%p\n", new_pteAdd[l], pteAdd[l]);
                   total_count++;
                 }
