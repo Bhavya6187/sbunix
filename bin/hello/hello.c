@@ -2,7 +2,7 @@
 # include <syscall.h>
 # include <libc/malloc.h>
 #include <stdarg.h>
-#include<defs.h>
+#include <defs.h>
 
 struct ad
 {
@@ -51,12 +51,13 @@ int main(int argc, char* argv[])
   if(ret1==0)
   {
     //temp = 20;
-    //u_printf("fork return:%d:", ret1);
-    //u_printf("This is child !! \n");
+    u_printf("fork return:%d:", ret1);
+    u_printf("This is child !! \n");
     //__syscall1(SYSCALL_EXIT, 0);
+    //exit(0);
     //ret1 = __syscall1(SYSCALL_EXECVE,(uint64_t)(filename));
     execve(filename);
-    //u_printf("In child return from exec()\n");
+    u_printf("In child return from exec()\n");
     while(1);
       u_printf("Hiiii\n");
   }
@@ -66,15 +67,19 @@ int main(int argc, char* argv[])
     {
       u_printf("fork return:%d:", ret1);
       u_printf("This is parent!! \n");
-      ret1 = __syscall0(SYSCALL_SCHEDULER);
+      //ret1 = __syscall0(SYSCALL_SCHEDULER);
+      yield();
       //while(1);
+      u_printf("Returning back from schedule in parent!! \n");
       //  u_printf("Fuck UUUUU\n");
-      while(1);
+      yield();
+      //ret1 = __syscall0(SYSCALL_SCHEDULER);
+      while(1)
       {
         for(i=0;i<500;i++)
         for(j=0;j<500;j++)
           ;
-        u_printf("%c", 'D');
+        //u_printf("In Parent after schedule\n");
       }
       //u_printf("LALALALLALALALALLALA !! ... \n");
     }

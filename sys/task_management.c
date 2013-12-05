@@ -332,13 +332,13 @@ uint64_t doFork()
 
 // Fork() Creating a child process from a parent
 //void doExec(char* filename, char* argv, char *en[])
-void doExec(char *fn)
+void doExec(char *filename)
 {
  
   PCB *pro;
   pro = running;
-  char filename[40];
-  strcpy(filename, fn);
+  //char filename[40];
+  //strcpy(filename, fn);
   // delete all page table entries
   deletePageTables();
   
@@ -375,7 +375,7 @@ void doExec(char *fn)
 	push %0;\
 	pushf;\
 	push $0x1B;\
-	push %1"::"g"(&pro->u_stack),"g"(pro->rip):"memory");
+	push %1"::"g"(pro->u_stack),"g"(pro->rip):"memory");
 	__asm volatile("\
 	iretq;\
   ");

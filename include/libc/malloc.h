@@ -7,4 +7,5 @@ void *malloc(uint64_t no_bytes);	// User space malloc implementation
 uint64_t fork();			// User space fork wrapper
 void execve(char *filename);
 void yield();
+void exit(int status);
 #endif

@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
   u_printf("\n in dirent structure = %s\n",dir->d_name);
   u_closedir(directory);
   */
-  while(1);
+  //while(1);
   
 	return 0;
 }

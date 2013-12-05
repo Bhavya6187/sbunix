@@ -66,6 +66,11 @@ void *malloc(uint64_t no_bytes)
 	return ((void *) tmp);
 }	
 
+// Yield
+void yield()
+{
+	__syscall0(SYSCALL_SCHEDULER);
+}
 
 // Fork System call wrapper
 uint64_t fork()
