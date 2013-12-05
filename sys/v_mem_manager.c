@@ -245,6 +245,73 @@ uint64_t map_pageTable(PCB *np)
 #define DIRTY 0xFFFFFFFFFFFFFFBF //1 bit set as read bit, so no write access
 #define   COW 0x0008000000000000 //52 bit set as COW bit
 // Copying pagetables and setting COW bits for the present physical pages !!
+/*
+void copyPageTables(PCB *child, PCB *parent)
+{
+  uint64_t i, j, k, l; // iterators for pml4e, pdpe, pde, pte
+  uint64_t *pml4eAdd, *pdpeAdd, *pdeAdd, *pteAdd;
+  uint64_t *a1=NULL, *a2=NULL, *a3=NULL, *a4=NULL; 
+  uint64_t child_pml4e_entry;
+  
+  child_pml4e_entry = child->pml4e_entry;
+  printf("Child PML4E entry =%p\n", child_pml4e_entry);
+  pml4eAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, 0x1FE));
+  // Iterate through all the page table entries in the PML4E of the Parent process 
+  for(i=0; i<510; i++)
+  {
+    if( i==child_pml4e_entry)
+      continue;
+
+    if(pml4eAdd[i]!=0) // if some entry exists we have to copy
+    {
+      pdpeAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, i));
+      for( j=0; j<512; j++)
+      {
+        if(pdpeAdd[j])
+        {
+          pdeAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, i, j));
+          for( k=0; k<512; k++)
+          {
+            if(pdeAdd[k])
+            {
+              pteAdd = (uint64_t *)(selfRef(0x1FE, i, j, k));
+              for(l=0; l<512; l++)
+              {
+                if(pteAdd[l])
+                {
+                  pteAdd[l]  = ((((uint64_t)pteAdd[l]) & R0 & ACCES & DIRTY) | COW);
+                  uint64_t temp = pteAdd[l];
+                  _ptcr3(child->cr3); 
+                  a1 = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, 0x1FE));
+                  a2 = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, i));
+                  a3 = (uint64_t *)(selfRef(0x1FE, 0x1FE, i, j));
+                  a4 = (uint64_t *)(selfRef(0x1FE, i, j, k));
+                  if(a1[i]==0)
+                    a1[i] = (((uint64_t) allocate_free_phy_page()) | 7);
+                  if(a2[j]==0)
+                    a2[j] = (((uint64_t) allocate_free_phy_page()) | 7);
+                  if(a3[k]==0)
+                    a3[k] = (((uint64_t) allocate_free_phy_page()) | 7);
+                  
+                  a4[l] = temp;
+                  _ptcr3(parent->cr3); 
+                  // setting COW 52 bit as 1 and give read only access to the physical page
+                  // for both parent and child
+                }
+              }
+            }
+          }
+
+        }
+      }
+    }
+  }
+  //Setting pml4e child->pml4e entry to zero Dushyant check !!
+  pml4eAdd[child->pml4e_entry]=0x0;
+}
+*/
+
+// Copying pagetables and setting COW bits for the present physical pages !!
 void copyPageTables(PCB *child, PCB *parent)
 {
   uint64_t i, j, k, l; // iterators for pml4e, pdpe, pde, pte
@@ -302,8 +369,10 @@ void copyPageTables(PCB *child, PCB *parent)
                 {
                   // setting COW 52 bit as 1 and give read only access to the physical page
                   // for both parent and child
-                  new_pteAdd[l] = ((((uint64_t)pteAdd[l]) & R0 & ACCES & DIRTY) | COW);
-                  pteAdd[l]     = ((((uint64_t)pteAdd[l]) & R0 & ACCES & DIRTY) | COW);
+                  //new_pteAdd[l] = ((((uint64_t)pteAdd[l]) & R0 & ACCES & DIRTY) | COW);
+                  //pteAdd[l]     = ((((uint64_t)pteAdd[l]) & R0 & ACCES & DIRTY) | COW);
+                  new_pteAdd[l] = ((uint64_t)pteAdd[l]);
+                  pteAdd[l]     = ((uint64_t)pteAdd[l]);
                   printf("new add=%p, old add=%p\n", new_pteAdd[l], pteAdd[l]);
                   total_count++;
                 }
@@ -320,6 +389,8 @@ void copyPageTables(PCB *child, PCB *parent)
   printf("Total no of entries finally added in PTE's :: %p",total_count);
   printf("Total no of pages allocated for PageTables :: %p %p %p",tp1, tp2, tp3);
 }
+
+
 
 // Deleting pagetables for execve()
 // Make sure that the CR3 is set for this process
@@ -384,23 +455,139 @@ void deletePageTables()
 // Make sure that the CR3 is set for the current running process
 void copyOnWritePageTables()
 {
+//  _set_k_ptable_cr3(pr->cr3);
+  volatile uint64_t i=0, j=0, k=0, l=0, m=0, ni = 0; // iterators for pml4e, pdpe, pde, pte
+  volatile uint64_t *pml4eAdd, *pdpeAdd, *pdeAdd, *pteAdd, *cppg;  // this is parent
+  volatile uint64_t *new_Add=NULL;
+  uint64_t t1=0, t2=0, t3=0, t4=0;
+
+  pml4eAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, 0x1FE));
+  // searching for a zero entry in the page tables to allocate a new page
+  for(i=0; i<509; i++)
+  {
+    if(pml4eAdd[i] == 0x0) // if some entry exists we have to copy
+    {
+      break;
+    }
+  }
+  uint64_t a1=1;
+  a1 = i;
+
+  pml4eAdd[a1] = ((uint64_t)allocate_free_phy_page() | 7);
+  new_Add = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, a1));
+  
+  printf("pml4e=%p, new=%p\n", pml4eAdd, new_Add);
+  // Iterate through all the page table entries in the PML4E of the Parent process 
+  printf("Now, we will do copying\n");
+  for(i=0; i<510; i++)
+  {
+    if(i==a1)
+      continue;
+
+    if(pml4eAdd[i] != 0x0) // if some entry exists we have to copy
+    {
+    	++t1;
+      pdpeAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, i));
+      for( j=0; j<512; j++)
+      {
+        if(pdpeAdd[j] != 0x0)
+        { 
+		      ++t2;
+          pdeAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, i, j));
+          for( k=0; k<512; k++)
+          {
+            if(pdeAdd[k] != 0x0)
+            {
+	    	      ++t3;
+              pteAdd = (uint64_t *)(selfRef(0x1FE, i, j, k));
+              for(l=0; l<512; l++)
+              {
+                if(pteAdd[l])
+                {
+			            ++t4;
+		              uint64_t toto1 = (uint64_t )(selfRef(i,j,k,l));
+                  // allocating new physical page for the process
+                  printf("pteAdd[l]=%p ",pteAdd[l]);
+		              new_Add[ni] = ((uint64_t)allocate_free_phy_page() | 7);
+		              if (ni >511)
+		              {
+		  	            printf("\n LIMIT EXCEDED");
+		              }	
+		              cppg = (uint64_t *)(selfRef(0x1FE, 0x1FE,a1,ni));
+                  printf("pteAdd[l]=%p ",pteAdd[l]);
+//                  printf("running CR3=%x\n ",running->cr3);
+		              char *src = (char *) toto1;
+		              char *dst = (char *) cppg;
+                  for(m=0;m<4096;m++)
+                  {
+		                char temp99 = src[m];
+		                dst[m] = temp99;		
+                  }
+                  pteAdd[l] = ((((uint64_t)new_Add[ni] >>12)<<12) | 7);
+                  printf("  pteAdd[l]=%p\n",pteAdd[l]);
+		              ni++;
+                }
+              }
+            }
+          }
+
+        }
+      }
+    }
+  }
+  pml4eAdd[a1] = ((uint64_t)0x0);
+//  _set_k_ptable_cr3(running->cr3);
+printf("\n TOTAL ENTRY FOR COW:%x:%x:%x:%x",t1,t2,t3,t4);
+}
+
+
+void ckop()
+{
+	uint64_t i = 0, j = 0, k = 0, l =0;
+	uint64_t *p4 = NULL, *p3 = NULL, *p2 = NULL, *p1 = NULL;
+
+	p4 = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, 0x1FE));
+	
+	for (i = 0; i < 510; i ++)
+	{
+		if (p4[i])
+		{
+			p3 = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, i));
+			for (j = 0; j < 512; j++)
+			{
+				if (p3[j])
+				{
+					p2 = (uint64_t *)(selfRef(0x1FE, 0x1FE, i, j));
+					for (k = 0;k < 512; k++)
+					{
+						if (p2[k])
+						{
+							p1 = (uint64_t *)(selfRef(0x1FE, i, j, k));
+							for (l = 0; l< 512; l++)
+							{
+								if (p1[l])
+								{
+									printf("\n PTE:%d:%d:%d:%d:%p", i,j,k,l,p1[l]);
+								}
+							}		
+						}	
+					}	
+				}	
+			}	
+		}	
+	}	
+}	
+/*****************************************************************************************************************************/
+
+
+/*
+// CR3 Switching Implementation for Testing :P
+
+void copyOnWritePageTables()
+{
   volatile uint64_t i=0, j=0, k=0, l=0, m=0 ; // iterators for pml4e, pdpe, pde, pte
   volatile uint64_t *pml4eAdd, *pdpeAdd, *pdeAdd, *pteAdd, *phyAdd;  // this is parent
   volatile uint64_t new_Add;
-  /*
-  PCB *parentp=NULL;
-  PCB *childp=NULL;
-
-  // At this point we dont know whether it is parent or child who has to be allocated new pages
-  childp = running; 
-  if(running->cow == 1) // This is definitely a child ... we will copy pages from its parent and reset COW bits of parent
-  {
-    childp = running;
-    parentp = get_parent_PCB(running->ppid);
-  }
-  uint64_t child_pml4e_entry;
-  uint64_t total_count=0, tp1=0, tp2=0, tp3=0;
-  */
   pml4eAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, 0x1FE));
   // searching for a zero entry in the page tables to allocate a new page
   for(i=2; i<509; i++)
@@ -412,7 +599,8 @@ void copyOnWritePageTables()
   }
   uint64_t a1=1;
   a1 = i;
-  new_Add = (uint64_t)(selfRef(0x1FE, 0x1FE, 0x1FE, a1));
+  new_Add = (uint64_t)
+  (selfRef(0x1FE, 0x1FE, 0x1FE, a1));
   printf("pml4e=%p, new=%p\n", pml4eAdd, new_Add);
   // Iterate through all the page table entries in the PML4E of the Parent process 
   printf("Now, we will do copying\n");
@@ -438,36 +626,32 @@ void copyOnWritePageTables()
               {
                 if(pteAdd[l])
                 {
-                  phyAdd = (uint64_t *)(selfRef(i, j, k, l));
+                  ++t4;
+                  uint64_t toto1 = (uint64_t )(selfRef(i,j,k,l));
                   // allocating new physical page for the process
-                  printf("pteAdd[l]=%p ", pteAdd[l]);
-                  uint64_t temp = (uint64_t)phyAdd;
-                  pml4eAdd[a1] = ((uint64_t)allocate_free_phy_page() | 7);
+                  printf("pteAdd[l]=%x ",pteAdd[l]);
+                  pml4eAdd[a1] = ((uint64_t)get_page() | 7);
+                  new_Add[ni] = ((uint64_t)get_page() | 7);
+                  if (ni >511)
+                  {
+                    printf("\n LIMIT EXCEDED");
+                  } 
+                  cppg = (uint64_t *)(selfRef(0x1FE, 0x1FE,a1,ni));
                   pteAdd[l] = ((((uint64_t)pteAdd[l]) & 0xFFFFFFFFFFFFF000 & (~COW)) |7);
-                  printf("pteAdd[l]=%p ",pteAdd[l]);
-                  printf("phyAdd   =%p ",phyAdd);
-                  printf("running CR3=%p\n ",running->cr3);
-                  //for(m=0;m<512;m++)
-                  //for(m=0;m<512;m++)
-                  char* check, *source;
-     	            check = (char *) new_Add;
-	                source = (char *) temp;
+                  printf("pteAdd[l]=%x ",pteAdd[l]);
+                  printf("running CR3=%x\n ",running->cr3);
+                  char *src = (char *) toto1;
+                  char *dst = (char *) cppg;
                   for(m=0;m<4096;m++)
                   {
-                    /**((uint64_t*)(new_Add+m)) = *((uint64_t*)(temp+m)) ;
-                    //new_Add[m] = *((uint64_t*)(temp+m)) ;
-                    if( *((uint64_t*)(temp+m)) >0)
-                    printf("A: %p : %p : %p :: %p \n", new_Add+m, (uint64_t)temp+m, *((uint64_t*)(new_Add+m)) , *((uint64_t*)(temp+m)));
-                    //new_Add[m] = *(((uint64_t*)pteAdd[l])+m) ;
-                    //new_Add[m] = ((uint64_t*)pteAdd[l])[m] ;*/
-		              	check[m] = source[m];
-                    //if( source[m] >0)
-                    //printf("B: %p : %p :%p :%p\n", new_Add+m, (uint64_t)temp+m, check[m], source[m]);
-                    // Load(copy) the contents of elf segments in memory at Virtual adress specified in elf byte by byte*/
-                  }
-                  //while(1);
-                  pteAdd[l] = ((((uint64_t)pml4eAdd[a1] >>12)<<12) | 7);
-                  printf("  pteAdd[l]=%p\n",pteAdd[l]);
+                    char temp99 = src[m];
+                    dst[m] = temp99;    
+                 }
+                 pteAdd[l] = ((((uint64_t)new_Add[ni] >>12)<<12) | 7);
+                 PTAB *fin2 = (PTAB *) toto1;
+                 printf("\n PTENEW:511:%x", fin2->p[511]);
+                 printf("  pteAdd[l]=%x",pteAdd[l]);
+                 ni++;
                 }
               }
             }
@@ -480,6 +664,7 @@ void copyOnWritePageTables()
   pml4eAdd[a1] = ((uint64_t)0x0);
   printf("Copy On Write Successful\n");
 }
+*/
 
 /*
 * Creates User mode dynamic stack for the process through Page Faults and Self Refrencing
@@ -509,6 +694,7 @@ uint64_t *process_stack()
 	return top;	//returns the top of the virtual page 4KB page as stack grows downwards
 }	
 
+
 void test()	// sort of execve in current scenario
 {
 	PCB *pro = NULL;
@@ -527,8 +713,8 @@ void test()	// sort of execve in current scenario
   pro->ppid=0;
   pro->cow=0;
 	_ptcr3(pro->cr3);
-  char elf_file[10]="bin/world";
   //char elf_file[10]="bin/world";
+  char elf_file[10]="bin/hello";
   //char elf_file[10]="bin/bash";
 	read_tarfs(pro,elf_file);
 	printf("\n BACK IN TEST");
@@ -544,19 +730,6 @@ void test()	// sort of execve in current scenario
   running = pro;
 	/* Running new process */
 	
-//	running = pro;	// Pointer which keeps track of currently running process	
-/*	pro->kernel_stack[63] = pro->rip;
-	pro->rsp = (uint64_t)&(pro->kernel_stack[63]);
-	__asm__(
-	   "movq %0, %%rsp;"
-	   :
-	   :"r"((pro->rsp))
-	);
-
-	__asm__(
-	   "retq;"
-	);
-*/
 	pro->u_stack[0] = pro->rip;
 	pro->rsp = (uint64_t)(pro->u_stack);
   printf("user_stack_rsp%p",pro->rsp);
@@ -570,7 +743,7 @@ void test()	// sort of execve in current scenario
 	push %0;\
 	pushf;\
 	push $0x1B;\
-	push %1"::"g"(&pro->u_stack),"g"(pro->rip):"memory");
+	push %1"::"g"(pro->u_stack),"g"(pro->rip):"memory");
 	__asm volatile("\
 	iretq;\
   ");

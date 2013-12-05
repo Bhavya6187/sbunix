@@ -115,7 +115,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
      printf("\n scanf returned %s",str);
   else
      printf("\n scanf returned error");*/
-struct dirent* dir = (struct dirent*)k_malloc(sizeof(dir));
+/*struct dirent* dir = (struct dirent*)k_malloc(sizeof(dir));
   strncpy(dir->d_name,"etc/",256);
   dir->offset = 0;
   printf("-----------%d", findfirst("etc/", 'a' , dir ));
@@ -123,7 +123,7 @@ struct dirent* dir = (struct dirent*)k_malloc(sizeof(dir));
   printf("-----------%d", findNext(dir)); 
   DIR* directory = opendir("etc/");
   dir = readdir(directory);
-  closedir(directory);
+  closedir(directory);*/
   test();
   while(1);
   //test();

@@ -24,6 +24,8 @@ int checkUST(PCB *pro);
 // Copies paretn userstack to child by the way of switching CR3
 int copyUST(PCB *childp);
 
+void ckop();
+
 /* creates and map Process page table (only PML4E) */
 uint64_t map_pageTable();
 

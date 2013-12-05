@@ -12,6 +12,7 @@ int main(int argc, char* argv[])
   i++;
   u_printf("In world.c with i = %d\n",i);
   
+  /*
   struct dirent* dir;
   DIR* directory;
 
@@ -24,6 +25,7 @@ int main(int argc, char* argv[])
   dir = u_readdir(directory);
   u_printf("\n in dirent structure = %s\n",dir->d_name);
   u_closedir(directory);
+  */
   while(1);
   
 	return 0;

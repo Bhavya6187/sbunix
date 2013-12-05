@@ -242,6 +242,8 @@ VMA *create_vma(uint64_t start_add, uint64_t size)
 	return vm;
 }
 
+
+
 // Fork() Creating a child process from a parent
 uint64_t doFork()
 {
@@ -262,22 +264,18 @@ uint64_t doFork()
 	pro->cr3 = map_pageTable(pro);		   // Storing Base Physical address of PML4e for new process
   pro->ppid = parent_process->pid;
 	printf("\n PCR3:%x", pro->cr3);
-  pro->cow = 1;
-  parent_process->cow = parent_process->cow + 1;
   /// -----------------------------------------------------------------------------------------
 
   //copy the page tables of parent process !!
   //copyUST(pro);
-  checkUST(pro);
-  checkUST(running);
+  //checkUST(pro);
+  //checkUST(running);
+  //ckop();
+
   copyPageTables(pro, parent_process);
   printf("PageTable copying done\n");
 
-  printf("Child PID=%p\n", pro->pid);
-  printf("Parent PID=%p\n", pro->ppid);
-  printf("Current PID=%p\n", get_curr_PID());
-  printf("Current Process=%p \n", get_curr_PCB());
-  printf("Current Process from RUNNING=%p \n", running);
+  printf("Child PID=%p, pPID=%p\n", pro->pid, pro->ppid);
   printf("CP Cr3=%p Chid Cr3=%p\n", running->cr3, pro->cr3);
   // Add it to task linked list !!
   runnableTaskQ = addToTailTaskList(runnableTaskQ, pro); 
@@ -286,14 +284,8 @@ uint64_t doFork()
   //m_map( (uint64_t)pro->u_stack, (uint64_t)(parent_process->u_stack), (uint64_t)(4096), (uint64_t)(4096) );
 	printf("\n Trying to Fork()\n");
   
-  /*PCB* t;
-  t = searchPCB(runnableTaskQ, pro->pid);
-  if(t==NULL)
-    printf(">>>> PID not found\n");
-  else
-    printf(">>>> PID found \n");*/
-  
-  //copyOnWritePageTables();
+  copyOnWritePageTables();
+  _ptcr3(running->cr3);
   // update the cr3 to process->cr3
   /*if ((pro->u_stack = process_stack()) == NULL)
 	{
@@ -302,43 +294,17 @@ uint64_t doFork()
 	}*/
   //check this function
   //m_map((uint64_t)pro->u_stack, (uint64_t)parent_process->u_stack, (uint64_t)(4096*8), (uint64_t)(4096*8) );
-  /*  
-  pro->u_stack[0] = pro->rip;
-	pro->rsp = (uint64_t)(pro->u_stack);
-	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[63]);
-	printf("\n GDT SET");
-	uint64_t tem = 0x28; 
-	__asm volatile("mov %0,%%rax;"::"r"(tem));
-	__asm volatile("ltr %ax");
-	__asm volatile("\
-	push $0x23;\
-	push %0;\
-	pushf;\
-	push $0x1B;\
-	push %1"::"g"(&pro->u_stack[0]),"g"(pro->rip):"memory");
-	__asm volatile("\
-	iretq;\
-	");
-  */
-  //Add parent_pid in the structure as well
- // if (test)
- // {
-  //    printf("I am in child");
- //     goto label:
- // }
- //pro->rip = 0xffffffff80202508;      
-// label:
-  /*__asm volatile(
-		"movq %0, %%rsp;"
-		:
-		:"r"((pro->rsp))
-	        :"memory"
-	);*/
+ 
+ // ckop();
+ // _ptcr3(pro->cr3);
+ // printf("hehehhe\n");
+ // ckop();
+ // _ptcr3(running->cr3);
+  //while(1);
   
   // Setting up the rax for both parent and child
   GREG *pp1 = (GREG *) &(running->kernel_stack[234]);
   GREG *cc1 = (GREG *) &(pro->kernel_stack[234]);
-  printf("\n TE:%x:%x", pp1->rax, cc1->rax);
   pp1->rax = pro->pid;
   cc1->rax = 0x0; 
   printf("\n TE:%x:%x", pp1->rax, cc1->rax);
@@ -346,7 +312,6 @@ uint64_t doFork()
   {
     printf("This is the parent ! Returning with pid=%p, parent/running pid=%p\n", pro->pid, running->pid);
     //Set everything for our child for it to execute in its registers
-    //parent_process->
 	  //__asm volatile("sti");
     //while(1);
     return pro->pid;
@@ -357,10 +322,8 @@ uint64_t doFork()
 	  //__asm volatile("sti");
     return 0;
   }
-  //printf("Returning from fork() .. pid=%p, running pid=%p\n", pid, running->pid);
 
 }
-
 
 // Fork() Creating a child process from a parent
 //void doExec(char* filename, char* argv, char *en[])
@@ -375,9 +338,6 @@ void doExec(char* filename)
   
   printf("In Exec :: check PID=%p, cr3=%p ppid=%p\n", pro->pid, pro->cr3, pro->ppid);
 	
-  // Hope CR3 is already switched
-  //_ptcr3(pro->cr3);
-  
   // ------------------------------------------- Zero out the kernel stack as well
   /*
   int i=0;
@@ -392,6 +352,8 @@ void doExec(char* filename)
 		printf("\n Cant allocate memory for process User stack");
 		//exit();
 	}	
+  
+  _ptcr3(pro->cr3);
   
 	//pro->u_stack[0] = pro->rip;
 	pro->rsp = (uint64_t)(pro->u_stack);
@@ -412,16 +374,7 @@ void doExec(char* filename)
 
 
 
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
 
 void exit_process(int status)
 {
@@ -537,145 +490,3 @@ void sleep_t(uint64_t time)
 
 }
 
-// Schedule function for context switching between two processes.. Hope it should work for both kernel and user processes
-void scheduler1()
-{
-//  test += 1;
-	PCB *current_process, *new_process;
-  //printf("In scheduler :P\n");
-  // 0 or 1 process
-  /*if(no_runnableQ<2)
-  {
-    __asm volatile(
-		  "retq;"
-	  );
-  }*/
-  current_process = running;
-  runnableTaskQ = moveTaskToEndOfList(runnableTaskQ);
-  new_process = runnableTaskQ->task;
-	// Should save state of caller here 
-	__asm volatile(
-		"cli"
-		);
-  __asm volatile(
-		"push %rax"
-		);
-	__asm volatile(
-		"push %rbx"
-		);
-	__asm volatile(
-		"push %rcx"
-		);
-	__asm volatile(
-		"push %rdx"
-		);
-	__asm volatile(
-		"push %rbp"
-		);
-	__asm volatile(
-		"push %r8"
-		);
-	__asm volatile(
-		"push %r9"
-		);
-	__asm volatile(
-		"push %r10"
-		);
-	__asm volatile(
-		"push %r11"
-		);
-	__asm volatile(
-		"push %r12"
-		);
-	__asm volatile(
-		"push %r13"
-		);
-	__asm volatile(
-		"push %r14"
-		);
-	__asm volatile(
-		"movq %%rsp, %0"
-		:"=g"(current_process->rsp)
-		:
-	  :"memory"
-	);
-  //current_process->rip = (uint64_t)(*((uint64_t*)(current_process->rsp)+12));
-
-	/* Now change the %rsp to callee rsp */
-	__asm volatile(
-		"movq %0, %%cr3;"
-		:
-		:"r"((new_process->cr3))
-    :"memory"
-	);
-
-  //printf("cr3 old=%p new=%p\n", current_process->cr3, new_process->cr3);  
-  //new_process->rsp = current_process->rsp;
-  //new_process->rip = current_process->rip;
-	
-  /* Now change the %rsp to callee rsp */
-	__asm volatile(
-		"movq %0, %%rsp;"
-		:
-		:"r"((new_process->rsp))
-	        :"memory"
-	);
-	__asm volatile(
-		"pop %r14"
-		);
-	__asm volatile(
-		"pop %r13"
-		);
-	__asm volatile(
-		"pop %r12"
-		);
-	__asm volatile(
-		"pop %r11"
-		);
-	__asm volatile(
-		"pop %r10"
-		);
-	__asm volatile(
-		"pop %r9"
-		);
-	__asm volatile(
-		"pop %r8"
-		);
-	__asm volatile(
-		"pop %rbp"
-		);
-	__asm volatile(
-		"pop %rdx"
-		);
-	__asm volatile(
-		"pop %rcx"
-		);
-	__asm volatile(
-		"pop %rbx"
-		);
-	__asm volatile(
-		"pop %rax"
-		);
-
-  //tss.rsp0 = (uint64_t)  &(new_process->kernel_stack[63]);
-	//printf("\n GDT SET");
-	
-  /*
-  uint64_t tem = 0x2B; 
-	__asm volatile("mov %0,%%rax;"::"r"(tem));
-	__asm volatile("ltr %ax");*/
-/*	__asm volatile("\
-	push $0x23;\
-	push %0;\
-	pushf;\
-	push $0x1B;\
-	push %1"::"g"(new_process->rsp),"g"(new_process->rip):"memory");
-	
-  __asm volatile("\
-	iretq;\
-	");
-*/
-	__asm volatile(
-		"iretq;"
-	);	
-}

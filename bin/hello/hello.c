@@ -43,8 +43,8 @@ int main(int argc, char* argv[])
   //u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
   //u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
   //u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
-  int ret1 = __syscall0(SYSCALL_FORK);
-  //int ret1 = fork(); 
+  //int ret1 = __syscall0(SYSCALL_FORK);
+  int ret1 = fork(); 
   int temp =0, i,j; 
   temp++;
   if(ret1==0)
@@ -53,8 +53,10 @@ int main(int argc, char* argv[])
     u_printf("fork return:%d:", ret1);
     u_printf("This is child !! \n");
     //__syscall1(SYSCALL_EXIT, 0);
-    //char filename[15] = "bin/world";
+    char filename[15] = "bin/world";
     //ret1 = __syscall1(SYSCALL_EXECVE,(uint64_t)(filename));
+    execve(filename);
+    u_printf("In child return from exec()\n");
     while(1);
       u_printf("Hiiii\n");
   }

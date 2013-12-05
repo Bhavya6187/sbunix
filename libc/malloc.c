@@ -67,12 +67,16 @@ void *malloc(uint64_t no_bytes)
 }	
 
 
-/*
-* Fork System call wrapper
-*/
+// Fork System call wrapper
 uint64_t fork()
 {
 	uint64_t ret;
 	ret =  __syscall0(SYSCALL_FORK);
 	return ret;
+}
+
+// EXECVE() System call wrapper
+void execve(char *filename)
+{
+  __syscall1(SYSCALL_EXECVE,(uint64_t)(filename));
 }
