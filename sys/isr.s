@@ -62,7 +62,7 @@ isr_common_stub_14:
   pushq %rdx
   pushq %rsi
   pushq %rdi
-# pushq %rbp
+ pushq %rbp
 # pushq %rsp           # Pushes the general purpose registers GPR's R8-R15 also might come
   pushq %r8
   pushq %r9
@@ -83,7 +83,7 @@ isr_common_stub_14:
   popq %r9
   popq %r8
 # popq %rsp
-# popq %rbp
+ popq %rbp
   popq %rdi
   popq %rsi
   popq %rdx
@@ -151,6 +151,7 @@ isr_stub_80:
   pushq %rdx
   pushq %rsi
   pushq %rdi
+  pushq %rbp
   pushq %r8
   pushq %r9
   pushq %r10
@@ -172,6 +173,7 @@ isr_stub_80:
   popq %r10
   popq %r9
   popq %r8
+  popq %rbp
   popq %rdi
   popq %rsi
   popq %rdx

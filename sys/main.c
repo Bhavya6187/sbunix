@@ -115,11 +115,17 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
      printf("\n scanf returned %s",str);
   else
      printf("\n scanf returned error");*/
+  DIR *dir = (DIR*)k_malloc(sizeof(DIR));
   dirent* dirt = (dirent*)k_malloc(sizeof(dirent));
   
-  printf("%p",dirt);
+  printf("\ndir 1%p\n",dirt);
+  findfirst("bin/",'a',dirt);
+  strcpy(dir->dirname,"bin/");
+  findNext(dirt);
+  printf("\ndirt 2 - %p\n",dirt);
 
   list();
+
  // printf("%p\n",findfirst("bin/",'a', dirt));
 //  test();
   while(1);
@@ -136,9 +142,15 @@ void boot(void)
 		:"=g"(loader_stack)
 		:"r"(&stack[INITIAL_STACK_SIZE])
 	);
+  __asm volatile("cli");
+
 	reload_gdt();
   reload_idt();
+  //IRQ_set_mask(0);
 	setup_tss();
+  __asm volatile("sti");
+
+
 	start(
 		(uint32_t*)((char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase),
 		&physbase,

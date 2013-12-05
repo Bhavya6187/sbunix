@@ -25,22 +25,23 @@ void schedule_process()
   // __asm volatile("ltr %ax");
   __asm volatile(
     "movq %0, %%rsp;\n\t"
-    "pop %%r15\n\t"
-    "pop %%r14\n\t"
-    "pop %%r13\n\t"
-    "pop %%r12\n\t"
-    "pop %%r11\n\t" 
-    "pop %%r10\n\t" 
-    "pop %%r9\n\t"  
-    "pop %%r8\n\t"
-    "pop %%rdi\n\t"
-    "pop %%rsi\n\t"
-    "pop %%rdx\n\t"
-    "pop %%rcx\n\t"
-    "pop %%rbx\n\t"
-    "pop %%rax\n\t"
+    "popq %%r15\n\t"
+    "popq %%r14\n\t"
+    "popq %%r13\n\t"
+    "popq %%r12\n\t"
+    "popq %%r11\n\t" 
+    "popq %%r10\n\t" 
+    "popq %%r9\n\t"  
+    "popq %%r8\n\t"
+    "popq %%rbp\n\t"
+    "popq %%rdi\n\t"
+    "popq %%rsi\n\t"
+    "popq %%rdx\n\t"
+    "popq %%rcx\n\t"
+    "popq %%rbx\n\t"
+    "popq %%rax\n\t"
     :
-    :"r"(&(next_process->kernel_stack[235]))
+    :"r"(&(next_process->kernel_stack[234]))
     :"memory"
   );
   __asm volatile(

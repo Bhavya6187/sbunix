@@ -336,8 +336,8 @@ uint64_t doFork()
 	);*/
   
   // Setting up the rax for both parent and child
-  GREG *pp1 = (GREG *) &(running->kernel_stack[235]);
-  GREG *cc1 = (GREG *) &(pro->kernel_stack[235]);
+  GREG *pp1 = (GREG *) &(running->kernel_stack[234]);
+  GREG *cc1 = (GREG *) &(pro->kernel_stack[234]);
   printf("\n TE:%x:%x", pp1->rax, cc1->rax);
   pp1->rax = pro->pid;
   cc1->rax = 0x0; 

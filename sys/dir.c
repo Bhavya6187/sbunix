@@ -343,15 +343,16 @@ int findfirst(char* dirname, char spec , struct dirent* data )
 					//indexOf_shift(base, str, startIndex)
 					strncpy(data -> d_name,entry -> name,NAMEMAX-1);
 					data -> offset = offset;
-					//printf("found - %s",data->d_name);
+					printf("found - %s",data->d_name);
 					return 0;
 				}
 			}
 			if(starts_with( entry-> name,dirname) && strcmp(entry->typeflag,"0")  == 0 ){
+        printf("\ngetting the file\n");
 				if((indexOf_shift(entry-> name, "/", strlen(dirname)+1))==-1){
 					strncpy(data -> d_name,entry -> name,NAMEMAX-1);
 					data -> offset = offset;
-					//printf("found - %s",data->d_name);
+					printf("found - %s",data->d_name);
 					return 0;
 				}
 			}
@@ -360,13 +361,13 @@ int findfirst(char* dirname, char spec , struct dirent* data )
 			offset += 1 + (size/BLOCKSIZE);
 			if(size > 0){
 				padding = BLOCKSIZE - size%BLOCKSIZE;
-				//printf("value - %d & padding - %d",(char*)&_binary_tarfs_end - (char*)entry, padding);
+				printf("value - %d & padding - %d",(char*)&_binary_tarfs_end - (char*)entry, padding);
 				if((char*)&_binary_tarfs_end - (char*)entry >= BLOCKSIZE && padding > 0)
 				{
 					entry = (struct posix_header_ustar *)((char*)entry + padding);
 					offset += 1;
 				}
-				//printf(" ,address:%p",entry);
+				printf(" ,address:%p",entry);
 				}	
 			}
 		}
