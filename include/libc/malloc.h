@@ -8,4 +8,7 @@ uint64_t fork();			// User space fork wrapper
 void execve(char *filename);
 void yield();
 void exit(int status);
+uint64_t waitpid(uint64_t pid);
+uint64_t wait();
+void sleep(uint64_t time);
 #endif

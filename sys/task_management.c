@@ -186,14 +186,12 @@ PCB *get_parent_PCB(uint64_t parent_pid)
 PCB *searchPCB(struct taskList *tlist, uint64_t pid)
 {
     struct taskList *list = tlist;
-    if(list==NULL)
-      return NULL;
-    if( (list->task->pid !=pid) && (list->next == NULL) )
-      return NULL;
-    list = list->next;
-    while (list->next)
-      if(list->next->task->pid == pid)
-        return list->next->task;
+    while(list)
+    {
+      if(list->task->pid == pid)
+        return list->task;
+      list=list->next;
+    }
     return NULL;
 }
 
@@ -212,21 +210,6 @@ PCB *create_pcb()
   allTaskQ = addToTailTaskList(allTaskQ, pro);
   no_allQ++;
 	
-	/* Update Values in the PCB sturct for the new process */
-
-  /*
-	if ((pro->pid = get_pid()) == 0)
-	{
-		printf("\n Error No Free PID found");	
-		return (PCB *) 0;
-	}
-	pro->cr3 = map_pageTable();		// Storing Base Physical address of PML4e for new process
-	printf("\n PCR3:%x", pro->cr3);
-
-  //Adding the PCB into Queue of Running process
-  */
-
-  //	pro->mm_st = create_vma();
 	return pro;
 }		
 		
@@ -247,7 +230,6 @@ VMA *create_vma(uint64_t start_add, uint64_t size)
 
 	return vm;
 }
-
 
 
 // Fork() Creating a child process from a parent
@@ -272,7 +254,7 @@ uint64_t doFork()
 	printf("\n PCR3:%x", pro->cr3);
   /// -----------------------------------------------------------------------------------------
 
-  //copy the page tables of parent process !!
+  //copy the user stack of the parent process
   //copyUST(pro);
   //checkUST(pro);
   //checkUST(running);
@@ -301,19 +283,12 @@ uint64_t doFork()
   //check this function
   //m_map((uint64_t)pro->u_stack, (uint64_t)parent_process->u_stack, (uint64_t)(4096*8), (uint64_t)(4096*8) );
  
- // ckop();
- // _ptcr3(pro->cr3);
- // printf("hehehhe\n");
- // ckop();
- // _ptcr3(running->cr3);
-  //while(1);
-  
   // Setting up the rax for both parent and child
   GREG *pp1 = (GREG *) &(running->kernel_stack[234]);
   GREG *cc1 = (GREG *) &(pro->kernel_stack[234]);
   pp1->rax = pro->pid;
   cc1->rax = 0x0; 
-  printf("\n TE:%x:%x", pp1->rax, cc1->rax);
+  printf("\n Display :%x:%x", pp1->rax, cc1->rax);
   if (running->pid == pro->ppid)
   {
     printf("This is the parent ! Returning with pid=%p, parent/running pid=%p\n", pro->pid, running->pid);
@@ -328,7 +303,6 @@ uint64_t doFork()
 	  //__asm volatile("sti");
     return 0;
   }
-
 }
 
 // Fork() Creating a child process from a parent
@@ -345,14 +319,6 @@ void doExec(char *filename)
   
   printf("In Exec :: check PID=%p, cr3=%p ppid=%p\n", pro->pid, pro->cr3, pro->ppid);
 	
-  // ------------------------------------------- Zero out the kernel stack as well
-  /*
-  int i=0;
-  for(i=0; i<256; i++)
-    pro->kernel_stack[i]=0x0;
-  */
-
-  
   //char *filename2;
   //filename2 = filename;
 	//read_tarfs(pro, "bin/world");

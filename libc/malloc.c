@@ -85,3 +85,20 @@ void execve(char *filename)
 {
   __syscall1(SYSCALL_EXECVE,(uint64_t)(filename));
 }
+
+uint64_t waitpid(uint64_t pid)
+{
+  uint64_t ret = __syscall1(SYSCALL_WAITPID, pid);
+  return ret;
+}
+
+uint64_t wait()
+{
+  uint64_t ret =__syscall0(SYSCALL_WAIT);
+  return ret;
+}
+
+void sleep(uint64_t time)
+{
+  __syscall1(SYSCALL_SLEEP, time);
+}
