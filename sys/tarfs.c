@@ -8,6 +8,11 @@
 #include <sys/page_table.h>
 #include <sys/task_management.h>
 #include <sys/tarfs.h>
+#include <sys/string.h>
+#include <sys/errno.h>
+
+int fd_used = 2;
+FDT fd_table[150];
 
 int strcmp2(char* str1, char*str2)
 {
@@ -228,3 +233,107 @@ int read_tarfs(PCB* task, char* name){
  return 2;
 }
 
+struct File* getFile(const char *fileName)
+{
+      struct posix_header_ustar * entry = (struct posix_header_ustar*)(&_binary_tarfs_start);
+      int padding =0;
+      errno = 0;
+      struct File* file = (struct File *)k_malloc(sizeof(struct File));
+      int exitflag = 0;
+      while((uint64_t)entry < (uint64_t)&_binary_tarfs_end)
+      {
+        int size = size_to_int(entry->size);
+        if(strcmp(entry->typeflag,"5")  == 0 && strncmp(fileName,entry->name,lastIndexOf (fileName, "/")+1) == 0 &&  lastIndexOf (fileName, "/")+ 1 == strlen(entry->name)){
+        strncpy(file->parent.d_name,entry->name,NAMEMAX);
+        file->parent.offset = (char*)entry - (char*)&_binary_tarfs_start;
+        if(++exitflag >= 2)
+            break;
+         }
+        if(strcmp(fileName,entry->name) == 0 && strcmp(entry->typeflag,"0")  == 0){
+        strncpy(file->path, fileName, NAMEMAX);
+        file->offset = (char*)entry - (char*)&_binary_tarfs_start;
+        if(++exitflag >= 2)
+                    break;
+        }
+        entry = (struct posix_header_ustar *)((char*)entry + sizeof(struct posix_header_ustar) + size );
+        if(size > 0){
+          padding = BLOCKSIZE - size%BLOCKSIZE;
+          if((char*)&_binary_tarfs_end - (char*)entry >=BLOCKSIZE)
+          {
+            entry = (struct posix_header_ustar *)((char*)entry + padding);
+          }
+        }
+      }
+
+      if(strcmp(fileName,entry->name)!=0){
+        return NULL;
+      }
+      return file;
+}
+
+uint64_t read_file(uint64_t fd,uint64_t num, char* buffer)
+{
+  volatile uint64_t i = 0;
+  while(fd_table[i].number != fd && i <150)
+  {
+      i++;
+  }
+  if(i >=150)
+    return NULL;
+
+  printf("\nFile has fd %d",fd);
+  FDT entry = fd_table[i];
+  char* base = (char*)&_binary_tarfs_start;
+  base = base + entry.fp->offset ;
+  struct posix_header_ustar* tarfs_struct = (struct posix_header_ustar*)base;
+  int size = size_to_int(tarfs_struct->size);
+  if(size == 0)
+    return NULL;
+  printf("size of file being read  = %d with seek = %d\n",size,entry.seek);
+  base = (char*)(tarfs_struct+1);
+  base = base + entry.seek ;
+
+  int index = 0;
+  for(index=0; index < num ; index++ )
+  {
+    if(entry.seek<size)
+    {
+      buffer[index] = base[index]; 
+      entry.seek++;
+    }
+  }
+  fd_table[i].seek = entry.seek;
+  return i;
+}
+
+uint64_t close_file(uint64_t fd)
+{
+  uint64_t i = 0;
+  while(fd_table[i].number != fd && i<150)
+  {
+      i++;
+  }
+  if(i >=150)
+    return 1;
+  fd_table[i].number=-1;
+  fd_table[i].fp=NULL;
+  fd_table[i].seek = 0;
+  return 0;
+}
+
+uint64_t open_file(char* filename)
+{
+  uint64_t i = 0;
+  while(fd_table[i].number != -1)
+  {
+      i++;
+  }
+  if(getFile(filename)==NULL)
+    return -1;
+  fd_table[i].number=fd_used + 1;
+  fd_table[i].fp=getFile(filename) ;
+  if(fd_table[i].fp == NULL)
+    return -1;
+  fd_table[i].seek = 0;
+  return fd_table[i].number;
+}

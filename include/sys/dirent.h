@@ -36,6 +36,11 @@
   } DIR;
   
   
+struct File {
+  char  path[256]; //256
+  uint64_t offset; //8
+  struct dirent parent; //264
+};
   
   void list();
   int findNext(struct dirent* current);
@@ -43,6 +48,9 @@
   struct dirent* readdir(DIR* dir);
   int findfirst(char* dirname, char spec , struct dirent* data );
   int closedir (DIR *dirp);
+  uint64_t open_file(char* filename);
+  uint64_t close_file(uint64_t fd);
+  uint64_t read_file(uint64_t fd,uint64_t num, char* buffer);
 
   
 #endif

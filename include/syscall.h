@@ -18,6 +18,7 @@
 #define SYSCALL_READDIR 12
 #define SYSCALL_OPENDIR 13
 #define SYSCALL_CLOSEDIR 14
+#define SYSCALL_STDERR 15
 
 SYSCALL_PROTO(0)(uint64_t n) {
    uint64_t ret;
@@ -50,6 +51,15 @@ SYSCALL_PROTO(2)(uint64_t n, uint64_t a1, uint64_t a2) {
 }
 
 SYSCALL_PROTO(3)(uint64_t n, uint64_t a1, uint64_t a2, uint64_t a3) {
+   uint64_t ret;
+   __asm volatile( "movq %1,%%rax\n\t"
+                   "movq %2,%%rbx\n\t"
+                   "movq %3,%%rcx\n\t"
+                   "movq %3,%%rdx\n\t"
+                   "int $80\n\t"
+                   "movq %%rax,%0\n\t;"
+                   :"=r"(ret):"r"(n),"r"(a1),"r"(a2),"r"(a3):"rax","rbx","rcx","rdx","memory");
+	return ret;
 	return 0;
 }
 

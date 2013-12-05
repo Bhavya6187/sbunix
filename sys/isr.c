@@ -92,7 +92,7 @@ uint64_t isr_handler_80(myregs_t *regs )
 {
    uint64_t ret = 0;
    uint64_t num_bytes = 0;
-   uint64_t f=-2, str = 0, filename = 0;
+   uint64_t f=-2, str = 0, filename = 0,fd=0;
    uint64_t exit_status=0, pid, time_secs;
    dirent* dir;
    dirent* dir_init;
@@ -112,7 +112,8 @@ uint64_t isr_handler_80(myregs_t *regs )
       case(2):
         addr = regs->rbx;
         num = regs->rcx;
-        ret = puts_user((char *)addr,num);
+        fd = regs->rdx;
+        ret = write(fd,(char *)addr,num);
         regs->rax = ret;
         break;
       case(3):

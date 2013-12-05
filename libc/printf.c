@@ -170,6 +170,60 @@ int user_putchar(char a, char* buffer , int total)
   buffer[0+total]=a;
   return 1;
 }
+uint64_t stderr(const char* fmt, ...) 
+{
+	va_list parameters;
+  char buffer[100] = {'\0'}; //= (char*)malloc(512) ;
+  uint64_t ret = 0;
+  int total=0;
+  const char* str = fmt;
+  va_start(parameters, fmt);
+  str = fmt;
+  while(*str != '\0')
+  {
+    if(*str != '%')
+    {
+      buffer[total] = *str;
+      str++;
+      total++;
+
+      continue;
+    }
+    str++;
+    switch( *str )
+    {
+      case 'c': total+=user_putchar(va_arg(parameters, int), buffer,total);
+                break;
+
+      case 'd': total+=user_putint(va_arg(parameters, int),buffer,total);
+                break;
+
+      case 's': total+=user_puts(va_arg(parameters, char*), buffer,total);
+                break;
+
+      case 'x': total+=user_int2hex(va_arg(parameters, int), buffer,total);
+                break;
+      
+      case 'l': if(*(++str)=='d')
+                {
+                  total+=user_putlong(va_arg(parameters, unsigned long), buffer,total);
+                  break;
+                }
+
+      case 'p': total+=user_long2hex(va_arg(parameters, unsigned long), buffer,total);
+                break;
+
+      case '%': total+=user_putchar('%', buffer,total);
+                break;
+    }
+    str++;
+  }
+  va_end(parameters);
+  buffer[total] = '\0';
+  total++;
+  ret=__syscall3(SYSCALL_STDERR,(uint64_t)buffer,total,2);
+  return ret;
+}
 uint64_t u_printf(const char* fmt, ...) 
 {
 	va_list parameters;
@@ -221,6 +275,6 @@ uint64_t u_printf(const char* fmt, ...)
   va_end(parameters);
   buffer[total] = '\0';
   total++;
-  ret=__syscall2(SYSCALL_PUTS,(uint64_t)buffer,total);
+  ret=__syscall3(SYSCALL_PUTS,(uint64_t)buffer,total,1);
   return ret;
 }

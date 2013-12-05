@@ -95,12 +95,15 @@ int puts(char* str)
   return strlength;
 }
 
-int puts_user(volatile char* str, int n)
+int write(int fd,volatile char* str, int n)
 {
   int i = 0;
-  for(i =0 ; i < n && str[i] != '\0' ; i++)
+  if(fd == 1 || fd==2)
   {
-      putchar(str[i]);
+    for(i =0 ; i < n && str[i] != '\0' ; i++)
+    {
+        putchar(str[i]);
+    }
   }
   update_cursor(position/COLUMN, position%COLUMN);
   return i+1;

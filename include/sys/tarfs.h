@@ -1,12 +1,13 @@
 #ifndef _TARFS_H
 #define _TARFS_H
-
+#define BLOCKSIZE 512
 #include<sys/task_management.h>
 #include<sys/v_mem_manager.h>
+#include<sys/dirent.h>
 
 extern char _binary_tarfs_start;
 extern char _binary_tarfs_end;
-
+extern int fd_used;
 int size_to_int(char* size);
 struct posix_header_ustar {
 	char name[100];
@@ -56,6 +57,17 @@ struct pheader
   uint64_t p_memsz; /* Size of segment in memory */
   char p_align[8]; /* Alignment of segment */
 };
+
+struct file_descriptor{
+  int number;
+  struct File* fp;
+  uint64_t seek; 
+};
+typedef struct file_descriptor FDT;
+
+//Size 532
+
+extern FDT fd_table[150];
 int read_tarfs(PCB* task, char* name);
 VMA* read_pheader(char* addr, struct elf_header* elf_base);
 #endif
