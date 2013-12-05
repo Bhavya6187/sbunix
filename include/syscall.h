@@ -15,6 +15,9 @@
 #define SYSCALL_WAITPID 9
 #define SYSCALL_WAIT 10
 #define SYSCALL_SLEEP 11
+#define SYSCALL_READDIR 12
+#define SYSCALL_OPENDIR 13
+#define SYSCALL_CLOSEDIR 14
 
 SYSCALL_PROTO(0)(uint64_t n) {
    uint64_t ret;

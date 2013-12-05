@@ -527,7 +527,7 @@ void test()	// sort of execve in current scenario
   pro->ppid=0;
   pro->cow=0;
 	_ptcr3(pro->cr3);
-  char elf_file[10]="bin/hello";
+  char elf_file[10]="bin/world";
   //char elf_file[10]="bin/world";
   //char elf_file[10]="bin/bash";
 	read_tarfs(pro,elf_file);

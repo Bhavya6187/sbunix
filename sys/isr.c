@@ -5,6 +5,8 @@
 #include <sys/task_schedule.h>
 #include <sys/v_mem_manager.h>
 #include <stdio.h>
+#include <sys/dirent.h>
+#include <sys/string.h>
     
 #define COW 0x0008000000000000 //52 bit set as COW bit
 
@@ -91,6 +93,10 @@ uint64_t isr_handler_80(myregs_t *regs )
    uint64_t num_bytes = 0;
    uint64_t f=-2, str = 0, filename = 0;
    uint64_t exit_status=0, pid, time_secs;
+   dirent* dir;
+   dirent* dir_init;
+   DIR* directory_struct;
+   DIR* directory_init;
    f++;
    //__asm__ volatile("movq %%rdi,%0;":"=m"(rdi1)::);
    //registers_t* regs = (registers_t*)rdi1;
@@ -147,7 +153,49 @@ uint64_t isr_handler_80(myregs_t *regs )
         time_secs = regs->rbx;
         sleep_t(time_secs);
         break;
+      case(12):
+        directory_init =(DIR*)regs->rbx;
+        dir =(struct dirent*) regs->rcx;
+        dir_init = (struct dirent*)k_malloc(sizeof(struct dirent));
+        dir_init = readdir((DIR*)directory_init);
+        
+        if(dir_init!=NULL)
+        {
+          regs->rax = 1;
+          strcpy(dir->d_name,dir_init->d_name);
+          dir->offset = dir_init->offset;
+        }
+        else
+          regs->rax = 0;
+        break;
+        if(dir!=NULL)
+          regs->rax = (uint64_t)dir;
+        else
+          regs->rax = 0;
+        break;
+      case(13):
+        str = regs->rbx;
+        directory_init = (DIR*)regs->rcx;
 
+        directory_struct = opendir((char*)str);
+
+        if(directory_struct!=NULL)
+        {
+          regs->rax = 1;
+          strcpy(directory_init->dirname,directory_struct->dirname);
+          directory_init->current = directory_struct->current;
+          directory_init->dirent_filled = directory_struct->dirent_filled;
+        }
+
+        else
+          regs->rax = 0;
+        break;
+
+      case(14):
+        directory_init = (DIR*)regs->rbx;
+        ret = closedir(directory_init);
+        regs->rax = ret;
+        
       default:
         return 0;
     }

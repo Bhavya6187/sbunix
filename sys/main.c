@@ -115,19 +115,16 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
      printf("\n scanf returned %s",str);
   else
      printf("\n scanf returned error");*/
-  DIR *dir = (DIR*)k_malloc(sizeof(DIR));
-  dirent* dirt = (dirent*)k_malloc(sizeof(dirent));
-  
-  printf("\ndir 1%p\n",dirt);
-  findfirst("bin/",'a',dirt);
-  strcpy(dir->dirname,"bin/");
-  findNext(dirt);
-  printf("\ndirt 2 - %p\n",dirt);
-
-  list();
-
- // printf("%p\n",findfirst("bin/",'a', dirt));
-//  test();
+struct dirent* dir = (struct dirent*)k_malloc(sizeof(dir));
+  strncpy(dir->d_name,"etc/",256);
+  dir->offset = 0;
+  printf("-----------%d", findfirst("etc/", 'a' , dir ));
+  printf("-----------%d", findNext(dir));
+  printf("-----------%d", findNext(dir)); 
+  DIR* directory = opendir("etc/");
+  dir = readdir(directory);
+  closedir(directory);
+  test();
   while(1);
   //test();
 }
