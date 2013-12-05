@@ -65,6 +65,7 @@ struct taskList *addToTailTaskList(struct taskList *list, struct pcb_t *new_pcb)
     {
       temp->prev = NULL;
       list = temp;
+      start = list;
     }   
     else
     {
@@ -359,6 +360,7 @@ void exit_process(int status)
 
   // Bring parent from the waitlist because in waitpid the parent might be waiting for the child to finish
   struct taskList * temp;
+  PCB *parent=NULL;
   temp = waitTaskQ;
   if(temp==NULL)
     printf("There are no processes in the WaitQ strange ???\n");
@@ -366,9 +368,9 @@ void exit_process(int status)
   {
     if(temp->task->pid == running->ppid) // parent found in the waitQ --- move it to the runnableQ 
     {
-      waitTaskQ = removeFromTaskList(waitTaskQ, temp->task);
-      runnableTaskQ = addToTailTaskList(runnableTaskQ, temp->task);
-      //runnableTaskQ = addToHeadTaskList(runnableTaskQ, temp->task);
+      parent = temp->task;
+      waitTaskQ = removeFromTaskList(waitTaskQ, parent);
+      runnableTaskQ = addToTailTaskList(runnableTaskQ, parent);
       break;
     }
     temp=temp->next;
@@ -399,7 +401,7 @@ uint64_t wait_pid(uint64_t pid)
   // cheack if PID exits ??
   if( searchPCB(runnableTaskQ, pid)==NULL )
     return -1;
-  
+
   waitTaskQ = addToTailTaskList(waitTaskQ, running);
   runnableTaskQ = removeFromTaskList(runnableTaskQ, running);
 
@@ -418,20 +420,26 @@ uint64_t wait_p()
 
   // Bring parent from the waitlist because in waitpid the parent might be waiting for the child to finish
   struct taskList * temp;
-  temp = waitTaskQ;
+  int flag=0;
+  temp = deadTaskQ;
   if(temp==NULL)
     printf("There are no processes in the WaitQ strange ???\n");
-  while(temp->next !=NULL)
+  while(temp->next)
   {
-    if(temp->task->ppid == running->pid) // child found in the runnableQ --- move parent to the waitQ until one child exits 
+    // search for a child in the runnableQ 
+    // if a child exists move parent to the waitQ until at least one child exits 
+    if(temp->task->ppid == running->pid) 
     {
-      waitTaskQ = removeFromTaskList(waitTaskQ, temp->task);
-      runnableTaskQ = addToTailTaskList(runnableTaskQ, temp->task);
-      //runnableTaskQ = addToHeadTaskList(runnableTaskQ, temp->task);
+      flag=1;
+      waitTaskQ = addToTailTaskList(waitTaskQ, running);
+      runnableTaskQ = removeFromTaskList(runnableTaskQ, running);
+      schedule_process();
       break;
     }
     temp=temp->next;
   }
+  if(flag==0)
+    return -1;
   return 0;
 
 }
