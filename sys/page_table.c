@@ -65,19 +65,32 @@ uint64_t set_paging(void * km, void * pf, void * pb)
   pml4e[vmem1] = (((uint64_t)pdpe) & 0xFFFFFFFFFF000) | 7;
   pdpe[vmem2]  = (((uint64_t)pde)  & 0xFFFFFFFFFF000) | 7;
   pde[vmem3]   = (((uint64_t)pte)  & 0xFFFFFFFFFF000) | 7;
+  pde[vmem3+1]   = (((uint64_t)thor)  & 0xFFFFFFFFFF000) | 7;
   pml4e[510] = (((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 7;
-  pml4e[509] = (((uint64_t)thor) & 0xFFFFFFFFFF000) | 7;
+//  pml4e[509] = (((uint64_t)thor) & 0xFFFFFFFFFF000) | 7;
 
   //pml4e[vmem4] = (((uint64_t)pml4e)  & 0xFFFFFFFFFF000) | 3;
 
   uint64_t i; 
-  int j;
-  for(j=0,i=physbase; i<physfree; i+=PAGE_SIZE,j++ )
+  int j=0;
+  i=physbase;
+  while(i<physfree)
+  {
+    if(j<511)
+    pte[vmem4+j] = ((((uint64_t)i) & 0xFFFFFFFFFF000) | 3);
+    else
+    thor[(j%512)] = ((((uint64_t)i) & 0xFFFFFFFFFF000) | 3);
+    i+=PAGE_SIZE;
+    j++;
+  }
+  /*for(j=0,i=physbase; i<physfree; i+=PAGE_SIZE,j++ )
   {
     pte[vmem4+j] = ((((uint64_t)i) & 0xFFFFFFFFFF000) | 3);
-  }
-  //printf("\n %d %d %d %d\n", vmem1, vmem2, vmem3, vmem4);
-   
+
+  }*/
+  printf("i = %p j=%d", i, j);
+  printf("\n %d %d %d %d\n", vmem1, vmem2, vmem3, vmem4);
+  //while(1); 
   /*pdpe_vm = (uint64_t *)allocate_free_phy_page();
   pde_vm = (uint64_t *)allocate_free_phy_page();
   pml4e[vmem1] = (((uint64_t)pdpe_vm) & 0xFFFFFFFFFF000) | 3;
@@ -87,8 +100,9 @@ uint64_t set_paging(void * km, void * pf, void * pb)
   //for(j=0, i=0xB8000; j<=0; i+=PAGE_SIZE,j++ )
     //pte_vm[vmem4+j] = ((((uint64_t)i) & 0xFFFFFFFFFF000) | 3);
   //pte_vm = (uint64_t *)allocate_free_phy_page();
-  //pte[vmem4] = ((((uint64_t)0xB8000) & 0xFFFFFFFFFF000) | 3);
-  pte[vmem4+j] = (0xB8000  | 3);
+  //pte[vmem4+j] = ((((uint64_t)0xB8000) & 0xFFFFFFFFFF000) | 3);
+  thor[vmem4+(j%512)] = ((((uint64_t)0xB8000) & 0xFFFFFFFFFF000) | 3);
+//  pte[vmem4+j] = (0xB8000  | 3);
   //printf("\n %d %d %d %d %p %p %p\n", vmem1, vmem2, vmem3, vmem4, pml4e[vmem1], pte_vm[vmem4], video_mem);
   //printf("j=%d\n",j);
   //printf("%p %p %p %p %p %p %p %p\n", pml4e, pdpe, pde, pte, pdpe_vm, pde_vm, pte_vm);
@@ -96,13 +110,17 @@ uint64_t set_paging(void * km, void * pf, void * pb)
   cr3 = ((uint64_t)pml4e);
   // Setting the Page Tables
   //printf("%x %x\n", head_fl, head_fl->next);
-  _ptcr3(cr3); //setting cr3 register to kick start paging
   vm_fl = 0xffffffff80000000;
+//  _ptcr3(cr3); //setting cr3 register to kick start paging
 	//head_fl->addr = 0xffffffff80000000 + physbase;
   // Mapping video memory
   /*free_list *ad = NULL;
   ad = (free_list*)((uint64_t)head_fl | 0xffffffff80000000 );*/
-  video_vm = (0xffffffff80000000|(uint64_t)physfree);
+  //video_vm = (0xffffffff80000000|(uint64_t)physfree);
+  //video_vm = (0xffffffff80000000|(uint64_t)physfree);
+  video_vm = (0xffffffff80000000|(uint64_t)(physfree));
+
+  _ptcr3(cr3); //setting cr3 register to kick start paging
   //printf("head=%x ad=%p \n", head_fl,  ad);
   //printf("adn:%p:\n", ad->next);
   return cr3;
