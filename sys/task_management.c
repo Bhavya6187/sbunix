@@ -353,7 +353,7 @@ void doExec(char *fn)
 	__asm volatile("\
 	push $0x23;\
 	push %0;\
-	pushf;\
+	push $0x200;\
 	push $0x1B;\
 	push %1"::"g"(pro->u_stack),"g"(pro->rip):"memory");
 	__asm volatile("\
@@ -412,7 +412,9 @@ void doExecvp(char *fn, char **argv)
                    ::"r"((uint64_t)(filename)),"r"((uint64_t)(param)):"rdi","rsi","memory"
                 );*/
 
-	printf("We will execute - %s %p\n", filename, param);
+	//pushf;
+	
+  printf("We will execute - %s %p\n", filename, param);
 	pro->u_stack[0] = pro->rip;
 	pro->rsp = (uint64_t)(pro->u_stack);
   printf("user_stack_rsp%p",pro->rsp);
@@ -421,7 +423,7 @@ void doExecvp(char *fn, char **argv)
 	__asm volatile("\
 	push $0x23;\
 	push %0;\
-	pushf;\
+	push $0x200;\
 	push $0x1B;\
 	push %1"::"g"(pro->u_stack),"g"(pro->rip):"memory");
   __asm volatile( "movq %0,%%rdi\n\t"

@@ -267,7 +267,7 @@ void irq_handler_0(registers_sch regs)
     {
       read_rtc();
         sec++;
-       if(tick%200==0)
+       if(tick%100==0)
          flag_sch=1;
     }
     /*if (regs.interrupt_number >= 32)
@@ -278,8 +278,8 @@ void irq_handler_0(registers_sch regs)
     // Send reset signal to master. (As well as slave, if necessary).
     outb(0x20, 0x20);
   
-  //if(flag_sch==1 && running!=NULL)
-  if(0)
+  if(flag_sch==1 && running!=NULL)
+  //if(0)
   {
     flag_sch=0;
     printf("Will handle scheduling\n");

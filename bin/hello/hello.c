@@ -46,7 +46,30 @@ int main(int argc, char* argv[])
   //int ret1 = __syscall0(SYSCALL_FORK);
   int temp =0, i,j, res=0; 
   temp++; res++;
-  char filename[25] = "bin/test_fork";
+  //char filename[25] = "bin/test_fork";
+  //char filename[25] = "bin/test_timer";
+  char filename[25] = "bin/test_fork_timer";
+  u_printf("Checking for TIMER ..>> This is INIT.\n");
+  
+  int ret1;
+  ret1 = fork();
+  if(ret1==0)
+  {
+    u_printf("In child return from exec()\n");
+    execve(filename);
+    while(1);
+  }
+  else
+  {
+    while(1);
+    {
+      for(i=0;i<500;i++)
+      for(j=0;j<500;j++)
+          ;
+      u_printf("%p ", getpid());
+    }
+  }
+
   //char params[5][10] = {"dushyant", "goyal", "\0", "\0", "\0"};
   char **params=NULL;
   for(i=0;i<5;i++)
@@ -58,7 +81,7 @@ int main(int argc, char* argv[])
 
 
   //char filename[25] = "bin/world";
-  int ret1 = fork(); 
+  ret1 = fork(); 
   if(ret1==0)
   {
     //temp = 20;

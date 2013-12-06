@@ -9,6 +9,7 @@ void execve(char *filename);
 void execvp(char *filename, char **argv);
 void yield();
 void exit(int status);
+uint64_t getpid();
 uint64_t waitpid(uint64_t pid);
 uint64_t wait();
 void sleep(uint64_t time);
