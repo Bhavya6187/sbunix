@@ -112,8 +112,7 @@ uint64_t isr_handler_80(myregs_t *regs )
       case(2):
         addr = regs->rbx;
         num = regs->rcx;
-        fd = regs->rdx;
-        ret = write(fd,(char *)addr,num);
+        ret = write(1,(char *)addr,num);
         regs->rax = ret;
         break;
       case(3):
@@ -197,6 +196,19 @@ uint64_t isr_handler_80(myregs_t *regs )
         directory_init = (DIR*)regs->rbx;
         ret = closedir(directory_init);
         regs->rax = ret;
+        break;
+      case(15):
+        addr = regs->rbx;
+        num = regs->rcx;
+        fd=2;
+        ret = write(fd,(char *)addr,num);
+        regs->rax = ret;
+        break;
+      case(16):
+        str = regs->rbx;
+        ret = open_file((char*)str);
+        regs->rax = ret;
+        break;
         
       default:
         return 0;
