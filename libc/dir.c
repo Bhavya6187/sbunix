@@ -37,3 +37,17 @@ uint64_t open(char* str)
 
 	return ret;
 }
+uint64_t close(uint64_t str)
+{
+	uint64_t ret;
+	ret =  __syscall1(SYSCALL_CLOSE,(uint64_t)str);
+
+	return ret;
+}
+uint64_t read(uint64_t fd,uint64_t num, char* str )
+{
+	uint64_t ret;
+	ret =  __syscall3(SYSCALL_READ,fd,num,(uint64_t)str);
+
+	return ret;
+}

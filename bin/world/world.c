@@ -11,6 +11,33 @@ int main(int argc, char* argv[])
   int i=1;
   i++;
   u_printf("In world.c with i = %d\n",i);
+  stderr("\n\nJust tring out stderr\n\n");
+  char temp[6];
+  u_scanf("%s",(uint64_t)temp);
+  u_printf("\nscanf gave temp as = %s\n",temp);
+  int tester;
+  u_scanf("%d",(uint64_t)&tester);
+  u_printf("\nscanf gave tester as = %d\n",tester);
+
+  char* ch = "etc/abc.sh";
+  u_printf("Opening ch %s",ch);
+  int fd = open(ch);
+  if(fd==-1)
+    u_printf("File not found");
+  else
+  {
+    u_printf("\nFile has fd %d",fd);
+    char st[20];
+    int i = 0;
+
+    for(i = 0; i<10;i++){
+      read(fd,1,st);
+        u_printf("char at %d - %c\n",i,st[0]);
+    }
+  }
+   close(fd) ;
+
+  while(1);
   
   /*
   struct dirent* dir;

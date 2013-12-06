@@ -213,6 +213,11 @@ uint64_t isr_handler_80(myregs_t *regs )
         ret = open_file((char*)str);
         regs->rax = ret;
         break;
+      case(17):
+        fd = regs->rbx;
+        ret = close_file(fd);
+        regs->rax = ret;
+        break;
         
       default:
         return 0;
