@@ -56,18 +56,16 @@ int main(int argc, char* argv[])
   if(ret1==0)
   {
     u_printf("In child return from exec()\n");
-    execve(filename);
+    //sleep(10);
+    //execve(filename);
     while(1);
+      u_printf("%p ", getpid());
   }
   else
   {
+    sleep(100);
     while(1);
-    {
-      for(i=0;i<500;i++)
-      for(j=0;j<500;j++)
-          ;
       u_printf("%p ", getpid());
-    }
   }
 
   //char params[5][10] = {"dushyant", "goyal", "\0", "\0", "\0"};

@@ -10,7 +10,7 @@ void schedule_process()
   
   ///-----------------WAIT() calls------------------///
   //check if a process is sleeping and is ready to be scheduled now :)
-  //checkAwake();
+  checkAwake();
   //------------------------------------------------///
 
   runnableTaskQ = moveTaskToEndOfList(runnableTaskQ);
