@@ -18,3 +18,4 @@
 struct dirent* u_readdir(DIR* directory);
 DIR* u_opendir(char* str);
 uint64_t u_closedir(DIR* directory);
+uint64_t open(char* str);

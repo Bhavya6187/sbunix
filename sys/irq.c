@@ -20,6 +20,7 @@ unsigned char month;
 unsigned int year;
 volatile unsigned char kbuf[128] = {0};
 volatile int kbuf_index=-1;
+volatile int newline  = 0;
 
 volatile uint64_t tick = 0;
 volatile uint64_t sec = 0;
@@ -354,6 +355,8 @@ void irq_handler_1(registers_t regs)
         kbuf_index++;
         kbuf[kbuf_index] = keyboard_map_shift[scancode];
         kbuf_index = kbuf_index%128;
+        if(kbuf[kbuf_index] == '\n')
+          newline  = 1;
         /*if( keyboard_map[scancode] >=97 && keyboard_map[scancode] <=122 )
             printtoside(keyboard_map[scancode]-32);
 //          putchar(keyboard_map[scancode]-32);
@@ -370,6 +373,8 @@ void irq_handler_1(registers_t regs)
         kbuf_index++;
         kbuf[kbuf_index] = keyboard_map[scancode];
         kbuf_index = kbuf_index%128;
+        if(kbuf[kbuf_index] == '\n')
+          newline  = 1;
       }
     }
   }

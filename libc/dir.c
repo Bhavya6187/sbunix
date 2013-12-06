@@ -30,3 +30,10 @@ uint64_t u_closedir(DIR* directory)
 
 	return ret;
 }
+uint64_t open(char* str)
+{
+	uint64_t ret;
+	ret =  __syscall1(SYSCALL_OPEN,(uint64_t)str);
+
+	return ret;
+}

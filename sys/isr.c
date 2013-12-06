@@ -125,9 +125,13 @@ uint64_t isr_handler_80(myregs_t *regs )
         regs->rax = addr;
         break;
       case(5):
-        addr = regs->rcx;
-        str = regs->rbx;
-        ret =(uint64_t)scanf((char*)str,addr);
+        addr = regs->rdx;
+        str = regs->rcx;
+        fd = regs->rbx;
+        if(fd ==0)
+          ret =(uint64_t)scanf((char*)str,addr);
+        else
+          ret =(uint64_t)read_file(fd,str,(char*)addr);
         regs->rax = ret;
         break;
       case(6):

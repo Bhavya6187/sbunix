@@ -8,7 +8,7 @@
 #define SYSCALL_PUTS 2 
 #define SYSCALL_FORK 3 
 #define SYSCALL_MALLOC 4
-#define SYSCALL_SCANF 5
+#define SYSCALL_READ 5
 #define SYSCALL_SCHEDULER 6
 #define SYSCALL_EXECVE 7
 #define SYSCALL_EXIT 8
@@ -19,6 +19,7 @@
 #define SYSCALL_OPENDIR 13
 #define SYSCALL_CLOSEDIR 14
 #define SYSCALL_STDERR 15
+#define SYSCALL_OPEN 16
 
 SYSCALL_PROTO(0)(uint64_t n) {
    uint64_t ret;
@@ -55,7 +56,7 @@ SYSCALL_PROTO(3)(uint64_t n, uint64_t a1, uint64_t a2, uint64_t a3) {
    __asm volatile( "movq %1,%%rax\n\t"
                    "movq %2,%%rbx\n\t"
                    "movq %3,%%rcx\n\t"
-                   "movq %3,%%rdx\n\t"
+                   "movq %4,%%rdx\n\t"
                    "int $80\n\t"
                    "movq %%rax,%0\n\t;"
                    :"=r"(ret):"r"(n),"r"(a1),"r"(a2),"r"(a3):"rax","rbx","rcx","rdx","memory");
