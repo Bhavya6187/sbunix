@@ -486,8 +486,8 @@ uint64_t wait_pid(uint64_t pid)
   if( searchPCB(runnableTaskQ, pid)==NULL )
     return -1;
 
-  waitTaskQ = addToTailTaskList(waitTaskQ, running);
   runnableTaskQ = removeFromTaskList(runnableTaskQ, running);
+  waitTaskQ = addToTailTaskList(waitTaskQ, running);
 
   // should i call schedule ??
   // parent will pause executing and call yield/schedule
@@ -533,10 +533,17 @@ void checkAwake()
   struct taskList *list = waitTaskQ;
   while(list)
   {
-    if ( (sec - (list->task->sleep_start)) > list->task->sleep_duration )
+    if ( ((sec - (list->task->sleep_start)) > list->task->sleep_duration ) && list->task->sleep_duration!=0)
     {
+      printf("In sleep:\n");
+      printf("\n");
+      printf("%p %p %p\n", list->task->sleep_start, list->task->sleep_duration, sec );
+      while(1);
+
       runnableTaskQ = addToHeadTaskList(runnableTaskQ, list->task);
       waitTaskQ = removeFromTaskList(waitTaskQ, list->task);
+      list->task->sleep_start=0;
+      list->task->sleep_duration=0;
     }
     list = list->next;
   }
