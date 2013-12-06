@@ -44,19 +44,32 @@ int main(int argc, char* argv[])
   //u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
   //u_printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"); 
   //int ret1 = __syscall0(SYSCALL_FORK);
+  int temp =0, i,j, res=0; 
+  temp++; res++;
+  char filename[25] = "bin/test_fork";
+  //char params[5][10] = {"dushyant", "goyal", "\0", "\0", "\0"};
+  char **params=NULL;
+  for(i=0;i<5;i++)
+  {
+    params[i] = (char*)malloc(sizeof(char)*10);
+  }
+  params[0]="dushyant\0";
+  params[1]="duant\0";
+
+
+  //char filename[25] = "bin/world";
   int ret1 = fork(); 
-  int temp =0, i,j, res; 
-  temp++;
-  //char filename[15] = "bin/world";
   if(ret1==0)
   {
     //temp = 20;
-    u_printf("fork return:%d:", ret1);
+    u_printf("HELLO>> CHILD fork return:%d:\n", ret1);
     u_printf("This is child !! \n");
     //__syscall1(SYSCALL_EXIT, 0);
-    exit(0);
+    //exit(0);
     //ret1 = __syscall1(SYSCALL_EXECVE,(uint64_t)(filename));
-    //execve(filename);
+    u_printf("In child return from exec()\n");
+    execve(filename);
+    //execvp(filename, params);
     u_printf("In child return from exec()\n");
     while(1);
       u_printf("Hiiii\n");
@@ -65,7 +78,7 @@ int main(int argc, char* argv[])
   {
     if(ret1>1)
     {
-      u_printf("fork return:%d:", ret1);
+      u_printf("HELLO>>> Parent fork return:%d:\n", ret1);
       u_printf("This is parent!! \n");
       //ret1 = __syscall0(SYSCALL_SCHEDULER);
       //yield();
@@ -73,11 +86,15 @@ int main(int argc, char* argv[])
       //u_printf("Returning back from schedule in parent!! \n");
       u_printf("Waiting for its child to ext()\n");
       //res = waitpid(ret1);
-      res = waitpid(11);
-      u_printf("Returning back after waiting for the child exits .. pid child=%p %d!! \n",ret1, res);
+      //res = waitpid(ret1);
+      //u_printf("Returning back after waiting for the child exits .. pid child=%p %d!! \n",ret1, res);
       //  u_printf("Fuck UUUUU\n");
-      while(1);
       yield();
+      yield();
+      while(1)
+        u_printf("lala");
+      yield();
+      while(1);
       //ret1 = __syscall0(SYSCALL_SCHEDULER);
       while(1)
       {
@@ -91,7 +108,8 @@ int main(int argc, char* argv[])
 
   }
 
-  //u_printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"); 
+  /*u_printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"); 
+  while(1);*/
   
   /*
   struct ad *ad1 = (struct ad*) malloc(sizeof(struct ad));

@@ -21,6 +21,8 @@
 #define SYSCALL_STDERR 15
 #define SYSCALL_OPEN 16
 #define SYSCALL_CLOSE 17
+#define SYSCALL_EXECVP 18
+#define SYSCALL_GETPID 19
 
 SYSCALL_PROTO(0)(uint64_t n) {
    uint64_t ret;

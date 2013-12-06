@@ -134,9 +134,8 @@ struct taskList *moveTaskToEndOfList(struct taskList *list)
 
 uint64_t get_curr_PID()
 {
-  // returning the pid from the current task
-  return (uint64_t)allTaskQ->task->pid;
-  //return runnableTaskQ->task->pid;
+  // returning pid of running process
+  return (uint64_t)(running->pid);
 }
 
 uint64_t get_PID_PCB(struct pcb_t * gpcb)
@@ -196,6 +195,17 @@ PCB *searchPCB(struct taskList *tlist, uint64_t pid)
     return NULL;
 }
 
+/*void PS(struct taskList *tlist)
+{
+    struct taskList *list = tlist;
+    while(list)
+    {
+      if(list->task->pid == pid)
+        return list->task;
+      list=list->next;
+    }
+    return NULL;
+}*/
 
 // This function creates the PCB for each new process created
 PCB *create_pcb()
@@ -306,17 +316,20 @@ uint64_t doFork()
   }
 }
 
-// Fork() Creating a child process from a parent
 //void doExec(char* filename, char* argv, char *en[])
-void doExec(char *filename)
+void doExec(char *fn)
 {
- 
   PCB *pro;
   pro = running;
-  //char filename[40];
-  //strcpy(filename, fn);
+  char *filename;
+
+  filename = (char*)(k_malloc((sizeof(char)*32)));
+  strcpy(filename, fn);
+  
+  printf("We will execute - %s %s\n", filename, fn);
   // delete all page table entries
   deletePageTables();
+  _ptcr3(pro->cr3);
   
   printf("In Exec :: check PID=%p, cr3=%p ppid=%p\n", pro->pid, pro->cr3, pro->ppid);
 	
@@ -331,7 +344,6 @@ void doExec(char *filename)
 		//exit();
 	}	
   
-  _ptcr3(pro->cr3);
   
 	//pro->u_stack[0] = pro->rip;
 	pro->rsp = (uint64_t)(pro->u_stack);
@@ -344,6 +356,76 @@ void doExec(char *filename)
 	pushf;\
 	push $0x1B;\
 	push %1"::"g"(pro->u_stack),"g"(pro->rip):"memory");
+	__asm volatile("\
+	iretq;\
+  ");
+
+}
+
+//void doExec(char* filename, char* argv, char *en[])
+void doExecvp(char *fn, char **argv)
+{
+ 
+  PCB *pro;
+  pro = running;
+  char filename[20];
+  char param[10][20];
+  for(int i=0;i<10; i++)
+  {
+    //param[i] = (char*)(k_malloc(sizeof(char)*10));
+    strcpy(param[i], argv[i]);
+    printf("Parameters - %s %s\n", param[i], argv[i]);
+  }
+
+  //filename = (char*)(k_malloc((sizeof(char)*32)));
+  strcpy(filename, fn);
+  printf("We will execute - %s %s\n", filename, fn);
+
+  // delete all page table entries
+  deletePageTables();
+  _ptcr3(pro->cr3);
+
+  char **params;
+  params = (char**)(p_malloc((sizeof(char*)*10)));
+  for(int i=0;i<10; i++)
+  {
+    params[i] = (char*)(p_malloc(sizeof(char)*20));
+    strcpy(params[i], param[i]);
+    printf("Parameters - %s %s\n", params[i], param[i]);
+  }
+  
+  printf("In Exec :: check PID=%p, cr3=%p ppid=%p\n", pro->pid, pro->cr3, pro->ppid);
+  //char *filename2;
+  //filename2 = filename;
+	//read_tarfs(pro, "bin/world");
+	read_tarfs(pro, filename);
+	printf("We will execute - %s\n", filename);
+	if ((pro->u_stack = process_stack()) == NULL)
+	{
+		printf("\n Cant allocate memory for process User stack");
+		//exit();
+	}	
+  
+/*
+  __asm volatile( "movq %0,%%rdi\n\t"
+                   "movq %1,%%rsi\n\t"
+                   ::"r"((uint64_t)(filename)),"r"((uint64_t)(param)):"rdi","rsi","memory"
+                );*/
+
+	printf("We will execute - %s %p\n", filename, param);
+	pro->u_stack[0] = pro->rip;
+	pro->rsp = (uint64_t)(pro->u_stack);
+  printf("user_stack_rsp%p",pro->rsp);
+	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[255]);
+	printf("In Execvp()  GDT SET\n");
+	__asm volatile("\
+	push $0x23;\
+	push %0;\
+	pushf;\
+	push $0x1B;\
+	push %1"::"g"(pro->u_stack),"g"(pro->rip):"memory");
+  __asm volatile( "movq %0,%%rdi\n\t"
+                   ::"r"((uint64_t)(params)):"rdi","memory");
 	__asm volatile("\
 	iretq;\
   ");

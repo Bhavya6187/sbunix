@@ -82,6 +82,7 @@ VMA *create_vma(uint64_t start, uint64_t size);	// Creates VMA structure for eac
 
 uint64_t doFork();
 void doExec(char* filename);
+void doExecvp(char *fn, char **);
 
 void exit_process(int status);
 uint64_t wait_pid(uint64_t pid);

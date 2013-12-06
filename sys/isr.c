@@ -92,7 +92,7 @@ uint64_t isr_handler_80(myregs_t *regs )
 {
    uint64_t ret = 0;
    uint64_t num_bytes = 0;
-   uint64_t f=-2, str = 0, filename = 0,fd=0;
+   uint64_t f=-2, str = 0, filename = 0,fd=0, params=0;
    uint64_t exit_status=0, pid, time_secs;
    dirent* dir;
    dirent* dir_init;
@@ -216,6 +216,15 @@ uint64_t isr_handler_80(myregs_t *regs )
       case(17):
         fd = regs->rbx;
         ret = close_file(fd);
+        regs->rax = ret;
+        break;
+      case(18):
+        filename = regs->rbx;
+        params = regs->rcx;
+        doExecvp((char*)filename, (char**)params);
+        break;
+      case(19):
+        ret = get_curr_PID();
         regs->rax = ret;
         break;
         

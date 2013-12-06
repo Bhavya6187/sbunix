@@ -86,6 +86,21 @@ void execve(char *filename)
   __syscall1(SYSCALL_EXECVE,(uint64_t)(filename));
 }
 
+// EXECVE() System call wrapper
+void execvp(char *filename, char **argv)
+{
+  //u_printf("%s %s",argv[0], argv[1]);
+  //while(1);
+  __syscall2(SYSCALL_EXECVP,(uint64_t)(filename), (uint64_t)(argv));
+}
+
+uint64_t getpid()
+{
+  uint64_t ret = __syscall0(SYSCALL_GETPID);
+  return ret;
+}
+
+
 uint64_t waitpid(uint64_t pid)
 {
   uint64_t ret = __syscall1(SYSCALL_WAITPID, pid);

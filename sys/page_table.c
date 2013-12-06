@@ -90,7 +90,6 @@ uint64_t set_paging(void * km, void * pf, void * pb)
   }*/
   printf("i = %p j=%d", i, j);
   printf("\n %d %d %d %d\n", vmem1, vmem2, vmem3, vmem4);
-  //while(1); 
   /*pdpe_vm = (uint64_t *)allocate_free_phy_page();
   pde_vm = (uint64_t *)allocate_free_phy_page();
   pml4e[vmem1] = (((uint64_t)pdpe_vm) & 0xFFFFFFFFFF000) | 3;
@@ -101,7 +100,11 @@ uint64_t set_paging(void * km, void * pf, void * pb)
     //pte_vm[vmem4+j] = ((((uint64_t)i) & 0xFFFFFFFFFF000) | 3);
   //pte_vm = (uint64_t *)allocate_free_phy_page();
   //pte[vmem4+j] = ((((uint64_t)0xB8000) & 0xFFFFFFFFFF000) | 3);
+  if(j>511)
   thor[vmem4+(j%512)] = ((((uint64_t)0xB8000) & 0xFFFFFFFFFF000) | 3);
+  else
+  thor[vmem4+j] = ((((uint64_t)0xB8000) & 0xFFFFFFFFFF000) | 3);
+
 //  pte[vmem4+j] = (0xB8000  | 3);
   //printf("\n %d %d %d %d %p %p %p\n", vmem1, vmem2, vmem3, vmem4, pml4e[vmem1], pte_vm[vmem4], video_mem);
   //printf("j=%d\n",j);

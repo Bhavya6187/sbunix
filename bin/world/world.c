@@ -8,6 +8,11 @@
 int main(int argc, char* argv[]) 
 {
 
+  u_printf("In world\n");
+  u_printf("%p\n", &argv);  
+  u_printf("%s\n", argv[0]);  
+  u_printf("%s\n", argv[1]);  
+  while(1);
   int i=1;
   i++;
   u_printf("In world.c with i = %d\n",i);

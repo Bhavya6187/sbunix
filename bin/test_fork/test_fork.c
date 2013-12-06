@@ -11,6 +11,14 @@ int main(int argc, char* argv[])
   int temp =0, i,j; 
   temp++;
   //char filename[15] = "bin/world";
+  char **params=NULL;
+  for(i=0;i<5;i++)
+  {
+    params[i] = (char*)malloc(sizeof(char)*10);
+  }
+  params[0]="dushyant\0";
+  params[1]="duant\0";
+ 
   if(ret1==0)
   {
     u_printf("First Child:%d:\n", ret1);
@@ -39,7 +47,7 @@ int main(int argc, char* argv[])
       ret2 = fork();
       if(ret2==0)
       {
-        execve("bin/world");
+        execvp("bin/world", params);
         u_printf("Child!!!:%d:\n", ret2);
         while(1)
           u_printf("Last child");
