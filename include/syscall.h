@@ -23,6 +23,7 @@
 #define SYSCALL_CLOSE 17
 #define SYSCALL_EXECVP 18
 #define SYSCALL_GETPID 19
+#define SYSCALL_PS 20
 
 SYSCALL_PROTO(0)(uint64_t n) {
    uint64_t ret;

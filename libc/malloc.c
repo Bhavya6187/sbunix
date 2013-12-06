@@ -117,3 +117,8 @@ void sleep(uint64_t time)
 {
   __syscall1(SYSCALL_SLEEP, time);
 }
+
+void ps_list()
+{
+  __syscall0(SYSCALL_PS);
+}

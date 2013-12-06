@@ -47,6 +47,5 @@ void copyOnWritePageTables();
 uint64_t *process_stack();	
 
 void init_VM(uint64_t pfree);		// Initializes the Virtual Memory Manager
-void test();
 
 #endif

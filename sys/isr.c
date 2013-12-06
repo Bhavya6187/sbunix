@@ -227,6 +227,9 @@ uint64_t isr_handler_80(myregs_t *regs )
         ret = get_curr_PID();
         regs->rax = ret;
         break;
+      case(20):
+        PS_Display();
+        break;
         
       default:
         return 0;

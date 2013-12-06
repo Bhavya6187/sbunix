@@ -124,7 +124,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   DIR* directory = opendir("etc/");
   dir = readdir(directory);
   closedir(directory);*/
-  test();
+  init_process();
   while(1);
   //test();
 }

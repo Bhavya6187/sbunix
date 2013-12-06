@@ -195,17 +195,36 @@ PCB *searchPCB(struct taskList *tlist, uint64_t pid)
     return NULL;
 }
 
-/*void PS(struct taskList *tlist)
+void PS_Display()
 {
-    struct taskList *list = tlist;
-    while(list)
+    struct taskList *list1 = runnableTaskQ;
+    struct taskList *list2 = waitTaskQ;
+    struct taskList *list3 = deadTaskQ;
+    PCB *pro;
+    printf("\n\nPROCESS  :  PID  :  PPID  :  START\n");
+    printf("Running Processes-------------------------------------------------------------\n");
+    while(list1)
     {
-      if(list->task->pid == pid)
-        return list->task;
-      list=list->next;
+      pro = list1->task;
+      printf("%s  :  %ld  :  %ld  :  %ldsec\n", pro->name, pro->pid, pro->ppid, pro->start_time);
+      list1=list1->next;
     }
-    return NULL;
-}*/
+    printf("Waiting Processes ------------------------------------------------------------\n");
+    while(list2)
+    {
+      pro = list2->task;
+      printf("%s  :  %ld  :  %ld  :  %ldsec\n", pro->name, pro->pid, pro->ppid, pro->start_time);
+      list2=list2->next;
+    }
+    printf("Dead Processes ----------------------------------------------------------------\n");
+    while(list3)
+    {
+      pro = list3->task;
+      printf("%s  :  %ld  :  %ld  :  %ldsec\n", pro->name, pro->pid, pro->ppid, pro->start_time);
+      list3=list3->next;
+    }
+ 
+}
 
 // This function creates the PCB for each new process created
 PCB *create_pcb()
@@ -251,7 +270,8 @@ uint64_t doFork()
   //parent_process = get_curr_PCB();
   parent_process = running;
 	pro = create_pcb();
-
+  strcpy(pro->name, parent_process->name);  
+  
   m_map((uint64_t)pro, (uint64_t)(get_curr_PCB()), (uint64_t)(sizeof(struct pcb_t)), (uint64_t)(sizeof(struct pcb_t)) );
  
   // Getting new pid -------------------------------------------------------------------------
@@ -345,6 +365,8 @@ void doExec(char *fn)
 	}	
   
   
+  strcpy(pro->name, filename);  
+  pro->start_time = sec;
 	//pro->u_stack[0] = pro->rip;
 	pro->rsp = (uint64_t)(pro->u_stack);
   printf("user_stack_rsp%p",pro->rsp);
@@ -398,6 +420,8 @@ void doExecvp(char *fn, char **argv)
   //char *filename2;
   //filename2 = filename;
 	//read_tarfs(pro, "bin/world");
+  strcpy(pro->name, filename);  
+  pro->start_time = sec;
 	read_tarfs(pro, filename);
 	printf("We will execute - %s\n", filename);
 	if ((pro->u_stack = process_stack()) == NULL)
@@ -566,3 +590,59 @@ void sleep_t(uint64_t time)
 
 }
 
+// First User Process to Start Running !! :) 
+void init_process()	
+{
+	PCB *pro = NULL;
+  printf("Made the pcb");
+	pro = create_pcb();
+ 	if ((pro->pid = get_pid()) == 0)
+	{
+		printf("\n Error No Free PID found");	
+	}
+	pro->cr3 = map_pageTable(pro);		// Storing Base Physical address of PML4e for new process
+	printf("\n PCR3:%x", pro->cr3);
+  //Adding the PCB into Queue of Running process
+  allTaskQ = addToHeadTaskList(allTaskQ, pro); 
+  no_allQ++;
+
+  pro->ppid=0;
+  pro->cow=0;
+	_ptcr3(pro->cr3);
+  //char elf_file[10]="bin/world";
+  char elf_file[10]="bin/hello";
+  //char elf_file[10]="bin/bash";
+	read_tarfs(pro,elf_file);
+	printf("\n BACK IN TEST");
+	if ((pro->u_stack = process_stack()) == NULL)
+	{
+		printf("\n Cant allocate memory for process User stack");
+		//exit();
+	}	
+	/* Setting the CR3 with the new process PML4E */	
+	printf("\n CR3 set done");
+  runnableTaskQ = addToHeadTaskList(runnableTaskQ, pro); 
+  no_runnableQ++;
+  running = pro;
+	/* Running new process */
+  
+  strcpy(pro->name, elf_file);
+  pro->start_time = sec;
+	pro->u_stack[0] = pro->rip;
+	pro->rsp = (uint64_t)(pro->u_stack);
+  printf("user_stack_rsp%p",pro->rsp);
+	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[255]);
+	printf("\n GDT SET");
+	uint64_t tem = 0x28; 
+	__asm volatile("mov %0,%%rax;"::"r"(tem));
+	__asm volatile("ltr %ax");
+	__asm volatile("\
+	push $0x23;\
+	push %0;\
+	pushf;\
+	push $0x1B;\
+	push %1"::"g"(pro->u_stack),"g"(pro->rip):"memory");
+	__asm volatile("\
+	iretq;\
+  ");
+}

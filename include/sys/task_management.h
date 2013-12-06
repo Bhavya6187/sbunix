@@ -28,11 +28,13 @@ struct pcb_t
 	VMA *mm_st;	// Pointer to First VMA Block of the Process 
 	uint64_t cr3;	// Coontents of CR3 Register. (add of PML4E page table)
 	uint64_t cow;	// Value of COW bit will tell how many processes with current process as parent are present 
+	uint64_t start_time;
+  char name[64];
 	uint64_t sleep_start;	
 	uint64_t sleep_duration;	
 	uint64_t rip;
+  /*
   uint64_t rax;
-	/*
   uint64_t rbx;
 	uint64_t rcx;
 	uint64_t rdx;
@@ -96,5 +98,9 @@ extern struct taskList *runnableTaskQ;
 extern PCB * running;
 extern int no_waitQ, no_allQ, no_runnableQ;
 void scheduler1();
+
+void PS_Display();
+
+void init_process();
 
 #endif

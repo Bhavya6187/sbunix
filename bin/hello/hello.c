@@ -70,6 +70,8 @@ int main(int argc, char* argv[])
   {
     waitpid(ret1);
     //sleep(100);
+    char f[10] = "bin/ps";
+    execve(f);
     while(1)
       u_printf("%p ", getpid());
   }

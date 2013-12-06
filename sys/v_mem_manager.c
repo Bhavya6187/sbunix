@@ -8,6 +8,7 @@
 #include<sys/page_table.h>
 #include<sys/tarfs.h>
 #include<sys/gdt.h>
+#include<sys/string.h>
 
 uint64_t cur_VK;
 uint64_t cur_PK;
@@ -695,56 +696,3 @@ uint64_t *process_stack()
 }	
 
 
-void test()	// sort of execve in current scenario
-{
-	PCB *pro = NULL;
-  printf("Made the pcb");
-	pro = create_pcb();
- 	if ((pro->pid = get_pid()) == 0)
-	{
-		printf("\n Error No Free PID found");	
-	}
-	pro->cr3 = map_pageTable(pro);		// Storing Base Physical address of PML4e for new process
-	printf("\n PCR3:%x", pro->cr3);
-  //Adding the PCB into Queue of Running process
-  allTaskQ = addToHeadTaskList(allTaskQ, pro); 
-  no_allQ++;
-
-  pro->ppid=0;
-  pro->cow=0;
-	_ptcr3(pro->cr3);
-  //char elf_file[10]="bin/world";
-  char elf_file[10]="bin/hello";
-  //char elf_file[10]="bin/bash";
-	read_tarfs(pro,elf_file);
-	printf("\n BACK IN TEST");
-	if ((pro->u_stack = process_stack()) == NULL)
-	{
-		printf("\n Cant allocate memory for process User stack");
-		//exit();
-	}	
-	/* Setting the CR3 with the new process PML4E */	
-	printf("\n CR3 set done");
-  runnableTaskQ = addToHeadTaskList(runnableTaskQ, pro); 
-  no_runnableQ++;
-  running = pro;
-	/* Running new process */
-	
-	pro->u_stack[0] = pro->rip;
-	pro->rsp = (uint64_t)(pro->u_stack);
-  printf("user_stack_rsp%p",pro->rsp);
-	tss.rsp0 = (uint64_t)  &(pro->kernel_stack[255]);
-	printf("\n GDT SET");
-	uint64_t tem = 0x28; 
-	__asm volatile("mov %0,%%rax;"::"r"(tem));
-	__asm volatile("ltr %ax");
-	__asm volatile("\
-	push $0x23;\
-	push %0;\
-	pushf;\
-	push $0x1B;\
-	push %1"::"g"(pro->u_stack),"g"(pro->rip):"memory");
-	__asm volatile("\
-	iretq;\
-  ");
-}
