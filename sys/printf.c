@@ -341,17 +341,72 @@ void printtoside(char a)
 	*video_2++ = color;
 }
 
-void printend(char* str)
+int itoa(int value, char* rc)
+{
+  char ptr[30];
+  int index = 0;
+  int neg = 0;
+  int j = 0;
+  char vals[10] = "0123456789";
+  if ( value < 0 )
+  {
+    value*=-1;
+    neg = 1;
+  }
+  do
+  {
+    // Modulo is negative for negative value. This trick makes abs() unnecessary.
+    ptr[index] = vals[value%10];
+    value /= 10;
+    index++;
+  } while ( value );
+  if(neg)
+    ptr[index]='-';
+  else
+    index--;
+  while ( index >= 0 )
+  {
+    rc[j]=ptr[index];
+    j++;
+    index--;
+  }
+  rc[j]= '\0';
+  return 0;
+}
+
+void printtoend(char* str, int a, int b)
 {
   int color = 0x07;
   //hour = hour-4;
 	//volatile char *video = (volatile char*)(0xB8F90);
-	volatile char *video = (volatile char*)(video_vm + 0x00F78);
+	volatile char *video = (volatile char*)(video_vm + 0xF08);
 	//volatile char *video = (volatile char*)(VIDEO_VM | 0xB8F90);
   int i = 0;
   while(str[i] != '\0') 
   {
     *(video++) = str[i];
+  	*video++ = color;
+    i++;
+  }
+  char intstr[30];
+
+  itoa(a,intstr);
+  i = 0;
+  while(intstr[i] != '\0') 
+  {
+    *(video++) = intstr[i];
+  	*video++ = color;
+    i++;
+  }
+
+  *(video++) = ':';
+  *video++ = color;
+  itoa(b,intstr);
+
+  i = 0;
+  while(intstr[i] != '\0') 
+  {
+    *(video++) = intstr[i];
   	*video++ = color;
     i++;
   }
