@@ -30,6 +30,7 @@ void printtoside(char hour);
 uint64_t sys_putint(int a);
 uint64_t stderr(const char* fmt, ...) ;
 int write(int fd, volatile char* str, int n);
+void printend(char* str);
 inline void outb( unsigned short port, unsigned char val )
 {
     __asm volatile( "outb %0, %1": : "a"(val), "Nd"(port) );

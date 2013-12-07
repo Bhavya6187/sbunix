@@ -340,3 +340,19 @@ void printtoside(char a)
   *(video_2++) = a;
 	*video_2++ = color;
 }
+
+void printend(char* str)
+{
+  int color = 0x07;
+  //hour = hour-4;
+	//volatile char *video = (volatile char*)(0xB8F90);
+	volatile char *video = (volatile char*)(video_vm + 0x00F78);
+	//volatile char *video = (volatile char*)(VIDEO_VM | 0xB8F90);
+  int i = 0;
+  while(str[i] != '\0') 
+  {
+    *(video++) = str[i];
+  	*video++ = color;
+    i++;
+  }
+}
