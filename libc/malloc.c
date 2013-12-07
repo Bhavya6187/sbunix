@@ -128,3 +128,13 @@ uint64_t kill(uint64_t pid)
   uint64_t ret =__syscall1(SYSCALL_KILL, pid);
   return ret;
 }
+
+void clearup()
+{
+  __syscall0(SYSCALL_CLEAR);
+}
+
+void free(uint64_t vadd)
+{
+  __syscall1(SYSCALL_KILL, vadd);
+}
