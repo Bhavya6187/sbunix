@@ -709,4 +709,7 @@ uint64_t *process_stack()
 	return top;	//returns the top of the virtual page 4KB page as stack grows downwards
 }	
 
-
+void free_mem(uint64_t vadd)
+{
+  
+}

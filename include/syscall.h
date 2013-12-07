@@ -25,6 +25,8 @@
 #define SYSCALL_GETPID 19
 #define SYSCALL_PS 20
 #define SYSCALL_KILL 21
+#define SYSCALL_CLEAR 22
+#define SYSCALL_FREE 23
 
 SYSCALL_PROTO(0)(uint64_t n) {
    uint64_t ret;

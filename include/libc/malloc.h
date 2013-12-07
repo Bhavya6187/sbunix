@@ -15,4 +15,6 @@ uint64_t wait();
 void sleep(uint64_t time);
 void ps_list();
 uint64_t kill(uint64_t pid);
+void clearup();
+void free(uint64_t vadd);
 #endif

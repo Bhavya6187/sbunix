@@ -670,3 +670,8 @@ void init_process()
 	iretq;\
   ");
 }
+
+void clear_screen()
+{
+  clrscr();
+}

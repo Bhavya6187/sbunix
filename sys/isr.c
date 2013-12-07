@@ -88,7 +88,7 @@ uint64_t isr_handler_80(myregs_t *regs )
 {
    uint64_t ret = 0;
    uint64_t num_bytes = 0;
-   uint64_t f=-2, str = 0, filename = 0,fd=0, params=0;
+   uint64_t f=-2, str = 0, filename = 0,fd=0, params=0, vadd;
    uint64_t exit_status=0, pid, time_secs;
    dirent* dir;
    dirent* dir_init;
@@ -230,6 +230,13 @@ uint64_t isr_handler_80(myregs_t *regs )
         pid = regs->rbx;
         ret = kill_process(pid);
         regs->rax = ret;
+        break;
+      case(22):
+        clear_screen();
+        break;
+      case(23):
+        vadd = regs->rbx;
+        free_mem(vadd);
         break;
         
       default:
