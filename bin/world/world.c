@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
   u_printf("In world\n");
   stderr("\n\nJust tring out stderr\n\n");
 
-  char* ch = "etc/abc.sh";
+  char ch[13] = "etc/abc.sh\0";
   int ret = check_shbang(ch);
   
   if(ret ==1)

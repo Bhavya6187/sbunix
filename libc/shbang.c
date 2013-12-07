@@ -13,7 +13,6 @@ int check_shbang(char* path)
     return 0;
   else
   {
-
     read(fd,2,st);
   }
    close(fd);

@@ -1,0 +1,57 @@
+Documentation----
+
+We have implemented the following in our project for Operating System -
+1. Page Tables using Self-referencing
+2. fork() using COW
+3. malloc()
+4. tarfs - open, read, close, opendir, readdir, closedir
+5. read(), write()
+6. ls, ps, sleep, sh
+7. getpid()
+8. wait()
+9. waitpid()
+10. exit()
+11. exec()
+12. execvp()
+13. printf()
+14. scanf()
+15. sleep()
+16. free()
+17. #!  (parser in libc) works independently but not with SHELL
+
+Some of the test binaries are in bin/ folder which can be run from the SHELL 
+
+The starting point of the OS will be the SHELL. 
+
+SHELL with PATH, cd, ulimit(we are setting the time for execution limit)
+
+
+
+Testing -
+
+Example 1:
+[$] bin/test_sleep      --- this will create two processes (parent will wait for the child to finish
+[$] bin/ps              --- this will show the running processes
+
+Example 2:
+[$] bin/test_malloc     
+
+Example 3:
+[$] bin/test_scanf      --- binary for testing the scanf    
+
+Example 4:
+[$] bin/test_segv       --- binary for testing the SEGV 
+
+Example 5:
+[$] bin/clear           --- binary for testing the clear
+
+Example 6:
+[$] bin/test_fork_time  --- binary for testing test_fork_with timer
+
+Example 7:
+[$] bin/test_fork_time  --- binary for testing test_fork_with timer
+
+Some of the binaries work when executed independently as a process from the init_process() function in the task_management.c file
+but breaks when executed from the SHELL;
+
+

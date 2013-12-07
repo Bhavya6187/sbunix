@@ -1,4 +1,1 @@
-#! bhavya
-is
-a
-rockstar
+#! bin/ps
