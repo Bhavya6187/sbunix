@@ -3,55 +3,80 @@
 *
 */
 
-# include <syscall.h>
 # include <libc/malloc.h>
 # include <bash.h>
 # include <stdio.h> 
 # include <defs.h>
+# include <sys/tarfs.h>
+# include <libc/dir.h>
 
 #define BUFSIZE 20
 #define TOKENSIZE 10
 
+
 char *PATH = "/bin";	// Environment variable seprated by :
-char *dummy = "\n\nbin/hello\n";	//dummy str for get char
+char *dummy = "bin/hello";	//dummy str for get char
 char *ipBuf[TOKENSIZE];	// Array of pointers for the input commands (not parsed)
 char *parseBuf;		// Pointer to parsed array of commands 
 int dumi = 0;
 
-//Returns length of string EXCluding the \0 
+
+/*
+*
+*/
+
+
+
+
+/*
+* Returns length of string EXCluding the \0 
+*/
 
 int strln(char *st)
 {
 	uint32_t i = 0;
+
 	while ((*st != '\0') && (st != NULL))
 	{
 		++st;
 		++i;
 	}
+
 	return (i);
 }
 
-// Copy one string into another - strcpy
+/*
+* Copy one string into another - strcpy
+*/
+
 int strcp(char *src, char *dst, uint32_t len)
 {
 	uint32_t i = 0;
+
 	if (src == NULL || dst == NULL)
 	{
 		u_printf("NULL src ot dst in strcp");
 		return -1;
 	}
+
 	while(i < len)
 	{
 		*dst++ = *src++;
 		++i;
 	}	
+
 	return 0;
 }
 
-// Zero out any memory location till the len provided
+
+/*
+* Zero out any memory location till the len provided
+*/
+
 void clear(char *pt, uint32_t len)
 {
 	uint32_t i = 0;
+
 	while(i < len)
 	{
 		pt[i] = 0;
@@ -59,7 +84,10 @@ void clear(char *pt, uint32_t len)
 	}
 }
 
-// Parses and tokenize the input string which users inputs from shell
+/*
+* Parses and tokenize the input string which users inputs from shell
+*/
+
 int parse_ip(char *str)
 {
 	char *pt = str;
@@ -85,7 +113,7 @@ int parse_ip(char *str)
 				clear(ipBuf[i], 10);
 			}
 			strcp(tmp1, ipBuf[i], strln(tmp1));		// Copying the found token in ipBuf
-			*(ipBuf[i] + (strln(tmp1) + 1)) = '\0';		// EOS
+			*(ipBuf[i] + (strln(tmp1))+1) = '\0';		// EOS
 			clear(tmp1, BUFSIZE);				// Clearing the next token
 			++i;
 			++pt;
@@ -113,62 +141,57 @@ char getchar()
 
 int main()			// Process 0
 {
-	uint32_t i = 0;
-	char c;
+//	uint32_t i = 0;
+//	char c;
 	char *tmp = (char *) malloc(sizeof(char) * BUFSIZE);			// tmp buffer for shell
 	char *cmd = (char *) malloc(sizeof(char) * BUFSIZE);			// Will hold the final command minus arguments if any
+	char *cur_PATH = (char *) malloc(sizeof(char) * 100);			// Will show current PATH (CWD)
 	int ret  = -1;
-
+	
+	strcp(PATH, cur_PATH, strln(PATH));					//copying PATH to current PATH
 	clear(tmp, BUFSIZE);							// Zero out new memory allocalted
 //	clear_screen();								// Kernel function should be a system call
 	
 	u_printf("\n[MY-SHELL: ]");
 	while(1)								// First process will never terminate 
 	{
-		c = getchar();							// reads user typed input from stdio	how ??
-
-		switch(c) 
+		//strcp(dummy, tmp, strln(dummy));
+		u_scanf("%s", (uint64_t)tmp);
+//		u_printf("AFTER%s::%d",(uint64_t)tmp, tmp[0]);
+		switch(tmp[0]) 
 		{
-			case '\n':						// User pressing only enter
-				if (tmp[0] == 0)
+			case '\0':						// User pressing only enter
+				u_printf("\n[MY-SHELL: ]");
+				break;
+			default:	
+				u_printf("in ELSE");
+				parse_ip(tmp);				// parses the input when user hits Enter
+				strcp(ipBuf[0], cmd, strln(ipBuf[0]));
+				*(cmd + (strln(ipBuf[0]))+1) = '\0';	
+				u_printf("cmd is:%s", cmd);
+        if(open(tmp) == -1)
+        {
+          u_printf("\nThe given command not found\n");
+          break;
+        }
+        u_printf("Executing %s",tmp);
+				ret  = fork();
+				if (!ret)
 				{
-					u_printf("\n [MY-SHELL: ]");
+					u_printf("In child");
+ //         while(1);
+//					while(1);
+					execve(tmp);
 				}
-				else 
-				{
-					parse_ip(tmp);				// parses the input when user hits Enter
-					strcp(ipBuf[0], cmd, strln(ipBuf[0]));
-					*(cmd + (strln(ipBuf[0]) + 1 )) = '\0';	
-
-					/* check for the command in the /bin dir -- need dir calls for this - for now just test with a hello binary */
-					// If cmd found call exceve with cmd binary
-					// else u_printf("\n [MY-SHELL: ]");
-					
-					ret  = fork();
-					if (!ret)
-					{
-						u_printf("In child");
-            char filename[10] = "bin/hello\0";
-            ret = __syscall1(SYSCALL_EXECVE,(uint64_t)(filename));
-            while(1)
-              u_printf("lalala\n");
-						//execve(cmd, NULL, NULL);
-					}
-					else{
-						u_printf("In parent");
-            while(1);
-						u_printf("In parent");
-						//yield();
-					}
-				}	
+				else{
+					u_printf("In parent");
+					yield();
+				}
 				clear(tmp, BUFSIZE);				// clear tmp to prepare for new user input
 				break;
 
-			default:						// Just copy user input into tmp buffer
-				tmp[i] = c;
-				++i;
-				break;
 		}
+		clear(tmp, BUFSIZE);				// clear tmp to prepare for new user input
 		clear(cmd, BUFSIZE);
 	}
 	return 0;

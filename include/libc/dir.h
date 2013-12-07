@@ -21,3 +21,5 @@ uint64_t u_closedir(DIR* directory);
 uint64_t open(char* str);
 uint64_t close(uint64_t fd);
 uint64_t read(uint64_t fd,uint64_t num, char* str );
+int check_shbang(char* path);
+int read_shbang(char* path, char**params);

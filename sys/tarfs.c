@@ -281,7 +281,7 @@ uint64_t read_file(uint64_t fd,uint64_t num, char* buffer)
   if(i >=150)
     return NULL;
 
-  printf("\nFile has fd %d",fd);
+  //printf("\nFile has fd %d",fd);
   FDT entry = fd_table[i];
   char* base = (char*)&_binary_tarfs_start;
   base = base + entry.fp->offset ;
@@ -289,7 +289,7 @@ uint64_t read_file(uint64_t fd,uint64_t num, char* buffer)
   int size = size_to_int(tarfs_struct->size);
   if(size == 0)
     return NULL;
-  printf("size of file being read  = %d with seek = %d\n",size,entry.seek);
+  //printf("size of file being read  = %d with seek = %d\n",size,entry.seek);
   base = (char*)(tarfs_struct+1);
   base = base + entry.seek ;
 
@@ -300,6 +300,11 @@ uint64_t read_file(uint64_t fd,uint64_t num, char* buffer)
     {
       buffer[index] = base[index]; 
       entry.seek++;
+    }
+    else
+    {
+      fd_table[i].seek = entry.seek;
+      return -2;
     }
   }
   fd_table[i].seek = entry.seek;
