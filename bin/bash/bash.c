@@ -1,7 +1,4 @@
-/*
-* This implements the bash for the OS
-*
-*/
+// Shell Implementation for the OS
 
 # include <libc/malloc.h>
 # include <bash.h>
@@ -13,70 +10,45 @@
 #define BUFSIZE 20
 #define TOKENSIZE 10
 
-
 char *PATH = "/bin";	// Environment variable seprated by :
 char *dummy = "bin/hello";	//dummy str for get char
 char *ipBuf[TOKENSIZE];	// Array of pointers for the input commands (not parsed)
 char *parseBuf;		// Pointer to parsed array of commands 
 int dumi = 0;
 
-
-/*
-*
-*/
-
-
-
-
-/*
-* Returns length of string EXCluding the \0 
-*/
-
+//Returns length of string EXCluding the \0 
 int strln(char *st)
 {
 	uint32_t i = 0;
-
 	while ((*st != '\0') && (st != NULL))
 	{
 		++st;
 		++i;
 	}
-
 	return (i);
 }
 
-/*
-* Copy one string into another - strcpy
-*/
-
+//Copy one string into another - strcpy
 int strcp(char *src, char *dst, uint32_t len)
 {
 	uint32_t i = 0;
-
 	if (src == NULL || dst == NULL)
 	{
 		u_printf("NULL src ot dst in strcp");
 		return -1;
 	}
-
 	while(i < len)
 	{
 		*dst++ = *src++;
 		++i;
 	}	
-
 	return 0;
 }
 
-
-/*
-* Zero out any memory location till the len provided
-*/
-
+// Zero out any memory location till the len provided
 void clear(char *pt, uint32_t len)
 {
 	uint32_t i = 0;
-
 	while(i < len)
 	{
 		pt[i] = 0;
@@ -84,16 +56,12 @@ void clear(char *pt, uint32_t len)
 	}
 }
 
-/*
-* Parses and tokenize the input string which users inputs from shell
-*/
-
+// Parses and tokenize the input string which users inputs from shell
 int parse_ip(char *str)
 {
 	char *pt = str;
 	uint32_t i = 0, j = 0;		// i is index in ipBuf , j is index in tmp1
 	char tmp1[BUFSIZE];
-
 	while (*pt != '\0')
 	{
 		if ( i == TOKENSIZE && (*pt != '\0'))
@@ -101,7 +69,6 @@ int parse_ip(char *str)
 			u_printf("\n Input too long. Cant tokenize");
 			return -1;
 		}
-		
 		if (*pt == ' ')		// Get the token and save in ipBuf
 		{
 			if (ipBuf[i] == NULL)	// If entry is free
@@ -150,25 +117,30 @@ int main()			// Process 0
 	
 	strcp(PATH, cur_PATH, strln(PATH));					//copying PATH to current PATH
 	clear(tmp, BUFSIZE);							// Zero out new memory allocalted
-//	clear_screen();								// Kernel function should be a system call
+  //clear_screen();								// Kernel function should be a system call
 	
 	u_printf("\n[MY-SHELL: ]");
 	while(1)								// First process will never terminate 
 	{
 		//strcp(dummy, tmp, strln(dummy));
 		u_scanf("%s", (uint64_t)tmp);
-//		u_printf("AFTER%s::%d",(uint64_t)tmp, tmp[0]);
-		switch(tmp[0]) 
+		//u_printf("AFTER%s::%d",(uint64_t)tmp, tmp[0]);
+		
+    switch(tmp[0]) 
 		{
 			case '\0':						// User pressing only enter
 				u_printf("\n[MY-SHELL: ]");
 				break;
-			default:	
-				u_printf("in ELSE");
+			
+      default:	
+		
+        u_printf("in ELSE");
 				parse_ip(tmp);				// parses the input when user hits Enter
 				strcp(ipBuf[0], cmd, strln(ipBuf[0]));
 				*(cmd + (strln(ipBuf[0]))+1) = '\0';	
 				u_printf("cmd is:%s", cmd);
+        
+        // Searcing if command exists
         if(open(tmp) == -1)
         {
           u_printf("\nThe given command not found\n");
