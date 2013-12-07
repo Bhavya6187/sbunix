@@ -24,5 +24,7 @@ int main(int argc, char* argv[])
   dir = u_readdir(directory);
   }
 
-  while(1);
+  //exit(0);
+  //while(1);
+  return 0;
 }

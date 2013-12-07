@@ -14,4 +14,5 @@ uint64_t waitpid(uint64_t pid);
 uint64_t wait();
 void sleep(uint64_t time);
 void ps_list();
+uint64_t kill(uint64_t pid);
 #endif

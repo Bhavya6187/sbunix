@@ -458,8 +458,6 @@ void doExecvp(char *fn, char **argv)
 
 }
 
-
-
 //////////////////////////////////////////////////////////////////////////////////////////
 
 void exit_process(int status)
@@ -495,6 +493,30 @@ void exit_process(int status)
 
   // call schedule() to start other process
   schedule_process();
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+uint64_t kill_process(int pid)
+{
+  PCB *s, *r;
+  r = running;
+  s = searchPCB(runnableTaskQ, pid);
+  if(s==NULL)
+    return -1;
+  
+  // REmove the process from the Queue
+  runnableTaskQ = removeFromTaskList(runnableTaskQ, s);
+  deadTaskQ = addToHeadTaskList(deadTaskQ, s);
+ 
+  _ptcr3(s->cr3); 
+  // Free the memory used by the process
+  deletePageTables();
+  _ptcr3(r->cr3); 
+
+  return 0;
 }
 
 

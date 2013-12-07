@@ -99,7 +99,7 @@ void *p_malloc(uint64_t no_bytes)
 
 uint32_t m_map(uint64_t start_Vadd, uint64_t source_add, uint64_t f_size, uint64_t m_size)
 {
-	printf("\n in m_map vadd = %p source =  %p f_size = %p m_size%p\n",start_Vadd,source_add,f_size,m_size );
+	//printf("\n in m_map vadd = %p source =  %p f_size = %p m_size%p\n",start_Vadd,source_add,f_size,m_size );
   char *check = NULL, *source = NULL;
 	uint64_t i = 0;
 	if (f_size < 1)
@@ -322,10 +322,10 @@ void copyPageTables(PCB *child, PCB *parent)
   uint64_t total_count=0, tp1=0, tp2=0, tp3=0;
   
   child_pml4e_entry = child->pml4e_entry;
-  printf("Child PML4E entry =%p\n", child_pml4e_entry);
+  //printf("Child PML4E entry =%p\n", child_pml4e_entry);
   pml4eAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, 0x1FE));
   new_pml4eAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, child_pml4e_entry ));
-  printf("pml4e=%p, new=%p\n", pml4eAdd, new_pml4eAdd);
+  //printf("pml4e=%p, new=%p\n", pml4eAdd, new_pml4eAdd);
 
   // Iterate through all the page table entries in the PML4E of the Parent process 
   for(i=0; i<510; i++)
@@ -340,7 +340,7 @@ void copyPageTables(PCB *child, PCB *parent)
       tp1++;
       pdpeAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, i));
       new_pdpeAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, child_pml4e_entry, i));
-      printf("pdpe=%p, new=%p\n", pdpeAdd, new_pdpeAdd);
+      //printf("pdpe=%p, new=%p\n", pdpeAdd, new_pdpeAdd);
       
       for( j=0; j<512; j++)
       {
@@ -351,7 +351,7 @@ void copyPageTables(PCB *child, PCB *parent)
           tp2++;
           pdeAdd = (uint64_t *)(selfRef(0x1FE, 0x1FE, i, j));
           new_pdeAdd = (uint64_t *)(selfRef(0x1FE, child_pml4e_entry, i, j));
-          printf("pde=%p, new=%p\n", pdeAdd, new_pdeAdd);
+          //printf("pde=%p, new=%p\n", pdeAdd, new_pdeAdd);
 
           for( k=0; k<512; k++)
           {
@@ -362,7 +362,7 @@ void copyPageTables(PCB *child, PCB *parent)
               tp3++;
               pteAdd = (uint64_t *)(selfRef(0x1FE, i, j, k));
               new_pteAdd = (uint64_t *)(selfRef(child_pml4e_entry, i, j, k));
-              printf("pte=%p, new=%p\n", pteAdd, new_pteAdd);
+              //printf("pte=%p, new=%p\n", pteAdd, new_pteAdd);
 
               for(l=0; l<512; l++)
               {
@@ -374,7 +374,7 @@ void copyPageTables(PCB *child, PCB *parent)
                   pteAdd[l]     = ((((uint64_t)pteAdd[l]) & R0 & ACCES & DIRTY) | COW);
                   //new_pteAdd[l] = ((uint64_t)pteAdd[l]);
                   //pteAdd[l]     = ((uint64_t)pteAdd[l]);
-                  printf("new add=%p, old add=%p\n", new_pteAdd[l], pteAdd[l]);
+                  //printf("new add=%p, old add=%p\n", new_pteAdd[l], pteAdd[l]);
                   total_count++;
                 }
               }
@@ -387,8 +387,8 @@ void copyPageTables(PCB *child, PCB *parent)
   }
   //Setting pml4e child->pml4e entry to zero Dushyant check !!
   pml4eAdd[child->pml4e_entry]=0x0;
-  printf("Total no of entries finally added in PTE's :: %p",total_count);
-  printf("Total no of pages allocated for PageTables :: %p %p %p",tp1, tp2, tp3);
+  //printf("Total no of entries finally added in PTE's :: %p",total_count);
+  //printf("Total no of pages allocated for PageTables :: %p %p %p",tp1, tp2, tp3);
 }
 
 
@@ -438,7 +438,7 @@ void deletePageTables()
                   for(m=0;m<4096;m++)
 		                page[m] = 0x0;
                   //pteAdd[l] = ((uint64_t)0x0);
-                  printf("pteAdd[l]=%p \n", pteAdd[l]);
+                  //printf("pteAdd[l]=%p \n", pteAdd[l]);
                   free_phy_page(((uint64_t)pteAdd[l]) & 0xFFFFFFFFFFFFF000);
                   
                   // Testing zeroing out ----------------------------------------
@@ -470,7 +470,7 @@ void deletePageTables()
     }
     pml4eAdd[i] = ((uint64_t)0x0000000000000000) ;
   }
-  printf("total pte pages freed=%d", total_count);
+  printf("Free success =%d", total_count);
 }
 
 // Copying Actual pagetable entries for the child process and resetting COW bit for the parent if no other child process has COW bit set
@@ -497,9 +497,9 @@ void copyOnWritePageTables()
   pml4eAdd[a1] = ((uint64_t)allocate_free_phy_page() | 7);
   new_Add = (uint64_t *)(selfRef(0x1FE, 0x1FE, 0x1FE, a1));
   
-  printf("pml4e=%p, new=%p\n", pml4eAdd, new_Add);
+  //printf("pml4e=%p, new=%p\n", pml4eAdd, new_Add);
   // Iterate through all the page table entries in the PML4E of the Parent process 
-  printf("Now, we will do copying\n");
+  //printf("Now, we will do copying\n");
   for(i=0; i<510; i++)
   {
     if(i==a1)
@@ -524,14 +524,14 @@ void copyOnWritePageTables()
                 {
 		              uint64_t toto1 = (uint64_t )(selfRef(i,j,k,l));
                   // allocating new physical page for the process
-                  printf("pteAdd[l]=%p ",pteAdd[l]);
+                  //printf("pteAdd[l]=%p ",pteAdd[l]);
 		              new_Add[ni] = ((uint64_t)allocate_free_phy_page() | 7);
 		              if (ni >511)
 		              {
-		  	            printf("\n LIMIT EXCEDED");
+		  	            //printf("\n LIMIT EXCEDED");
 		              }	
 		              cppg = (uint64_t *)(selfRef(0x1FE, 0x1FE,a1,ni));
-                  printf("pteAdd[l]=%p ",pteAdd[l]);
+                  //printf("pteAdd[l]=%p ",pteAdd[l]);
 		              char *src = (char *) toto1;
 		              char *dst = (char *) cppg;
                   for(m=0;m<4096;m++)
@@ -540,7 +540,7 @@ void copyOnWritePageTables()
 		                dst[m] = temp99;		
                   }
                   pteAdd[l] = ((((uint64_t)new_Add[ni] >>12)<<12) | 7);
-                  printf("  pteAdd[l]=%p\n",pteAdd[l]);
+                  //printf("  pteAdd[l]=%p\n",pteAdd[l]);
 		              ni++;
                 }
               }

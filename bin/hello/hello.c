@@ -58,21 +58,21 @@ int main(int argc, char* argv[])
     u_printf("In child return from exec()\n");
     //sleep(10);
     //execve(filename);
-    int t=0;
+    char f[10] = "bin/ps";
+    execve(f);
+    /*int t=0;
     while(t<100000)
     {
       u_printf("%p ", getpid());
       t++  ;
-    }
-    exit(0);
+    }*/
+    //exit(0);
   }
   else
   {
     waitpid(ret1);
     //sleep(100);
     while(1);
-    char f[10] = "bin/ps";
-    execve(f);
     while(1)
       u_printf("%p ", getpid());
   }

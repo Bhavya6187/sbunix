@@ -3,7 +3,7 @@
 #include<defs.h>
 
 //#include <unistd.h>
-#define ROW 25
+#define ROW 24
 #define COLUMN 80
 #define VIDEO_VM 0xFFFF800000000000
 int position=0;

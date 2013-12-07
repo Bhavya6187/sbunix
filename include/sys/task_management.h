@@ -102,5 +102,6 @@ void scheduler1();
 void PS_Display();
 
 void init_process();
+uint64_t kill_process(int pid);
 
 #endif

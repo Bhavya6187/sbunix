@@ -168,7 +168,7 @@ uint64_t free_phy_page(uint64_t temp_addr)
   }
   if(found)
   {
-    printf("Page found and freed=%p\n", temp);
+    temp++;//printf("Page found and freed=%p\n", temp);
     return 1;
   }
   else

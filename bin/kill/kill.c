@@ -7,7 +7,7 @@
 int main(int argc, char* argv[]) 
 {
   ps_list();
-  //while(1);
+  while(1);
   return 0;
 }
  

@@ -47,17 +47,10 @@ uint64_t set_paging(void * km, void * pf, void * pb)
   pte = (uint64_t *)allocate_free_phy_page();
   thor = (uint64_t *)allocate_free_phy_page();
  
-  /*
-  vmem1 = ((kernmem << 16) >> 55); 
-  vmem2 = ((kernmem << (16+9)) >> 55); 
-  vmem3 = ((kernmem << (16+9+9)) >> 55); 
-  vmem4 = ((kernmem << (16+9+9+9)) >> 55); 
-  */
   vmem1 = getPML4Eindex(kernmem);
   vmem2 = getPDPEindex(kernmem);
   vmem3 = getPDEindex(kernmem);
   vmem4 = getPTEindex(kernmem);
-  //printf("v1=%d v2=%d v3=%d v4=%d \n", vmem1, vmem2, vmem3, vmem4);
 
   //Creating Page Table heirarchy - Page Table Translation
   //Mapping is done as per AMD manual PML4E, PDPE, PDE structure
@@ -83,11 +76,6 @@ uint64_t set_paging(void * km, void * pf, void * pb)
     i+=PAGE_SIZE;
     j++;
   }
-  /*for(j=0,i=physbase; i<physfree; i+=PAGE_SIZE,j++ )
-  {
-    pte[vmem4+j] = ((((uint64_t)i) & 0xFFFFFFFFFF000) | 3);
-
-  }*/
   printf("i = %p j=%d", i, j);
   printf("\n %d %d %d %d\n", vmem1, vmem2, vmem3, vmem4);
   /*pdpe_vm = (uint64_t *)allocate_free_phy_page();
@@ -229,9 +217,9 @@ void page_mapping(uint64_t vadd)
 	  //:"memory"
 	  //);
     uint64_t base1, base2, base3, base4;
-    printf("pml4eindex= %d : pdpeindex = %d : pdeindex = %d : pteindex= %d \n", pml4eindex, pdpeindex, pdeindex, pteindex);
+    //printf("pml4eindex= %d : pdpeindex = %d : pdeindex = %d : pteindex= %d \n", pml4eindex, pdpeindex, pdeindex, pteindex);
     //, setindices1, setindices2, setindices3, setindices4;
-    printf("In page_mapping:: Virtual Address is = %p\n",vadd);
+    //printf("In page_mapping:: Virtual Address is = %p\n",vadd);
     // Access PML4E table
     base1 = 0xFFFF000000000000; 
     base1 = (((base1 >> (12+9+9+9+9))<<9 | 0x1FE ) << (12+9+9+9) );
@@ -240,12 +228,12 @@ void page_mapping(uint64_t vadd)
     base1 = (((base1 >> (12+9))<<9 | 0x1FE       ) << (12) );
     pml4e = (uint64_t*)base1;
     pdpe = (uint64_t*)pml4e[pml4eindex];
-    printf("base pdpe = %p %p : ", base1, pdpe);
+    //printf("base pdpe = %p %p : ", base1, pdpe);
     if(!pdpe)
     {
         pdpe = (uint64_t *)allocate_free_phy_page();
         pml4e[pml4eindex] = (((uint64_t)pdpe) & 0xFFFFFFFFFF000) | 7;
-        printf("allocating pdpe = %p\n", pdpe);
+        //printf("allocating pdpe = %p\n", pdpe);
     }
     
     // Access PDPE table
@@ -256,12 +244,12 @@ void page_mapping(uint64_t vadd)
     base2 = (((base2 >> (12+9))<<9 |pml4eindex   ) << (12) );
     pdpe = (uint64_t*)base2;
     pde = (uint64_t*)pdpe[pdpeindex];
-    printf("base pde= %p %p : ", base2, pde);
+    //printf("base pde= %p %p : ", base2, pde);
     if(!pde)
     {
         pde = (uint64_t *)allocate_free_phy_page();
         pdpe[pdpeindex] = (((uint64_t)pde) & 0xFFFFFFFFFF000) | 7;
-        printf("allocating pde = %p\n", pde);
+        //printf("allocating pde = %p\n", pde);
     }
 
     // Access PDE table
@@ -272,12 +260,12 @@ void page_mapping(uint64_t vadd)
     base3 = (((base3 >> (12+9))<<9 |pdpeindex    ) << (12) );
     pde = (uint64_t*)base3;
     pte = (uint64_t*)pde[pdeindex];
-    printf("base pte= %p %p : ", base3, pte);
+    //printf("base pte= %p %p : ", base3, pte);
     if(!pte)
     {
         pte = (uint64_t *)allocate_free_phy_page();
         pde[pdeindex] = (((uint64_t)pte) & 0xFFFFFFFFFF000) | 7;
-        printf("allocating pte = %p\n", pte);
+        //printf("allocating pte = %p\n", pte);
     }
 
     // Access PTE table
@@ -288,13 +276,13 @@ void page_mapping(uint64_t vadd)
     base4 = (((base4 >> (12+9))<<9 |pdeindex       ) << (12) );
     pte = (uint64_t*)base4;
     paddr = (uint64_t*)pte[pteindex];
-    printf("base paddr= %p %p %d : ", base4, paddr, pteindex);
+    //printf("base paddr= %p %p %d : ", base4, paddr, pteindex);
     if(!paddr)
     {
         paddr = (uint64_t *)allocate_free_phy_page();
         pte[pteindex] = (((uint64_t)paddr) & 0xFFFFFFFFFF000) | 7;
-        printf("allocating paddr = %p\n", paddr);
+        //printf("allocating paddr = %p\n", paddr);
     }
-    printf("Return from page_mapping\n");
+    //printf("Return from page_mapping\n");
 
 }

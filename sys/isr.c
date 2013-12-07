@@ -38,15 +38,11 @@ void isr_handler_13(registers_t regs)
 	  );
     //regs.interrupt_number = 13;
     printf("Interrupt Number = %d errCode=%d cr=%p\n", 13, regs.err_code, cr2);
-    printf("Success !!\n");
     while(1);
 }
 
 void isr_handler_14(registers_t regs)
 {
-     printf("Exception: Page Fault !! Lol .. !! Grrr.... \n");
-     // Pushed by pushq i.e. all general purpose registers
-     // printf(" r15 %x, r14 %x, r13 %x, r12 %x, r11 %x, r10 %x, r9 %x, r8 %x,\n rsp %x, rbp %x, rdi %x, rsi %x, rdx %x, rcx %x, rbx %x, rax %x \n",     regs.r15, regs.r14, regs.r13, regs.r12, regs.r11, regs.r10, regs.r9, regs.r8, regs.rsp, regs.rbp, regs.rdi, regs.rsi, regs.rdx, regs.rcx, regs.rbx, regs.rax);
     uint64_t cr2;
     uint64_t check_COW=0;
     uint64_t phyPageEntry;
@@ -60,21 +56,21 @@ void isr_handler_14(registers_t regs)
     int re=0; 
     //regs.interrupt_number = 14;
     re = (regs.err_code & 7);
-    printf("Interrupt Number = %d %d %p\n", 14, regs.err_code, cr2);
+    //printf("Interrupt Number = %d %d %p\n", 14, regs.err_code, cr2);
     if(re==7)
     {
-      printf("RE=7\n");
+      //printf("RE=7\n");
       phyPageEntry = (uint64_t)getPhyFromVirtual((uint64_t)cr2);
       if(phyPageEntry==0)
       {
-        printf("Virtual Address doeant exist");
+        //printf("Virtual Address doeant exist");
         // Do page mapping probably !!
       }
       check_COW =  (( ((uint64_t)phyPageEntry)  & COW)>>51) ;
-      printf("IN = %d %d %p phypageentry %d %p\n", 14, regs.err_code, cr2, check_COW, phyPageEntry);
+      //printf("IN = %d %d %p phypageentry %d %p\n", 14, regs.err_code, cr2, check_COW, phyPageEntry);
       if(check_COW)
       {
-        printf("COW bit is 1 i.e. fork() has been done for this process\n");
+        //printf("COW bit is 1 i.e. fork() has been done for this process\n");
         copyOnWritePageTables();
         _ptcr3(running->cr3);
         //Allocate new pages for the child or the parent.. yet to be done
@@ -85,7 +81,7 @@ void isr_handler_14(registers_t regs)
       if ((0 == re) || (2 == re) || (4 == re) || (6 == re))
         page_mapping(cr2);
     }
-    printf("Success !!\n");
+    //printf("Exception: Page Fault Handeled !! \n");
 }
 
 uint64_t isr_handler_80(myregs_t *regs )
@@ -230,6 +226,11 @@ uint64_t isr_handler_80(myregs_t *regs )
       case(20):
         PS_Display();
         break;
+      case(21):
+        pid = regs->rbx;
+        ret = kill_process(pid);
+        regs->rax = ret;
+        break;
         
       default:
         return 0;
@@ -237,14 +238,3 @@ uint64_t isr_handler_80(myregs_t *regs )
     return ret;
     // printf("Interrupt 80 for system calls .... \n");
 }
-
-/*
-  movq $31, %rdi
-  pushq %rdi      # Push the interrupt number 0
-  popq %rdi        # Pops the general purpose registers GPR's R8-R15 also might come
-     uint64_t ds;                  // Data segment selector
-     uint64_t rax, rbx, rcx, rdx, rdi, rsi, rbp, rsp; // Pushed by pushq i.e. all general purpose registers
-     unsigned char interrupt_number, err_code;    // Interrupt number and error code (if applicable)
-     uint64_t eip, cs, eflags, useresp, ss; // Pushed by the processor automatically.
-*/
-
