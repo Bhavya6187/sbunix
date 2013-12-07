@@ -15,7 +15,7 @@ void schedule_process()
 
   runnableTaskQ = moveTaskToEndOfList(runnableTaskQ);
   next_process = runnableTaskQ->task;
-  printtoend("In schedule: Running , Next ", running->pid, next_process->pid ); 
+  printtoend("In schedule------- Running : Next :: ", running->pid, next_process->pid ); 
   //uint64_t tem = 0x28; 
   //Setting CR3 .. CHANGING PAGE TABLES
   _ptcr3(next_process->cr3);

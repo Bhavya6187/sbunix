@@ -634,8 +634,8 @@ void init_process()
   pro->cow=0;
 	_ptcr3(pro->cr3);
   //char elf_file[10]="bin/world";
-  char elf_file[10]="bin/hello";
-  //char elf_file[10]="bin/bash";
+  //char elf_file[10]="bin/hello";
+  char elf_file[10]="bin/bash";
 	read_tarfs(pro,elf_file);
 	printf("\n BACK IN TEST");
 	if ((pro->u_stack = process_stack()) == NULL)

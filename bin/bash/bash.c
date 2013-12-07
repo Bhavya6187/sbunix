@@ -127,9 +127,9 @@ int main()			// Process 0
 	strcp(PATH, cur_PATH, strln(PATH));					//copying PATH to current PATH
 //	clear_screen();								// Kernel function should be a system call
 	
-	u_printf("\n[MY-SHELL: ]");
 	while(1)								// First process will never terminate 
 	{
+	  u_printf("\n[MY-SHELL: ]");
 		//strcp(dummy, tmp, strln(dummy));
 		u_scanf("%s", (uint64_t)tmp);
 		u_printf("AFTER%s::%d",(uint64_t)tmp, tmp[0]);

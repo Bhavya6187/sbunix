@@ -282,7 +282,7 @@ void irq_handler_0(registers_sch regs)
   //if(0)
   {
     flag_sch=0;
-    printf("Will handle scheduling\n");
+    //printf("Will handle scheduling\n");
     schedule_process();
  	  /* 
     PCB *current_process, *new_process;
