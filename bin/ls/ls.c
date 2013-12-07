@@ -20,11 +20,9 @@ int main(int argc, char* argv[])
   dir = u_readdir(directory);
   
   while(dir!=NULL){
-  u_printf("%s  ",dir->d_name);
+  u_printf("%s \n ",dir->d_name);
   dir = u_readdir(directory);
   }
 
-  //exit(0);
-  //while(1);
   return 0;
 }

@@ -16,7 +16,7 @@
 
 char *PATH = "/bin";	// Environment variable seprated by :
 char *dummy = "bin/hello";	//dummy str for get char
-char ipBuf[20][20];	// Array of pointers for the input commands (not parsed)
+char **ipBuf;	// Array of pointers for the input commands (not parsed)
 char *parseBuf;		// Pointer to parsed array of commands 
 int dumi = 0;
 
@@ -81,16 +81,6 @@ int strcp(char *src, char *dst, uint32_t len)
 * Zero out any memory location till the len provided
 */
 
-void clear(char *pt, uint32_t len)
-{
-	uint32_t i = 0;
-
-	while(i < len)
-	{
-		pt[i] = 0;
-		++i;
-	}
-}
 
 /*
 * Parses and tokenize the input string which users inputs from shell
@@ -136,6 +126,12 @@ int main()			// Process 0
 	char *cur_PATH = (char *) malloc(sizeof(char) * 100);			// Will show current PATH (CWD)
 	int ret  = -1;
   int num = 0;
+ 
+  ipBuf = (char**)malloc(sizeof(char*)*20);
+  for(int i=0;i<20;i++)
+  {
+    ipBuf[i] = (char*)malloc(sizeof(char)*20);
+  }
 	
 	strcp(PATH, cur_PATH, strln(PATH));					//copying PATH to current PATH
 //	clear_screen();								// Kernel function should be a system call
@@ -148,16 +144,14 @@ int main()			// Process 0
     clear_buffer();
     clear_tmp(tmp);
 		u_scanf("%s", (uint64_t)tmp);
-    num --;
 		num = parse_ip(tmp);				// parses the input when user hits Enter
 		//u_printf("AFTER%s::%d",(uint64_t)tmp, tmp[0]);
-		switch(tmp[0]) 
+		switch(num) 
 		{
-			case '\0':						// User pressing only enter
-				u_printf("[MY-SHELL: ]");
-				break;
-			default:	
-        if(open(tmp) == -1)
+			case 0:						// User pressing only enter
+        break;       
+			case 1:						// User pressing only enter
+        if(open(ipBuf[0]) == -1)
         {
           u_printf("\nThe given command not found\n");
           clear_buffer();
@@ -168,9 +162,27 @@ int main()			// Process 0
 				if (!ret)
 				{
 					u_printf("In child");
- //         while(1);
-//					while(1);
 					execve(ipBuf[0]);
+				}
+				else{
+					u_printf("In parent");
+					yield();
+          clear_buffer();
+				}
+				break;
+			default:	
+        if(open(ipBuf[0]) == -1)
+        {
+          u_printf("\nThe given command not found\n");
+          clear_buffer();
+          break;
+        }
+        u_printf("Executing %s",ipBuf[0]);
+				ret  = fork();
+				if (!ret)
+				{
+					u_printf("In child");
+					execvp(ipBuf[0], (char**)(&ipBuf[1]) );
 				}
 				else{
 					u_printf("In parent");
