@@ -395,7 +395,7 @@ void copyPageTables(PCB *child, PCB *parent)
 
 // Deleting pagetables for execve()
 // Make sure that the CR3 is set for this process
-/*void deletePageTables()
+void deletePageTables()
 {
   uint64_t i; // iterators for pml4e, pdpe, pde, pte
   uint64_t *pml4eAdd;
@@ -403,9 +403,9 @@ void copyPageTables(PCB *child, PCB *parent)
   // Iterate through all the page table entries in the PML4E of the Parent process 
   for(i=0; i<510; i++)
      pml4eAdd[i] = ((uint64_t)0x0000000000000000) ;
-}*/
+}
 
-void deletePageTables()
+void deletePageTables2()
 {
   uint64_t i, j, k, l, m; // iterators for pml4e, pdpe, pde, pte
   uint64_t *pml4eAdd, *pdpeAdd, *pdeAdd, *pteAdd;
@@ -552,6 +552,7 @@ void copyOnWritePageTables()
     }
   }
   pml4eAdd[a1] = ((uint64_t)0x0);
+  printf("REturning from COW\n");
 }
 
 

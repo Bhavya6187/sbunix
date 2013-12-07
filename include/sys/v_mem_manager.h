@@ -38,6 +38,8 @@ void copyPageTables(PCB *child, PCB *parent);
 // Deleting pagetables for execve()
 void deletePageTables();
 
+void deletePageTables2();
+
 // Copying Actual pagetable entries for the child process and resetting COW bit for the parent if no other child process has COW bit set
 // Make sure to decreement the COW bit for parent everytime  child is allocated with new individual physical pages 
 // Make sure that the CR3 is set for the current running process
