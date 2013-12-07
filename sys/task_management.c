@@ -582,10 +582,10 @@ void checkAwake()
   {
     if ( ((sec - (list->task->sleep_start)) > list->task->sleep_duration ) && list->task->sleep_duration!=0)
     {
-      printf("In sleep:\n");
+      /*printf("In sleep:\n");
       printf("\n");
       printf("%p %p %p\n", list->task->sleep_start, list->task->sleep_duration, sec );
-      while(1);
+      while(1);*/
 
       runnableTaskQ = addToHeadTaskList(runnableTaskQ, list->task);
       waitTaskQ = removeFromTaskList(waitTaskQ, list->task);

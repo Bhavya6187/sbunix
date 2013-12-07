@@ -55,11 +55,11 @@ void isr_handler_14(registers_t regs)
 	  );
     int re=0; 
     //regs.interrupt_number = 14;
-    if(cr2==0)
+    /*if(cr2==0)
     {
       printf("Segmentation fault\nProcess will be killed\n ");
       exit_process(0);
-    }
+    }*/
 
     re = (regs.err_code & 7);
     //printf("Interrupt Number = %d %d %p\n", 14, regs.err_code, cr2);
