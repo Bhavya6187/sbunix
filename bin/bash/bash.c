@@ -32,6 +32,14 @@ int dumi = 0;
 * Returns length of string EXCluding the \0 
 */
 
+void clear_buffer()
+{
+  for(int i = 0 ; i < 20 ; i++)
+  {
+    for(int j = 0; j < 20 ; j++)
+      ipBuf[i][j] = 0;
+  }
+}
 int strln(char *st)
 {
 	uint32_t i = 0;
@@ -115,6 +123,11 @@ char getchar()
 	return (dummy[dumi++]);		
 }
 
+void clear_tmp(char* tmp)
+{
+  for(int i = 0; i < BUFSIZE; i++)
+    tmp[i]=0;
+}
 int main()			// Process 0
 {
 //	uint32_t i = 0;
@@ -131,21 +144,23 @@ int main()			// Process 0
 	{
 	  u_printf("\n[MY-SHELL: ]");
 		//strcp(dummy, tmp, strln(dummy));
+
+    clear_buffer();
+    clear_tmp(tmp);
 		u_scanf("%s", (uint64_t)tmp);
-		u_printf("AFTER%s::%d",(uint64_t)tmp, tmp[0]);
+    num --;
+		num = parse_ip(tmp);				// parses the input when user hits Enter
+		//u_printf("AFTER%s::%d",(uint64_t)tmp, tmp[0]);
 		switch(tmp[0]) 
 		{
 			case '\0':						// User pressing only enter
-				u_printf("\n[MY-SHELL: ]");
+				u_printf("[MY-SHELL: ]");
 				break;
 			default:	
-				u_printf("in ELSE");
-        num--;
-				num = parse_ip(tmp);				// parses the input when user hits Enter
-
         if(open(tmp) == -1)
         {
           u_printf("\nThe given command not found\n");
+          clear_buffer();
           break;
         }
         u_printf("Executing %s",ipBuf[0]);
@@ -160,10 +175,11 @@ int main()			// Process 0
 				else{
 					u_printf("In parent");
 					yield();
+          clear_buffer();
 				}
 				break;
 
-		}
+	  }
 	}
 	return 0;
 }	

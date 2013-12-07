@@ -144,7 +144,7 @@ void boot(void)
 
 	reload_gdt();
   reload_idt();
-  //IRQ_set_mask(0);
+  IRQ_set_mask(0);
 	setup_tss();
   __asm volatile("sti");
 

@@ -89,7 +89,7 @@ VMA* read_pheader(char* addr, struct elf_header* elf_base)
    uint64_t base = (uint64_t) elf_base;
    uint64_t contents = base + offset;
 
-   printf("\n in read vadd = %p source =  %p f_size = %p m_size%p\n", vaddr, contents,filesz,memsz);
+   //printf("\n in read vadd = %p source =  %p f_size = %p m_size%p\n", vaddr, contents,filesz,memsz);
    if(memsz != 0)
    {
      uint32_t ret = m_map((uint64_t)vaddr,(uint64_t)contents, filesz, memsz);
@@ -144,7 +144,7 @@ void readelf(char* addr, PCB *task)
 
   for(i = 0; i < num_entries; i++ )
   {
-    printf("reading entry %d out of %d entries\n",i,num_entries);
+    //printf("reading entry %d out of %d entries\n",i,num_entries);
   	if (i == 0)
 		{
 			local = read_pheader(pheader, elf_base);
@@ -179,7 +179,7 @@ int read_tarfs(PCB* task, char* name){
 // while(header < (struct posix_header_ustar*)(&_binary_tarfs_end))
  while(header < end)
  {
-    printf("name = %s\n",header->name);
+    //printf("name = %s\n",header->name);
  //   printf("size = %s\n",header->size);
     /*printf("mode = %s\n",header->mode);
     printf("uid = %s\n",header->uid);
@@ -197,13 +197,13 @@ int read_tarfs(PCB* task, char* name){
     printf("devminor = %s\n",header->devminor);
     printf("pad = %s\n",header->pad);*/
     temp_size = size_to_int(header->size);
-    printf("size given by function = %d\n",temp_size);
+    //printf("size given by function = %d\n",temp_size);
     if(temp_size > 0 && strcmp2(name,header->name))
     {
 
-        printf("\nThe address with header %p", header);
-        printf("\nThe address with elf %p\n", header);
-        printf("\nStrcmp says %d\n", strcmp2(name,header->name));
+        //printf("\nThe address with header %p", header);
+        //printf("\nThe address with elf %p\n", header);
+        //printf("\nStrcmp says %d\n", strcmp2(name,header->name));
         elf_header =(char*)(header+1);
         readelf((char*)elf_header, task);
 //        while(1);
@@ -213,7 +213,7 @@ int read_tarfs(PCB* task, char* name){
     if(header->name[0] == '\0' && header->size[0]=='\0' && prevname == '\0' && prevsize == '\0')
     {
         
-      printf("\nfound consecutive 0\n");
+      //printf("\nfound consecutive 0\n");
       return 2;
     }
 

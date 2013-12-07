@@ -10,12 +10,12 @@ int scanf(const char *format, uint64_t ptr)
     return 0;
   else
   {
-    printf("Got a newline\n");
+//    printf("Got a newline\n");
     char* str = (char*)ptr;
     while(kbuf[i]!='\n')
     {
       str[i]=kbuf[i];
-      printf("buffer is = %c at %d\n",str[i],i);
+//      printf("buffer is = %c at %d\n",str[i],i);
       i++;
     }
     str[i]='\0';
