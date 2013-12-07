@@ -70,6 +70,7 @@ int main(int argc, char* argv[])
   {
     waitpid(ret1);
     //sleep(100);
+    while(1);
     char f[10] = "bin/ps";
     execve(f);
     while(1)

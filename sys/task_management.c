@@ -552,6 +552,7 @@ uint64_t wait_p()
 
 }
 
+// Checks for the processes that need to wake up
 void checkAwake()
 {
   struct taskList *list = waitTaskQ;
@@ -591,6 +592,7 @@ void sleep_t(uint64_t time)
 }
 
 // First User Process to Start Running !! :) 
+// This will start running our shell
 void init_process()	
 {
 	PCB *pro = NULL;
