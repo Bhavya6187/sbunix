@@ -55,14 +55,14 @@ int get_hex(uint64_t* ptr )
 uint64_t u_scanf(const char* format, uint64_t ptr) 
 {
   uint64_t ret = 0;
-  u_printf("\n Inside Scanf\n"); 
+//  u_printf("\n Inside Scanf\n"); 
   while(1)
   {
     ret=__syscall3(SYSCALL_READ,0,(uint64_t)format,(uint64_t)buf);
     if(ret != 0)
       break;
   }
-  u_printf("\nout of scanf infinite loop with %s \n",buf ) ;
+ // u_printf("\nout of scanf infinite loop with %s \n",buf ) ;
   if(format[0] == '%' && format[1]=='d')
     ret = get_int((int*)ptr);
   if(format[0] == '%' && format[1]=='x')
@@ -78,6 +78,6 @@ uint64_t u_scanf(const char* format, uint64_t ptr)
     }
     ret = 1;
   }
-  u_printf("\nout of scanf\n");
+ // u_printf("\nout of scanf\n");
   return ret;
 }
