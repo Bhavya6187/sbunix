@@ -174,7 +174,7 @@ int main()			// Process 0
         if(open(ipBuf[0]) == -1)
         {
           u_printf("\nThe given command not found\n");
-          clear_buffer();
+          clear_buffer()  ;
           break;
         }
         u_printf("Executing %s",ipBuf[0]);
