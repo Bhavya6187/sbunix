@@ -4,18 +4,6 @@
 #include <stdarg.h>
 #include <defs.h>
 
-struct ad
-{
-  uint64_t t1;
-  uint64_t t2;
-  uint64_t t3;
-  uint64_t t4;
-  uint64_t t5;
-  uint64_t t6;
-  uint64_t t7;
-  uint64_t t8;
-};
-
 int main(int argc, char* argv[]) 
 {
   /*uint64_t ret=0;

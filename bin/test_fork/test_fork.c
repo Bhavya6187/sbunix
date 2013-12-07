@@ -22,11 +22,6 @@ int main(int argc, char* argv[])
   if(ret1==0)
   {
     u_printf("First Child:%d:\n", ret1);
-    //u_printf("This is child !! \n");
-    //__syscall1(SYSCALL_EXIT, 0);
-    //ret1 = __syscall1(SYSCALL_EXECVE,(uint64_t)(filename));
-    //execve(filename);
-    //u_printf("In child return from exec()\n");
     yield();
     while(1)
     {
@@ -47,7 +42,7 @@ int main(int argc, char* argv[])
       ret2 = fork();
       if(ret2==0)
       {
-        execvp("bin/world", params);
+        execve("bin/hi");
         u_printf("Child!!!:%d:\n", ret2);
         while(1)
           u_printf("Last child");
@@ -64,20 +59,6 @@ int main(int argc, char* argv[])
     }
   }
 
-  /*    while(1)
-      {
-        for(i=0;i<500;i++)
-        for(j=0;j<500;j++)
-          ;
-        u_printf("In parent via timer scheduling :) \n");
-      }
-      //u_printf("LALALALLALALALALLALA !! ... \n");
-    }
-
-  }*/
-
-  //u_printf(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n"); 
-  
   /*
   struct ad *ad1 = (struct ad*) malloc(sizeof(struct ad));
   struct ad *ad1 = (struct ad*) malloc(sizeof(struct ad));

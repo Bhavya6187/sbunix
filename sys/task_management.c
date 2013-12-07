@@ -346,12 +346,12 @@ void doExec(char *fn)
   filename = (char*)(k_malloc((sizeof(char)*32)));
   strcpy(filename, fn);
   
-  printf("We will execute - %s %s\n", filename, fn);
+  //printf("We will execute - %s %s\n", filename, fn);
   // delete all page table entries
   deletePageTables();
   _ptcr3(pro->cr3);
   
-  printf("In Exec :: check PID=%p, cr3=%p ppid=%p\n", pro->pid, pro->cr3, pro->ppid);
+  //printf("In Exec :: check PID=%p, cr3=%p ppid=%p\n", pro->pid, pro->cr3, pro->ppid);
 	
   //char *filename2;
   //filename2 = filename;
@@ -396,12 +396,12 @@ void doExecvp(char *fn, char **argv)
   {
     //param[i] = (char*)(k_malloc(sizeof(char)*10));
     strcpy(param[i], argv[i]);
-    printf("Parameters - %s %s\n", param[i], argv[i]);
+    //printf("Parameters - %s %s\n", param[i], argv[i]);
   }
 
   //filename = (char*)(k_malloc((sizeof(char)*32)));
   strcpy(filename, fn);
-  printf("We will execute - %s %s\n", filename, fn);
+  //printf("We will execute - %s %s\n", filename, fn);
 
   // delete all page table entries
   deletePageTables();
@@ -413,7 +413,7 @@ void doExecvp(char *fn, char **argv)
   {
     params[i] = (char*)(p_malloc(sizeof(char)*20));
     strcpy(params[i], param[i]);
-    printf("Parameters - %s %s\n", params[i], param[i]);
+    //printf("Parameters - %s %s\n", params[i], param[i]);
   }
   
   printf("In Exec :: check PID=%p, cr3=%p ppid=%p\n", pro->pid, pro->cr3, pro->ppid);

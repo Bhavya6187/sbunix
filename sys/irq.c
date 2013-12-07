@@ -267,7 +267,7 @@ void irq_handler_0(registers_sch regs)
     {
       read_rtc();
         sec++;
-       if(tick%70==0)
+       if(tick%20==0)
          flag_sch=1;
     }
     /*if (regs.interrupt_number >= 32)
