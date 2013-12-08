@@ -1,8 +1,3 @@
-/*
-* This implements the bash for the OS
-*
-*/
-
 # include <libc/malloc.h>
 # include <bash.h>
 # include <stdio.h> 
@@ -13,24 +8,12 @@
 #define BUFSIZE 20
 #define TOKENSIZE 10
 
-
 char *PATH = "/bin";	// Environment variable seprated by :
 char *dummy = "bin/hello";	//dummy str for get char
 char **ipBuf;	// Array of pointers for the input commands (not parsed)
 char *parseBuf;		// Pointer to parsed array of commands 
 int dumi = 0;
 
-
-/*
-*
-*/
-
-
-
-
-/*
-* Returns length of string EXCluding the \0 
-*/
 
 void clear_buffer()
 {
@@ -40,6 +23,7 @@ void clear_buffer()
       ipBuf[i][j] = 0;
   }
 }
+
 int strln(char *st)
 {
 	uint32_t i = 0;
@@ -52,10 +36,6 @@ int strln(char *st)
 
 	return (i);
 }
-
-/*
-* Copy one string into another - strcpy
-*/
 
 int strcp(char *src, char *dst, uint32_t len)
 {
@@ -76,15 +56,6 @@ int strcp(char *src, char *dst, uint32_t len)
 	return 0;
 }
 
-
-/*
-* Zero out any memory location till the len provided
-*/
-
-
-/*
-* Parses and tokenize the input string which users inputs from shell
-*/
 
 int parse_ip(char *str)
 {
@@ -157,15 +128,13 @@ int main()			// Process 0
           clear_buffer();
           break;
         }
-        u_printf("Executing %s",ipBuf[0]);
+        //u_printf("Executing %s",ipBuf[0]);
 				ret  = fork();
 				if (!ret)
 				{
-					u_printf("In child");
 					execve(ipBuf[0]);
 				}
 				else{
-					u_printf("In parent");
 					yield();
           clear_buffer();
 				}
@@ -177,15 +146,13 @@ int main()			// Process 0
           clear_buffer()  ;
           break;
         }
-        u_printf("Executing %s",ipBuf[0]);
+        //u_printf("Executing %s",ipBuf[0]);
 				ret  = fork();
 				if (!ret)
 				{
-					u_printf("In child");
 					execvp(ipBuf[0], (char**)(&ipBuf[1]) );
 				}
 				else{
-					u_printf("In parent");
 					yield();
           clear_buffer();
 				}
